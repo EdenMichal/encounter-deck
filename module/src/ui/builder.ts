@@ -40,11 +40,15 @@ export function startBuilder(): void {
   const sync = () => instance?.syncVisibility();
   Hooks.on("changeSidebarTab", sync);
   Hooks.on("collapseSidebar", sync);
-  Hooks.on("updateSetting", (s: any) => {
+  // dnd5e's Sources checklist is a world setting: the first save creates it, later saves update it.
+  const onSources = (s: any) => {
     if (s.key !== "dnd5e.packSourceConfiguration") return;
     invalidateMonsters();
+    instance?.render({ parts: ["search"] });
     instance?.refreshResults();
-  });
+  };
+  Hooks.on("createSetting", onSources);
+  Hooks.on("updateSetting", onSources);
 }
 
 const choices = (config: Record<string, any>) =>
@@ -242,8 +246,18 @@ class Builder extends HandlebarsApplicationMixin(ApplicationV2) {
       sizes: mark(choices(CONFIG.DND5E.actorSizes), f.size),
       habitats: mark(choices(CONFIG.DND5E.habitats), f.habitat),
       sourceCount: sourcePacks().length,
-      filtered: Object.entries(f).some(([k, v]) => (k === "name" ? !!v : v !== null && v !== "")),
+      filtered: this.filtered,
     };
+  }
+
+  get filtered(): boolean {
+    return Object.entries(this.filter).some(([k, v]) => (k === "name" ? !!v : v !== null && v !== ""));
+  }
+
+  /** Typing only re-renders the results, so show or hide "Clear filters" by hand. */
+  syncClearButton(): void {
+    const button = this.element?.querySelector(".ed-clear-filters") as HTMLElement | null;
+    if (button) button.hidden = !this.filtered;
   }
 
   resultsContext() {
@@ -352,7 +366,7 @@ class Builder extends HandlebarsApplicationMixin(ApplicationV2) {
   bindInputs(el: HTMLElement): void {
     el.addEventListener("input", (e: Event) => {
       const t = e.target as HTMLInputElement;
-      if (t.name === "edName") { this.filter.name = t.value; this.#renderResults(); }
+      if (t.name === "edName") { this.filter.name = t.value; this.syncClearButton(); this.#renderResults(); }
     });
     el.addEventListener("change", (e: Event) => {
       const t = e.target as HTMLInputElement;
@@ -370,6 +384,7 @@ class Builder extends HandlebarsApplicationMixin(ApplicationV2) {
         case "tactics": this.saveFlags({ tactics: t.value }); return;
         default: return;
       }
+      this.syncClearButton();
       this.render({ parts: ["results"] });
     });
   }

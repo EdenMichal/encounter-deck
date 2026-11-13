@@ -19,7 +19,8 @@
 /* -------------------------------------------- */
 
 #combat [data-application-part="edBrowser"] { display: none; }
-#combat.ed-browser-mode > [data-application-part]:not([data-application-part="edBrowser"]) { display: none; }
+/* Hide the tracker parts and anything other modules add to them while the browser shows. */
+#combat.ed-browser-mode > :not([data-application-part="edBrowser"]) { display: none !important; }
 #combat.ed-browser-mode > [data-application-part="edBrowser"] {
   display: flex;
   flex-direction: column;
@@ -334,7 +335,8 @@
 .ed-details { display: flex; flex-direction: column; gap: var(--ed-gap); padding-top: 6px; border-top: 1px solid var(--ed-line); }
 .ed-field { display: flex; flex-direction: column; gap: 2px; font-size: 11px; color: var(--ed-muted); }
 .ed-field textarea, .ed-field input { color: var(--color-text-primary, inherit); font-size: 13px; }
-.ed-field textarea { resize: vertical; min-height: 48px; }
+.ed-field textarea { resize: vertical; min-height: 48px; font-family: inherit; }
+.ed-builder [hidden] { display: none !important; }
 .ed-link-zone {
   display: flex;
   align-items: center;

@@ -24,6 +24,6 @@
     <button type="button" class="ed-link-button" data-action="edSources" data-tooltip="The world-wide checklist of compendiums to search (shared with dnd5e's Compendium Browser)">
       <i class="fa-solid fa-book-open-reader" inert></i> Sources ({{sourceCount}})
     </button>
-    {{#if filtered}}<button type="button" class="ed-link-button" data-action="edClearFilters">Clear filters</button>{{/if}}
+    <button type="button" class="ed-link-button ed-clear-filters" data-action="edClearFilters" {{#unless filtered}}hidden{{/unless}}>Clear filters</button>
   </div>
 </section>
