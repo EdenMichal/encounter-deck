@@ -10,14 +10,14 @@ Reuse what Foundry and dnd5e already do (the combat tracker, actor sheets, compe
 
 ## Prep
 
-- **Storage:** a world compendium created by the module (ADR 0001). Only the Active Campaign and the Shared Library load. Completed encounters load only when "Show completed" is on.
+- **Storage:** a world compendium created by the module (ADR 0001). Each Encounter is a dnd5e Encounter actor (ADR 0003). Only the Active Campaign and the Shared Library load. Completed encounters load only when "Show completed" is on.
 - **Campaigns:** a switcher in the header, remembered per world. Folders inside each Campaign.
 - **Shared Library:** always visible. Using a Master Copy copies it into the Campaign.
 - **Party:** each Campaign is linked to a Party Folder. Only the PCs directly inside it count. A Present toggle per PC.
 - **Advancement Mode:** XP or Milestone, set per Campaign and defaulting to a world setting.
 - **Encounter:** Creature Entries (an actor UUID plus a count), notes and tactics, tags, Status (Draft, Ready or Completed), and an optional link to a journal page or scene. Encounters can be duplicated.
-- **Builder:** name search, then filters for CR range, type, size and habitat. Results have a + button and can be dragged, with quantity +/−. A live 2024 difficulty meter for present PCs.
-- **Sources:** one checklist for the whole world, with every monster compendium on by default.
+- **Builder:** a collapsible drawer docked on the side of the Combat tab. Name search, then filters for CR range, type, size and habitat. Results have a + button and can be dragged, with quantity +/−. A live 2024 difficulty meter for present PCs.
+- **Sources:** one checklist for the whole world, with every monster compendium on by default. It is dnd5e's own Compendium Browser source checklist (ADR 0003).
 - **Missing monsters:** the row keeps its saved name and CR and is marked "missing". You can remove it or swap in another monster.
 
 ## Running a fight
