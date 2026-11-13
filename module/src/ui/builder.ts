@@ -313,6 +313,11 @@ class Builder extends HandlebarsApplicationMixin(ApplicationV2) {
     this.element.classList.toggle("collapsed", this.collapsed);
     this.syncVisibility();
     this.#changedHook = Hooks.on(CHANGED_HOOK, () => this.onChanged());
+    // Some compendium art paths don't exist; show the default portrait instead of a broken image.
+    this.element.addEventListener("error", (e: Event) => {
+      const img = e.target as HTMLImageElement;
+      if (img?.tagName === "IMG" && !img.dataset.fallback) { img.dataset.fallback = "1"; img.src = CONST.DEFAULT_TOKEN; }
+    }, true);
     this.bindInputs(this.element);
     this.bindDragDrop(this.element);
     if (!this.collapsed) this.refreshResults();

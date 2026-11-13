@@ -112,7 +112,7 @@ export async function setStatus(id: string, status: Status): Promise<void> {
   if (status === "completed" && isInLibrary(doc?.folder?.id ?? doc?._source.folder)) {
     return void ui.notifications.warn("A Master Copy is never Completed.");
   }
-  await doc?.setFlag(MODULE_ID, "status", status);
+  await doc?.update({ [`flags.${MODULE_ID}.status`]: status });
 }
 
 export async function duplicate(id: string): Promise<void> {

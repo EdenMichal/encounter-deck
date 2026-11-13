@@ -62,7 +62,7 @@ export async function togglePresent(campaign: any, actorId: string): Promise<voi
   const absent = new Set(campaignFlags(campaign).absent);
   if (absent.has(actorId)) absent.delete(actorId);
   else absent.add(actorId);
-  await campaign.setFlag(MODULE_ID, "absent", [...absent]);
+  await campaign.update({ [`flags.${MODULE_ID}.absent`]: [...absent] });
 }
 
 /** Every world Actors folder, shown with its path ("Parties / Tuesday group"). */

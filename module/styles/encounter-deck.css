@@ -170,6 +170,8 @@
 /*  Builder drawer                              */
 /* -------------------------------------------- */
 
+/* The drawer lives inside #sidebar and hangs off its left edge. */
+#sidebar:has(> #encounter-deck-builder) { position: relative; }
 #encounter-deck-builder {
   position: absolute;
   top: 0;
@@ -180,9 +182,10 @@
   z-index: 1;
   display: grid;
   grid-template-columns: var(--ed-handle-width) minmax(0, 1fr) minmax(0, 1.15fr);
-  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
   grid-template-areas:
     "handle search head"
+    "handle search entries"
     "handle results entries"
     "handle results details";
   gap: 0 8px;
@@ -201,7 +204,7 @@
   width: var(--ed-handle-width);
   padding-right: 0;
   grid-template-columns: var(--ed-handle-width);
-  grid-template-areas: "handle" "handle" "handle";
+  grid-template-areas: "handle" "handle" "handle" "handle";
   background: none;
   border: none;
   box-shadow: none;
@@ -272,6 +275,8 @@
 .ed-result-text, .ed-entry-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .ed-result-name, .ed-entry-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
 .ed-result-sub, .ed-entry-sub { font-size: 11px; color: var(--ed-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.ed-result-pack { font-size: 10px; color: var(--ed-muted); opacity: 0.75; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .ed-details-head { display: flex; gap: 4px; align-items: center; }
 .ed-details-head .ed-name { flex: 1; min-width: 0; font-size: 15px; font-weight: bold; }
