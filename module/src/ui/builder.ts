@@ -49,6 +49,12 @@ export function startBuilder(): void {
   };
   Hooks.on("createSetting", onSources);
   Hooks.on("updateSetting", onSources);
+  // Fold the drawer away when a fight begins, so it doesn't cover a carousel tracker across the top. The GM can
+  // reopen it. combatStart only fires on the client that pressed Begin Combat, so watch the round 0 → 1 update,
+  // which every client sees; Combat#startCombat is the only change to round 1 made without a turn direction.
+  Hooks.on("updateCombat", (_combat: any, changed: any, options: any) => {
+    if (changed.round === 1 && options?.direction === undefined && instance && !instance.collapsed) instance.setCollapsed(true);
+  });
 }
 
 const choices = (config: Record<string, any>) =>
