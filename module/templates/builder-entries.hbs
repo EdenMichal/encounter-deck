@@ -1,0 +1,47 @@
+<section class="ed-entries-wrap">
+  {{#if open}}
+  <div class="ed-meter ed-band-{{meter.band}}" role="meter" aria-valuenow="{{meter.xp}}" aria-label="Difficulty">
+    <div class="ed-meter-top">
+      <strong class="ed-meter-label">{{meter.label}}</strong>
+      <span>{{meter.xpLabel}} XP · {{count}} {{#if (eq count 1)}}creature{{else}}creatures{{/if}}</span>
+    </div>
+    <div class="ed-meter-bar">
+      <div class="ed-meter-fill" style="width: {{meter.pct}}%"></div>
+      <span class="ed-meter-stop" style="left: {{meter.stops.low}}%" data-tooltip="Low {{meter.low}} XP"></span>
+      <span class="ed-meter-stop" style="left: {{meter.stops.moderate}}%" data-tooltip="Moderate {{meter.moderate}} XP"></span>
+      <span class="ed-meter-stop" style="left: {{meter.stops.high}}%" data-tooltip="High {{meter.high}} XP"></span>
+    </div>
+    <p class="ed-meter-party">
+      {{#if party.campaign}}
+        {{#if party.presentCount}}{{party.presentCount}} present in {{party.campaign}} · Low {{meter.low}} / Moderate {{meter.moderate}} / High {{meter.high}}{{else}}No present PCs in {{party.campaign}}'s Party Folder{{/if}}
+      {{else}}No Active Campaign{{/if}}
+    </p>
+  </div>
+  <ol class="ed-entries ed-dropzone" data-zone="entries">
+    {{#each entries}}
+    <li class="ed-entry {{#if missing}}missing{{/if}} {{#if swapTarget}}swapping{{/if}}" data-uuid="{{uuid}}">
+      {{#if img}}<img src="{{img}}" alt="">{{else}}<i class="fa-solid fa-ghost ed-entry-ghost" inert></i>{{/if}}
+      <div class="ed-entry-text">
+        {{#if missing}}
+        <span class="ed-entry-name">{{name}} <span class="ed-missing-tag" data-tooltip="Its Source compendium or the monster itself is gone">missing</span></span>
+        {{else}}
+        <a class="ed-entry-name" data-action="edSheet" data-tooltip="Open the stat block">{{name}}</a>
+        {{/if}}
+        <span class="ed-entry-sub">CR {{crLabel}} · {{xpLabel}} XP</span>
+      </div>
+      {{#if missing}}
+      <button type="button" class="icon fa-solid fa-right-left {{#if swapTarget}}active{{/if}}" data-action="edSwap" data-tooltip="Swap in another monster" aria-label="Swap"></button>
+      {{/if}}
+      <span class="ed-qty">
+        <button type="button" class="icon fa-solid fa-minus" data-action="edDec" aria-label="One fewer"></button>
+        <span class="ed-count">{{count}}</span>
+        <button type="button" class="icon fa-solid fa-plus" data-action="edInc" aria-label="One more"></button>
+      </span>
+      <button type="button" class="icon fa-solid fa-trash ed-entry-remove" data-action="edRemove" data-tooltip="Remove" aria-label="Remove"></button>
+    </li>
+    {{else}}
+    <li class="ed-empty ed-drop-hint">Drag monsters here, or press + on a search result.</li>
+    {{/each}}
+  </ol>
+  {{/if}}
+</section>

@@ -1,0 +1,25 @@
+<section class="ed-results-wrap">
+  {{#if loading}}
+  <p class="ed-empty-note"><i class="fa-solid fa-spinner fa-spin" inert></i> Reading the Sources…</p>
+  {{else}}
+  <p class="ed-results-count">
+    {{#if swapping}}<strong>Pick a replacement for the missing monster.</strong>{{else}}{{total}} monsters{{#if limited}}, showing the first {{limit}}{{/if}}{{/if}}
+  </p>
+  <ol class="ed-results">
+    {{#each results}}
+    <li class="ed-result" draggable="true" data-uuid="{{uuid}}">
+      <img src="{{img}}" alt="" loading="lazy">
+      <div class="ed-result-text">
+        <a class="ed-result-name" data-action="edSheet" data-tooltip="Open the stat block">{{name}}</a>
+        <span class="ed-result-sub">CR {{crLabel}} · {{xpLabel}} XP · {{subtitle}}</span>
+        <span class="ed-result-pack">{{packLabel}}</span>
+      </div>
+      <button type="button" class="icon fa-solid {{#if ../swapping}}fa-right-left{{else}}fa-plus{{/if}}" data-action="edAdd"
+        {{#unless ../canAdd}}disabled{{/unless}} data-tooltip="{{#if ../swapping}}Swap in{{else}}Add to the Encounter{{/if}}" aria-label="Add {{name}}"></button>
+    </li>
+    {{else}}
+    <li class="ed-empty">No monsters match.</li>
+    {{/each}}
+  </ol>
+  {{/if}}
+</section>

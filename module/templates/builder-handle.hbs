@@ -1,0 +1,5 @@
+<button type="button" class="ed-handle" data-action="edCollapse" aria-expanded="{{#if collapsed}}false{{else}}true{{/if}}"
+  data-tooltip="{{#if collapsed}}Open the Builder{{else}}Collapse the Builder{{/if}}" data-tooltip-direction="LEFT">
+  <i class="fa-solid {{#if collapsed}}fa-chevron-left{{else}}fa-chevron-right{{/if}}" inert></i>
+  <span class="ed-handle-label">Builder{{#if name}} · {{name}}{{/if}}</span>
+</button>

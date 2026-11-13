@@ -1,0 +1,21 @@
+<section class="ed-details">
+  {{#if open}}
+  <label class="ed-field">Tags <input type="text" name="tags" value="{{tags}}" placeholder="ambush, forest, boss"></label>
+  <div class="ed-field">Link
+    <div class="ed-dropzone ed-link-zone" data-zone="link">
+      {{#if link}}
+      <a data-action="edOpenLink" class="{{#if link.missing}}ed-missing{{/if}}"><i class="fa-solid {{link.icon}}" inert></i> {{link.name}}</a>
+      <button type="button" class="icon fa-solid fa-xmark" data-action="edClearLink" data-tooltip="Remove link" aria-label="Remove link"></button>
+      {{else}}
+      <span class="ed-hint">Drop a journal page or scene here</span>
+      {{/if}}
+    </div>
+  </div>
+  <label class="ed-field">Notes <textarea name="notes" rows="3">{{notes}}</textarea></label>
+  <label class="ed-field">Tactics <textarea name="tactics" rows="3">{{tactics}}</textarea></label>
+  <footer class="ed-details-foot">
+    <button type="button" data-action="edDuplicate"><i class="fa-solid fa-clone" inert></i> Duplicate</button>
+    <button type="button" data-action="edDelete"><i class="fa-solid fa-trash" inert></i> Delete</button>
+  </footer>
+  {{/if}}
+</section>

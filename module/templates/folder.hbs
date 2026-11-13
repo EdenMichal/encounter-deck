@@ -1,0 +1,35 @@
+<div class="ed-folder {{#if node.root}}ed-root{{/if}} {{#if node.isLibrary}}ed-library{{/if}} {{#if node.collapsed}}collapsed{{/if}}" data-folder-id="{{node.id}}">
+  <div class="ed-folder-head" data-action="edToggleFolder" data-can-nest="{{node.canNest}}">
+    <i class="fa-solid {{#if node.root}}{{#if node.isLibrary}}fa-book-bookmark{{else}}fa-chess-rook{{/if}}{{else}}{{#if node.collapsed}}fa-folder{{else}}fa-folder-open{{/if}}{{/if}} fa-fw" inert></i>
+    <span class="ed-folder-name">{{node.name}}</span>
+    <span class="ed-folder-controls">
+      <button type="button" class="icon fa-solid fa-plus" data-action="edNewEncounter" data-tooltip="New Encounter" aria-label="New Encounter"></button>
+      {{#if node.canNest}}<button type="button" class="icon fa-solid fa-folder-plus" data-action="edNewFolder" data-tooltip="New folder" aria-label="New folder"></button>{{/if}}
+    </span>
+  </div>
+  {{#unless node.collapsed}}
+  <ol class="ed-folder-body">
+    {{#each node.folders}}<li class="ed-subfolder">{{> "modules/encounter-deck/templates/folder.hbs" node=this}}</li>{{/each}}
+    {{#each node.encounters}}
+    <li class="ed-row status-{{status}} {{#if active}}active{{/if}}" data-encounter-id="{{id}}" data-library="{{isLibrary}}" draggable="true" data-action="edOpen">
+      <div class="ed-row-top">
+        <span class="ed-row-name">{{name}}</span>
+        {{#if linked}}<i class="fa-solid fa-link ed-row-icon" data-tooltip="Linked to a journal page or scene" inert></i>{{/if}}
+        {{#if missing}}<i class="fa-solid fa-triangle-exclamation ed-row-icon ed-missing" data-tooltip="Has missing monsters"></i>{{/if}}
+        {{#if isLibrary}}
+        <button type="button" class="icon fa-solid fa-copy ed-use" data-action="edUseMaster" data-tooltip="Use in the Active Campaign (makes a copy)" aria-label="Use in the Active Campaign"></button>
+        {{else}}
+        <span class="ed-status ed-status-{{status}}">{{statusLabel}}</span>
+        {{/if}}
+      </div>
+      <div class="ed-row-meta" {{#if summary}}data-tooltip="{{summary}}"{{/if}}>
+        <span>{{count}} {{#if (eq count 1)}}creature{{else}}creatures{{/if}} · {{xp}} XP</span>
+        <span class="ed-band ed-band-{{band}}">{{bandLabel}}</span>
+      </div>
+      {{#if tags.length}}<div class="ed-tags">{{#each tags}}<span class="ed-tag">{{this}}</span>{{/each}}</div>{{/if}}
+    </li>
+    {{/each}}
+    {{#unless node.hasContent}}<li class="ed-empty">Nothing here yet</li>{{/unless}}
+  </ol>
+  {{/unless}}
+</div>

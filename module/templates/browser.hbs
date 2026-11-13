@@ -1,0 +1,50 @@
+<section class="ed-browser">
+  {{#if ready}}
+  <header class="ed-head">
+    <div class="ed-campaign-row">
+      {{#if campaigns.length}}
+      <select class="ed-campaign-select" aria-label="Active Campaign" data-tooltip="Active Campaign">
+        {{#each campaigns}}<option value="{{id}}" {{#if active}}selected{{/if}}>{{name}}</option>{{/each}}
+      </select>
+      <button type="button" class="icon fa-solid fa-gear" data-action="edCampaignSettings" data-tooltip="Campaign settings" aria-label="Campaign settings"></button>
+      {{else}}
+      <span class="ed-no-campaign">No Campaign yet</span>
+      {{/if}}
+      <button type="button" class="icon fa-solid fa-plus" data-action="edNewCampaign" data-tooltip="New Campaign" aria-label="New Campaign"></button>
+    </div>
+    {{#if campaign}}
+    <div class="ed-party">
+      {{#each party.members}}
+      <button type="button" class="ed-pc {{#unless present}}absent{{/unless}}" data-action="edTogglePresent" data-actor-id="{{id}}"
+        data-tooltip="{{name}}, level {{level}}: {{#if present}}Present{{else}}Absent{{/if}} (click to toggle)" aria-pressed="{{present}}">
+        <img src="{{img}}" alt="{{name}}"><span class="ed-pc-level">{{level}}</span>
+      </button>
+      {{else}}
+      <button type="button" class="ed-link-button" data-action="edCampaignSettings">Pick a Party Folder</button>
+      {{/each}}
+    </div>
+    {{#if party.budgetText}}<p class="ed-budget">{{party.presentCount}} present · {{party.budgetText}} · {{campaign.advancement}}</p>{{/if}}
+    {{/if}}
+    <div class="ed-filter-row">
+      <input type="search" class="ed-query" name="edQuery" placeholder="Filter by name, tag or monster" value="{{query}}" aria-label="Filter encounters">
+      <label class="ed-toggle" data-tooltip="Completed encounters stay hidden (and unloaded) unless this is on">
+        <input type="checkbox" data-action="edShowCompleted" {{#if showCompleted}}checked{{/if}}>
+        Show completed{{#if hiddenCompleted}} ({{hiddenCompleted}}){{/if}}
+      </label>
+    </div>
+  </header>
+  <div class="ed-tree">
+    {{#if campaignTree}}
+      {{> "modules/encounter-deck/templates/folder.hbs" node=campaignTree}}
+    {{else}}
+      <p class="ed-empty-note">Create a Campaign to start prepping encounters.</p>
+    {{/if}}
+    {{#if library}}{{> "modules/encounter-deck/templates/folder.hbs" node=library}}{{/if}}
+  </div>
+  {{#if inCombat}}
+  <footer class="ed-foot"><button type="button" data-action="edBackToTracker"><i class="fa-solid fa-swords" inert></i> Back to the combat tracker</button></footer>
+  {{/if}}
+  {{else}}
+  {{#unless inactive}}<p class="ed-empty-note">Encounter Deck is setting up its compendium…</p>{{/unless}}
+  {{/if}}
+</section>

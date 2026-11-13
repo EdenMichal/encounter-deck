@@ -1,0 +1,16 @@
+{
+  "name": "encounter-deck",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "esbuild module/src/main.ts --bundle --format=esm --target=es2022 --sourcemap --outfile=module/dist/main.js",
+    "watch": "npm run build -- --watch",
+    "test": "vitest run",
+    "typecheck": "tsc -p . --noEmit"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2",
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.0"
+  }
+}
