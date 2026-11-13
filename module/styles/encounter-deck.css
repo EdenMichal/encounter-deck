@@ -124,13 +124,11 @@
   gap: 2px;
   padding: 4px 6px;
   border: 1px solid var(--ed-line);
-  border-left: 3px solid var(--ed-line);
   border-radius: var(--ed-radius);
   cursor: pointer;
 }
 .ed-row:hover { background: var(--sidebar-entry-hover-bg, rgba(255, 255, 255, 0.08)); }
 .ed-row.active { border-color: var(--ed-accent); box-shadow: 0 0 0 1px var(--ed-accent) inset; }
-.ed-row.status-ready { border-left-color: var(--ed-low); }
 .ed-row.status-completed { opacity: 0.6; }
 .ed-row-top { display: flex; align-items: center; gap: 4px; }
 .ed-row-name { flex: 1; min-width: 0; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
