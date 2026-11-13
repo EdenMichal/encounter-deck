@@ -17,6 +17,8 @@ export function registerSettings(): void {
   game.settings.register(MODULE_ID, "activeCampaign", { scope: "world", config: false, type: String, default: "", onChange: changed });
   game.settings.register(MODULE_ID, "showCompleted", { scope: "client", config: false, type: Boolean, default: false, onChange: changed });
   game.settings.register(MODULE_ID, "collapsedFolders", { scope: "client", config: false, type: Object, default: {} });
+  // Whether the GM has been asked once about Monk's TokenBar's own XP dialog.
+  game.settings.register(MODULE_ID, "tokenBarAsked", { scope: "world", config: false, type: Boolean, default: false });
   game.settings.register(MODULE_ID, "builderCollapsed", { scope: "client", config: false, type: Boolean, default: false });
 }
 

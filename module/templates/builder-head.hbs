@@ -3,6 +3,7 @@
   <header class="ed-details-head">
     <input type="text" name="name" value="{{name}}" class="ed-name" aria-label="Encounter name">
     <select name="status" aria-label="Status">{{#each statuses}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select>
+    <button type="button" class="icon fa-solid fa-play" data-action="edImport" data-tooltip="Import into the scene you're viewing" aria-label="Import"></button>
     <button type="button" class="icon fa-solid fa-xmark" data-action="edCloseEncounter" data-tooltip="Close" aria-label="Close"></button>
   </header>
   <p class="ed-where">

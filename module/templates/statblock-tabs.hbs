@@ -1,0 +1,11 @@
+<ol class="ed-sb-tabs">
+  {{#each tabs}}
+  <li>
+    <button type="button" class="ed-sb-tab {{#if selected}}selected{{/if}} {{#if turn}}turn{{/if}} {{#if defeated}}defeated{{/if}}"
+      data-action="edSelectTab" data-combatant-id="{{id}}" data-tooltip="{{name}}" data-tooltip-direction="LEFT"
+      aria-label="{{name}}" aria-pressed="{{selected}}">
+      <img src="{{img}}" alt="">
+    </button>
+  </li>
+  {{/each}}
+</ol>

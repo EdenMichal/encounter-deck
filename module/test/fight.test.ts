@@ -1,0 +1,62 @@
+import { describe, expect, it } from "vitest";
+import { hasMargin, marginSlots, parseHp, splitXp, tokenNames, type SceneArea } from "../src/fight";
+
+// A 10×8 cell canvas (100px cells) with a 2-cell margin all round: the background is cells 2–7 × 2–5.
+const area: SceneArea = { width: 1000, height: 800, size: 100, sceneRect: { x: 200, y: 200, width: 600, height: 400 } };
+
+describe("hasMargin", () => {
+  it("is true with padding and false without", () => {
+    expect(hasMargin(area)).toBe(true);
+    expect(hasMargin({ ...area, sceneRect: { x: 0, y: 0, width: 1000, height: 800 } })).toBe(false);
+  });
+});
+
+describe("marginSlots", () => {
+  it("fills the top margin left to right", () => {
+    expect(marginSlots(area, [], [{ width: 1, height: 1 }, { width: 1, height: 1 }])).toEqual([{ x: 0, y: 0 }, { x: 100, y: 0 }]);
+  });
+
+  it("skips existing tokens and never touches the background", () => {
+    const slots = marginSlots(area, [{ x: 0, y: 0, width: 100, height: 100 }], [{ width: 1, height: 1 }])!;
+    expect(slots).toEqual([{ x: 100, y: 0 }]);
+    // Fill every margin cell (10×8 = 80 cells, 6×4 = 24 background) and nothing lands on the background.
+    const all = marginSlots(area, [], Array(56).fill({ width: 1, height: 1 }))!;
+    expect(all).toHaveLength(56);
+    expect(all.every(p => p.x < 200 || p.x >= 800 || p.y < 200 || p.y >= 600)).toBe(true);
+  });
+
+  it("fits large creatures in cells that have room", () => {
+    const [big] = marginSlots(area, [], [{ width: 2, height: 2 }])!;
+    expect(big).toEqual({ x: 0, y: 0 });
+  });
+
+  it("returns null when they don't all fit", () => {
+    expect(marginSlots(area, [], Array(57).fill({ width: 1, height: 1 }))).toBeNull();
+    expect(marginSlots(area, [], [{ width: 3, height: 3 }])).toBeNull();
+  });
+});
+
+describe("tokenNames", () => {
+  it("keeps a lone creature's name", () => expect(tokenNames("Ogre", 0, 1)).toEqual(["Ogre"]));
+  it("numbers a group", () => expect(tokenNames("Goblin", 0, 3)).toEqual(["Goblin 1", "Goblin 2", "Goblin 3"]));
+  it("continues numbering for reinforcements", () => expect(tokenNames("Goblin", 4, 2)).toEqual(["Goblin 5", "Goblin 6"]));
+});
+
+describe("splitXp", () => {
+  it("splits evenly and rounds down", () => expect(splitXp(450, 4)).toBe(112));
+  it("gives nothing with nobody present", () => expect(splitXp(450, 0)).toBe(0));
+});
+
+describe("parseHp", () => {
+  it("reads damage, healing and a new value", () => {
+    expect(parseHp("-7")).toEqual({ value: -7, isDelta: true });
+    expect(parseHp(" +5 ")).toEqual({ value: 5, isDelta: true });
+    expect(parseHp("12")).toEqual({ value: 12, isDelta: false });
+    expect(parseHp("=12")).toEqual({ value: 12, isDelta: false });
+  });
+  it("rejects anything else", () => {
+    expect(parseHp("")).toBeNull();
+    expect(parseHp("abc")).toBeNull();
+    expect(parseHp("-")).toBeNull();
+  });
+});

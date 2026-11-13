@@ -12,7 +12,7 @@ import { setSetting, setting } from "../settings";
 import { cachedMonsters, invalidateMonsters, loadMonsters, lookupMonster, openSourcesConfig, sourcePacks, xpForCr } from "../sources";
 import { encounterFlags, getEncounter, isInLibrary, pack, rootOf, folderById } from "../store";
 import { partyContext } from "./browser-model";
-import { duplicate, openLink, removeEncounter, setStatus } from "./combat-tab";
+import { duplicate, openLink, removeEncounter, runImport, setStatus } from "./combat-tab";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 const RESULT_LIMIT = 100;
@@ -82,6 +82,7 @@ class Builder extends HandlebarsApplicationMixin(ApplicationV2) {
       edDuplicate: act(app => app.encounterId && duplicate(app.encounterId)),
       edDelete: act(app => app.encounterId && removeEncounter(app.encounterId)),
       edCloseEncounter: act(app => app.closeEncounter()),
+      edImport: act(async app => { if (!app.encounterId) return; await app.settled(); return runImport(app.encounterId); }),
     },
   };
 
@@ -104,6 +105,11 @@ class Builder extends HandlebarsApplicationMixin(ApplicationV2) {
   /** Saves still in flight. Until they land, our local entries are newer than the document. */
   #pending = 0;
   #renderResults = foundry.utils.debounce(() => this.render({ parts: ["results"] }), 120);
+
+  /** Resolves once every save in flight has landed, so Import reads the latest entries. */
+  async settled(): Promise<void> {
+    for (let i = 0; this.#pending > 0 && i < 50; i++) await new Promise(r => setTimeout(r, 50));
+  }
 
   get flags(): EncounterFlags | null {
     return this.doc ? encounterFlags(this.doc) : null;

@@ -7,3 +7,4 @@ declare const foundry: any;
 declare const ui: any;
 declare const fromUuid: (uuid: string) => Promise<any>;
 declare const fromUuidSync: (uuid: string, options?: object) => any;
+declare const canvas: any;

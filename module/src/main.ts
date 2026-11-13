@@ -3,6 +3,8 @@ import { registerSettings } from "./settings";
 import { ensureStorage, watchChanges } from "./store";
 import { createCombatTab } from "./ui/combat-tab";
 import { startBuilder } from "./ui/builder";
+import { checkTokenBar, startFinish } from "./finish";
+import { startStatBlockTabs } from "./ui/statblocks";
 
 Hooks.once("init", () => {
   registerSettings();
@@ -26,5 +28,8 @@ Hooks.once("ready", async () => {
     ui.notifications.error("Encounter Deck could not create its compendium. See the console for details.");
   }
   startBuilder();
+  startStatBlockTabs();
+  startFinish();
   Hooks.callAll(CHANGED_HOOK);
+  checkTokenBar();
 });
