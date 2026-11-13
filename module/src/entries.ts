@@ -19,7 +19,11 @@ export function readEntries(members: Member[] = [], cache: EntryCache[] = [], lo
   return members.map(m => {
     const live = lookup(m.uuid);
     const saved = cache.find(c => c.uuid === m.uuid);
-    const base: EntryCache = live ?? saved ?? { uuid: m.uuid, name: "Unknown creature", img: "", cr: null, xp: 0 };
+    const unknown: EntryCache = { uuid: m.uuid, name: "Unknown creature", img: "", cr: null, xp: 0 };
+    // A live monster whose CR isn't indexed keeps the saved CR and XP.
+    const base: EntryCache = live
+      ? { ...live, cr: live.cr ?? saved?.cr ?? null, xp: live.cr !== null ? live.xp : saved?.xp ?? 0 }
+      : saved ?? unknown;
     return { ...base, uuid: m.uuid, count: Math.max(0, m.quantity?.value ?? 1), missing: !live };
   });
 }

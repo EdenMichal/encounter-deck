@@ -1,0 +1,16 @@
+<section class="ed-head-part">
+  {{#if open}}
+  <header class="ed-details-head">
+    <input type="text" name="name" value="{{name}}" class="ed-name" aria-label="Encounter name">
+    <select name="status" aria-label="Status">{{#each statuses}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select>
+    <button type="button" class="icon fa-solid fa-xmark" data-action="edCloseEncounter" data-tooltip="Close" aria-label="Close"></button>
+  </header>
+  <p class="ed-where">
+    {{#if library}}<span class="ed-badge">Master Copy</span>{{/if}}
+    <i class="fa-solid fa-folder" inert></i> {{where}}
+    {{#if copiedFrom}}· copied from {{copiedFrom}}{{/if}}
+  </p>
+  {{else}}
+  <p class="ed-empty-note">Pick an Encounter in the Combat tab, or press + on a folder to start one.</p>
+  {{/if}}
+</section>
