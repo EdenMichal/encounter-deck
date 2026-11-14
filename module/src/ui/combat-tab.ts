@@ -135,9 +135,11 @@ export async function removeEncounter(id: string): Promise<void> {
 /** Import, then show the tracker and fold the Builder away so the fight has room. */
 export async function runImport(id: string): Promise<void> {
   if (!(await importEncounter(id))) return;
-  const tab = ui.combat;
-  if (tab?.ui) tab.ui.forceBrowser = false;
-  tab?.render();
+  for (const tab of [ui.combat, ui.combat?.popout]) {
+    if (!tab?.ui) continue;
+    tab.ui.forceBrowser = false;
+    if (tab.rendered) tab.render();
+  }
   const drawer = builder();
   if (drawer && !drawer.collapsed) drawer.setCollapsed(true);
 }
@@ -244,8 +246,8 @@ export function createCombatTab(Base: any) {
       if (!game.user.isGM) return;
       // The browser part was last rendered while hidden: bring it up to date now that it shows.
       if (this.browserMode && !this.#browserFresh) this.render({ parts: ["edBrowser"] });
-      // In the tracker, a button to get back to the browser.
-      const header = el.querySelector<HTMLElement>(":scope > [data-application-part='header']");
+      // In the tracker, a button to get back to the browser (the sidebar tab and its floating pop-out alike).
+      const header = el.querySelector<HTMLElement>("[data-application-part='header']");
       if (header && !this.browserMode && !header.querySelector(".ed-show-browser")) {
         header.insertAdjacentHTML("afterbegin", `<button type="button" class="ed-show-browser" data-action="edShowBrowser"><i class="fa-solid fa-book-skull" inert></i> Encounters</button>`);
       }

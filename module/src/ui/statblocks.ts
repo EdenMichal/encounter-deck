@@ -39,10 +39,15 @@ export function closeStatBlock(): void {
   shown = null;
 }
 
-/** The fixed spot: just left of the sidebar, near the top. */
+/** The fixed spot: near the top, just left of the sidebar, or of the floating combat tracker when that's open. */
 function spotFor(sheet: any): { left: number; top: number } {
-  const sidebar = document.getElementById("sidebar")?.getBoundingClientRect();
   const width = Number(sheet.position?.width) || Number(sheet.options?.position?.width) || 600;
-  const edge = (sidebar?.left ?? window.innerWidth) - GAP;
-  return { left: Math.max(GAP, edge - width), top: 60 };
+  const sidebar = document.getElementById("sidebar")?.getBoundingClientRect();
+  let edge = sidebar?.left ?? window.innerWidth;
+  const popout = ui.combat?.popout;
+  if (popout?.rendered && !popout.minimized) {
+    const r = popout.element.getBoundingClientRect();
+    if (r.width && r.left < edge) edge = r.left;
+  }
+  return { left: Math.max(GAP, edge - GAP - width), top: 60 };
 }

@@ -20,8 +20,11 @@
 
 .encounter-deck-tab [data-application-part="edBrowser"] { display: none; }
 /* Hide the tracker parts and anything other modules add to them while the browser shows. */
-.encounter-deck-tab.ed-browser-mode > :not([data-application-part="edBrowser"]) { display: none !important; }
-.encounter-deck-tab.ed-browser-mode > [data-application-part="edBrowser"] {
+.encounter-deck-tab.ed-browser-mode > :not([data-application-part="edBrowser"]):not(.window-header):not(.window-content),
+.encounter-deck-tab.ed-browser-mode > .window-content > :not([data-application-part="edBrowser"]) { display: none !important; }
+/* The floating pop-out keeps its title bar; its parts sit one level down, in .window-content. */
+.encounter-deck-tab.ed-browser-mode > [data-application-part="edBrowser"],
+.encounter-deck-tab.ed-browser-mode > .window-content > [data-application-part="edBrowser"] {
   display: flex;
   flex-direction: column;
   flex: 1;
