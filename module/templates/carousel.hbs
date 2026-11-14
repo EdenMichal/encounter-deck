@@ -1,0 +1,33 @@
+<div class="ed-car-strip">
+  {{#if show}}
+  {{#if isGM}}
+  <button type="button" class="ed-car-nav" data-action="edPrevTurn" data-tooltip="Previous turn" aria-label="Previous turn"><i class="fa-solid fa-chevron-left" inert></i></button>
+  {{/if}}
+  <div class="ed-car-round" aria-label="Round {{round}}"><i class="fa-solid fa-chevron-right" inert></i><span>{{round}}</span></div>
+  <ol class="ed-car-list">
+    {{#each cards}}
+    <li class="ed-car-item {{#if current}}current{{/if}} {{#if hero}}hero{{/if}} {{#if defeated}}defeated{{/if}} {{#if secret}}secret{{/if}}" data-combatant-id="{{id}}">
+      <div class="ed-car-card" data-action="edCard" data-tooltip="{{name}}" aria-label="{{name}}">
+        <img class="ed-car-portrait" src="{{img}}" alt="">
+        {{#if defeated}}<span class="ed-car-dead"><img src="{{@root.deadIcon}}" alt="Defeated"></span>{{/if}}
+        {{#if init}}<span class="ed-car-init" aria-label="Initiative {{init}}">{{init}}</span>{{/if}}
+        {{#if statuses.length}}
+        <ul class="ed-car-statuses">
+          {{#each statuses}}<li data-tooltip="{{name}}"><img class="{{#if svg}}svg{{/if}}" src="{{img}}" alt="{{name}}"></li>{{/each}}
+          {{#if more}}<li class="more" data-tooltip="{{more}} more">+{{more}}</li>{{/if}}
+        </ul>
+        {{/if}}
+        {{#if current}}<span class="ed-car-name">{{name}}</span>{{/if}}
+        {{#if bloodied}}<span class="ed-car-bloodied">Bloodied</span>{{/if}}
+        {{#if hp}}<span class="ed-car-bar"><span class="{{#if hp.low}}low{{/if}}" style="width: {{hp.pct}}%"></span></span>{{/if}}
+      </div>
+      {{#if hero}}<img class="ed-car-trim" src="{{@root.trim}}" alt="">{{/if}}
+      {{#if hp}}<span class="ed-car-hp">{{hp.text}}</span>{{/if}}
+    </li>
+    {{/each}}
+  </ol>
+  {{#if isGM}}
+  <button type="button" class="ed-car-nav next" data-action="edNextTurn" data-tooltip="Next turn" aria-label="Next turn"><i class="fa-solid fa-chevron-right" inert></i></button>
+  {{/if}}
+  {{/if}}
+</div>

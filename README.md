@@ -1,8 +1,8 @@
 # Encounter Deck
 
-A Foundry VTT v14 (dnd5e 5.3+) module for preparing encounters ahead of time, organized by campaign, without putting anything on a scene until you need it. GM-only.
+A Foundry VTT v14 (dnd5e 5.3+) module for preparing encounters ahead of time, organized by campaign, without putting anything on a scene until you need it. Prep is GM-only; the carousel is for the whole table.
 
-Status: **v0.2 (running the fight)**. See [PLAN.md](PLAN.md) for the full spec and roadmap, [CONTEXT.md](CONTEXT.md) for the terms, and [docs/adr/](docs/adr/) for the decisions.
+Status: **v0.3 (carousel)**. See [PLAN.md](PLAN.md) for the full spec and roadmap, [CONTEXT.md](CONTEXT.md) for the terms, and [docs/adr/](docs/adr/) for the decisions.
 
 ## What v0.1 does
 
@@ -21,6 +21,14 @@ Status: **v0.2 (running the fight)**. See [PLAN.md](PLAN.md) for the full spec a
 - **Finish:** Foundry's own "End combat". If the fight began, each imported Encounter is marked Completed and, in XP mode, the full XP is split between the Present PCs with one chat line. Every imported token and actor is removed either way.
 - **Token-less PCs:** a player rolling initiative from the tracker or sheet updates their existing combatant instead of adding a second one.
 - **Monk's TokenBar:** if its "Show XP Dialog" is on, Encounter Deck asks once whether to turn it off, so XP isn't awarded twice.
+
+## What v0.3 adds
+
+- **Carousel:** the running fight across the top of the screen, for the whole table. Square portrait cards hang from the top edge in initiative order; the current one is larger and named, with the round on the left. Heroes (player characters and anything a player owns) get a slim gold trim underneath. Initiative sits in a gold-stroked box in the corner, and statuses and conditions show down the right edge with Foundry's own icons (a "+N" when they don't fit).
+- **Who sees what:** the GM gets Previous/Next Turn, every initiative and every HP bar; a click selects and pans to a token, a double-click on a monster opens its Stat Block. Players and the table display never see monster initiative or HP: a monster at half HP or less shows **Bloodied**. Hidden combatants are GM-only.
+- **Show the carousel to** (module setting): Everyone (default), GM and players but not the table display (the user Monk's Common Display shows the map on), or GM only.
+- **Carousel Combat Tracker:** if it's active, Encounter Deck asks once whether to turn it off. Until it's off, our carousel stays hidden so there are never two.
+- A long fight scrolls sideways (the mouse wheel works) and keeps the current card in view; Stat Blocks open below the carousel.
 
 ## Develop
 

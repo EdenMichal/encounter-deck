@@ -401,3 +401,165 @@
 .encounter-deck-tab .combatant .ed-hp.bloodied .ed-hp-input { color: var(--ed-moderate); }
 .encounter-deck-tab .combatant .ed-hp.down .ed-hp-input { color: var(--ed-over); }
 .encounter-deck-tab .combatant .ed-sb-button { flex: none; }
+
+/* -------------------------------------------- */
+/*  Carousel                                    */
+/* -------------------------------------------- */
+
+/* Square portrait cards hanging from the top edge, centred over the canvas. Only the cards and buttons take clicks. */
+#ui-top:has(> #encounter-deck-carousel) { position: relative; }
+#encounter-deck-carousel {
+  --ed-card-w: 64px;
+  --ed-card-h: 96px;
+  --ed-gold: #d8b45a;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  /* The middle column runs under the sidebar's tab strip on the right; stay clear of it. */
+  max-width: calc(100% - 64px);
+  pointer-events: none;
+  color: #f4f1ea;
+}
+#encounter-deck-carousel.ed-hidden { display: none; }
+.ed-car-strip { display: flex; align-items: flex-start; gap: 10px; }
+.ed-car-nav {
+  pointer-events: all;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  margin-top: 8px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ece8e1;
+  background: rgba(12, 12, 14, 0.85);
+  border: 1px solid var(--ed-gold);
+  border-radius: 4px;
+}
+.ed-car-nav.next { color: #1a1209; background: var(--ed-gold); }
+.ed-car-list {
+  /* A long fight scrolls sideways (the wheel works too), keeping the current card in view. */
+  position: relative;
+  min-width: 0;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  pointer-events: all;
+}
+.ed-car-list::-webkit-scrollbar { display: none; }
+.ed-car-list > li { flex: none; }
+.ed-car-round {
+  flex: none;
+  width: 22px;
+  height: var(--ed-card-h);
+  padding-top: 30px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  border-right: 2px solid rgba(216, 180, 90, 0.8);
+  font-size: 15px;
+  font-weight: 700;
+  text-shadow: 0 0 3px #000, 0 0 2px #000;
+}
+.ed-car-round i { font-size: 11px; }
+.ed-car-item { margin: 0; display: flex; flex-direction: column; align-items: center; }
+.ed-car-card {
+  pointer-events: all;
+  position: relative;
+  width: var(--ed-card-w);
+  height: var(--ed-card-h);
+  box-sizing: border-box;
+  overflow: hidden;
+  background: #26262b;
+  border: 1px solid #000;
+  border-top-width: 0;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.45);
+  cursor: pointer;
+  transition: width 0.2s ease, height 0.2s ease;
+}
+.ed-car-item.current .ed-car-card { width: calc(var(--ed-card-w) * 1.2); height: calc(var(--ed-card-h) * 1.2); border-color: #f6e2b0; }
+.ed-car-item.defeated .ed-car-card { opacity: 0.6; }
+.ed-car-item.secret .ed-car-card { opacity: 0.5; outline: 1px dashed rgba(255, 255, 255, 0.6); outline-offset: -1px; }
+.ed-car-card img { border: none; }
+.ed-car-portrait { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top center; }
+.ed-car-init {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 3px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  background: rgba(12, 12, 14, 0.9);
+  border: 1px solid var(--ed-gold);
+  border-radius: 3px;
+}
+.ed-car-statuses { list-style: none; margin: 0; padding: 0; position: absolute; top: 3px; right: 3px; display: flex; flex-direction: column; gap: 2px; }
+.ed-car-statuses li {
+  margin: 0;
+  width: 18px;
+  height: 18px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 700;
+  background: rgba(12, 12, 14, 0.88);
+  border: 1px solid var(--ed-gold);
+  border-radius: 3px;
+}
+.ed-car-statuses img { width: 13px; height: 13px; object-fit: contain; }
+/* Foundry's and dnd5e's condition icons are single-colour SVGs: draw them white on the dark box. Images keep their colours. */
+.ed-car-statuses img.svg { filter: brightness(0) invert(1); }
+.ed-car-name {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 7px;
+  padding: 2px 3px;
+  font-family: "Modesto Condensed", var(--font-h1, serif), serif;
+  font-size: 14px;
+  line-height: 1.05;
+  text-align: center;
+  text-shadow: 0 0 3px #000, 0 0 2px #000;
+}
+.ed-car-dead { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.5); }
+.ed-car-dead img { width: 30px; height: 30px; filter: brightness(0) invert(1); }
+.ed-car-bloodied {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: rgba(150, 24, 24, 0.85);
+}
+.ed-car-bar { position: absolute; left: 0; right: 0; bottom: 0; height: 4px; background: rgba(0, 0, 0, 0.6); }
+.ed-car-bar > span { display: block; height: 100%; background: #41aa7d; }
+.ed-car-bar > span.low { background: #d23b2a; }
+.ed-car-trim { position: relative; z-index: 1; width: calc(var(--ed-card-w) + 26px); max-width: none; margin-top: -5px; border: none; pointer-events: none; }
+.ed-car-item.current .ed-car-trim { width: calc(var(--ed-card-w) * 1.2 + 26px); }
+.ed-car-hp { margin-top: 1px; font-size: 11px; font-weight: 600; text-shadow: 0 0 3px #000, 0 0 2px #000; }

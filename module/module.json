@@ -1,8 +1,8 @@
 {
   "id": "encounter-deck",
   "title": "Encounter Deck",
-  "description": "GM-only encounter prep for dnd5e: Campaigns, a Shared Library and a Builder with a live 2024 difficulty meter, inside the Combat tab.",
-  "version": "0.2.0",
+  "description": "Encounter prep and running for dnd5e: Campaigns, a Shared Library and a Builder with a live 2024 difficulty meter inside the Combat tab, plus a carousel initiative tracker across the top for the whole table.",
+  "version": "0.3.0",
   "compatibility": {
     "minimum": "14",
     "verified": "14.360"

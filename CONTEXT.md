@@ -52,6 +52,14 @@ _Avoid_: Padding, off-map
 A monster's own dnd5e sheet, opened in one fixed spot beside the sidebar and replacing the previous one. The tracker's book button and a double-click on a monster row open it, and Next/Previous Turn opens the monster whose turn it is (skipping PCs).
 _Avoid_: Follow turn, auto-open
 
+**Carousel**:
+The running fight across the top of the screen for the whole table: one card per combatant in initiative order, the current one larger. Players see monsters' Bloodied state, never their numbers.
+_Avoid_: Dock, initiative bar, combat strip
+
+**Hero**:
+A player character, or anything a player owns. Heroes get the gold trim on the Carousel and players see their numbers.
+_Avoid_: PC (fine in prose, but a companion is a Hero too), ally, party member
+
 **Builder**:
 The screen for creating and editing Encounters: search and filter monsters, add them, and see the difficulty live.
 _Avoid_: Creator, editor, suite

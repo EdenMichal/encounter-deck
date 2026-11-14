@@ -19,6 +19,17 @@ export function registerSettings(): void {
   game.settings.register(MODULE_ID, "collapsedFolders", { scope: "client", config: false, type: Object, default: {} });
   // Whether the GM has been asked once about Monk's TokenBar's own XP dialog.
   game.settings.register(MODULE_ID, "tokenBarAsked", { scope: "world", config: false, type: Boolean, default: false });
+  game.settings.register(MODULE_ID, "carouselAudience", {
+    name: "Show the carousel to",
+    hint: "Who sees the carousel across the top during a fight. Players and the table display never see monster initiative or exact monster HP: a monster at half HP or less shows Bloodied. The table display is the user Monk's Common Display shows the map on.",
+    scope: "world",
+    config: true,
+    type: String,
+    choices: { everyone: "Everyone", players: "GM and players, not the table display", gm: "GM only" },
+    default: "everyone",
+  });
+  // Whether the GM has been asked once about turning off Carousel Combat Tracker.
+  game.settings.register(MODULE_ID, "carouselTakeoverAsked", { scope: "world", config: false, type: Boolean, default: false });
   game.settings.register(MODULE_ID, "builderCollapsed", { scope: "client", config: false, type: Boolean, default: false });
 }
 
