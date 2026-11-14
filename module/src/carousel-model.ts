@@ -32,6 +32,7 @@ export interface CombatantInput {
   hidden: boolean;
   defeated: boolean;
   hp: { value: number; max: number } | null;
+  ac: number | null;
   statuses: StatusIcon[];
 }
 
@@ -48,9 +49,12 @@ export interface CardView {
   init: string | null;
   hp: { text: string; pct: number; low: boolean } | null;
   bloodied: boolean;
+  /** Null when this viewer doesn't get to see it: players never learn a monster's AC. */
+  ac: string | null;
   statuses: (StatusIcon & { svg: boolean })[];
-  /** How many more statuses didn't fit. */
+  /** How many more statuses didn't fit; the +N box opens the full list. */
   more: number;
+  allStatuses: (StatusIcon & { svg: boolean })[];
 }
 
 /** At or below half HP, and still up. */
@@ -66,7 +70,8 @@ export function buildCards(list: CombatantInput[], currentId: string | null, isG
       const seesNumbers = isGM || c.hero;
       const hp = c.hp && c.hp.max > 0 ? c.hp : null;
       const value = hp ? Math.max(0, hp.value) : 0;
-      const statuses = c.statuses.length > maxStatuses ? c.statuses.slice(0, maxStatuses - 1) : c.statuses;
+      const all = c.statuses.map(s => ({ ...s, svg: /\.svg($|\?)/i.test(s.img) }));
+      const shown = all.length > maxStatuses ? all.slice(0, maxStatuses - 1) : all;
       return {
         id: c.id,
         name: c.name,
@@ -80,8 +85,10 @@ export function buildCards(list: CombatantInput[], currentId: string | null, isG
           ? { text: `${value}/${hp.max}`, pct: Math.min(100, Math.round((value / hp.max) * 100)), low: isBloodied(value, hp.max) }
           : null,
         bloodied: !seesNumbers && !!hp && !c.defeated && isBloodied(value, hp.max),
-        statuses: statuses.map(s => ({ ...s, svg: /\.svg($|\?)/i.test(s.img) })),
-        more: c.statuses.length - statuses.length,
+        ac: seesNumbers && c.ac !== null && Number.isFinite(c.ac) ? String(c.ac) : null,
+        statuses: shown,
+        more: all.length - shown.length,
+        allStatuses: all,
       };
     });
 }

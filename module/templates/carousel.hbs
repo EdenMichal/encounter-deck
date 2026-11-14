@@ -12,10 +12,11 @@
         {{#if bloodied}}<span class="ed-car-bloodied" role="img" aria-label="Bloodied"></span>{{/if}}
         {{#if defeated}}<span class="ed-car-dead"><img src="{{@root.deadIcon}}" alt="Defeated"></span>{{/if}}
         {{#if init}}<span class="ed-car-init" aria-label="Initiative {{init}}">{{init}}</span>{{/if}}
+        {{#if ac}}<span class="ed-car-ac" aria-label="Armor Class {{ac}}"><i class="fa-solid fa-shield" inert></i>{{ac}}</span>{{/if}}
         {{#if statuses.length}}
         <ul class="ed-car-statuses">
           {{#each statuses}}<li data-tooltip="{{name}}"><img class="{{#if svg}}svg{{/if}}" src="{{img}}" alt="{{name}}"></li>{{/each}}
-          {{#if more}}<li class="more" data-tooltip="{{more}} more">+{{more}}</li>{{/if}}
+          {{#if more}}<li><button type="button" class="ed-car-more" data-action="edMoreStatuses" data-tooltip="Show all statuses" aria-label="Show all {{allStatuses.length}} statuses">+{{more}}</button></li>{{/if}}
         </ul>
         {{/if}}
         {{#if current}}<span class="ed-car-name">{{name}}</span>{{/if}}
@@ -26,6 +27,14 @@
     </li>
     {{/each}}
   </ol>
+  {{#if popover}}
+  <div class="ed-car-popover" data-for="{{popover.id}}" role="dialog" aria-label="Statuses of {{popover.name}}">
+    <h3>{{popover.name}}</h3>
+    <ul>
+      {{#each popover.statuses}}<li><img class="{{#if svg}}svg{{/if}}" src="{{img}}" alt=""><span>{{name}}</span></li>{{/each}}
+    </ul>
+  </div>
+  {{/if}}
   {{#if isGM}}
   <button type="button" class="ed-car-nav next" data-action="edNextTurn" data-tooltip="Next turn" aria-label="Next turn"><i class="fa-solid fa-chevron-right" inert></i></button>
   {{/if}}

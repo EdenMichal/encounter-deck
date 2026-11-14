@@ -52,6 +52,7 @@ function shownEffects(actor: any): any[] {
 
 function inputOf(c: any): CombatantInput {
   const hp = c.actor?.system?.attributes?.hp;
+  const ac = Number(c.actor?.system?.attributes?.ac?.value);
   const seen = new Set<string>();
   const statuses = shownEffects(c.actor)
     .filter((e: any) => !seen.has(e.img) && seen.add(e.img))
@@ -65,6 +66,7 @@ function inputOf(c: any): CombatantInput {
     hidden: !!c.hidden,
     defeated: !!c.isDefeated,
     hp: hp && Number.isFinite(hp.max) ? { value: Number(hp.value) || 0, max: Number(hp.max) } : null,
+    ac: Number.isFinite(ac) ? ac : null,
     statuses,
   };
 }
@@ -79,8 +81,16 @@ class Carousel extends HandlebarsApplicationMixin(ApplicationV2) {
       edPrevTurn: () => shownCombat()?.previousTurn(),
       edNextTurn: () => shownCombat()?.nextTurn(),
       edCard: function (this: Carousel, _event: Event, target: HTMLElement) { return this.focusToken(target); },
+      edMoreStatuses: function (this: Carousel, _event: Event, target: HTMLElement) {
+        const id = target.closest<HTMLElement>("[data-combatant-id]")?.dataset.combatantId ?? null;
+        this.expanded = this.expanded === id ? null : id;
+        return this.render();
+      },
     },
   };
+
+  /** The card whose full list of statuses is open under it. */
+  expanded: string | null = null;
 
   static PARTS = { strip: { template: T("carousel") } };
 
@@ -96,11 +106,15 @@ class Carousel extends HandlebarsApplicationMixin(ApplicationV2) {
     const show = !!combat?.started && !oldCarouselActive()
       && canSeeCarousel(setting("carouselAudience") as Audience, { isGM, isTable: isTableDisplay() });
     if (!show) return { show: false };
+    const cards = buildCards(combat.turns.map(inputOf), combat.combatant?.id ?? null, isGM);
+    const open = cards.find(c => c.id === this.expanded && c.more > 0);
+    if (!open) this.expanded = null;
     return {
       show,
       isGM,
       round: combat.round,
-      cards: buildCards(combat.turns.map(inputOf), combat.combatant?.id ?? null, isGM),
+      cards,
+      popover: open ? { id: open.id, name: open.name, statuses: open.allStatuses } : null,
       trim: TRIM,
       deadIcon: CONFIG.controlIcons?.defeated ?? "icons/svg/skull.svg",
     };
@@ -115,6 +129,20 @@ class Carousel extends HandlebarsApplicationMixin(ApplicationV2) {
     if (list && current && list.scrollWidth > list.clientWidth) {
       list.scrollLeft = current.offsetLeft - (list.clientWidth - current.offsetWidth) / 2;
     }
+    this.placePopover();
+  }
+
+  /** Put the open list of statuses just under its card, kept inside the carousel. */
+  placePopover(): void {
+    const root = this.element as HTMLElement;
+    const popover = root.querySelector<HTMLElement>(".ed-car-popover");
+    const item = popover && root.querySelector<HTMLElement>(`.ed-car-item[data-combatant-id="${popover.dataset.for}"]`);
+    if (!popover || !item) return;
+    const box = root.getBoundingClientRect();
+    const at = item.getBoundingClientRect();
+    const left = Math.min(Math.max(0, at.left - box.left), Math.max(0, box.width - popover.offsetWidth));
+    popover.style.left = `${Math.round(left)}px`;
+    popover.style.top = `${Math.round(at.bottom - box.top + 4)}px`;
   }
 
   async _onFirstRender(context: any, options: any) {
@@ -126,6 +154,15 @@ class Carousel extends HandlebarsApplicationMixin(ApplicationV2) {
       event.preventDefault();
       list.scrollLeft += event.deltaY || event.deltaX;
     }, { passive: false });
+    // The list of statuses closes on a click anywhere else, or on scrolling the strip.
+    document.addEventListener("pointerdown", (event: PointerEvent) => {
+      if (!this.expanded) return;
+      const target = event.target as HTMLElement;
+      if (target.closest?.(".ed-car-popover, .ed-car-more")) return;
+      this.expanded = null;
+      this.render();
+    }, true);
+    this.element.addEventListener("scroll", () => this.placePopover(), true);
     // The GM double-clicks a monster to open its Stat Block, as in the tracker.
     this.element.addEventListener("dblclick", (event: MouseEvent) => {
       if (!game.user.isGM) return;

@@ -16,7 +16,7 @@ Status: **v0.3 (carousel)**. See [PLAN.md](PLAN.md) for the full spec and roadma
 ## What v0.2 adds
 
 - **Import:** the ▶ button on an encounter row (on hover), its right-click menu, or the Builder. Compendium monsters are copied into a hidden *Encounter Deck: In Combat* Actors folder (world actors are used as they are), numbered tokens go into the Margin of the scene you're viewing, and they plus the Present PCs (without tokens) join the combat. Import again mid-fight for reinforcements; numbering continues (Goblin 5, 6…). A Master Copy is copied into the Active Campaign first. A scene with no padding is refused (ADR 0002).
-- **Tracker:** AC and HP on every row for the GM. Type `-7` for damage, `+5` for healing or `12` for a new value, like dnd5e's token HUD.
+- **Tracker:** AC (in gold) and HP on every row for the GM, with the visibility, defeated and ping buttons packed close. Type `-7` for damage, `+5` for healing or `12` for a new value, like dnd5e's token HUD.
 - **Stat Blocks:** a monster's book button or a double-click on its tracker row opens its own dnd5e sheet in one fixed spot beside the sidebar (the book button again closes it). Next/Previous Turn opens the monster whose turn it is and leaves PC turns alone.
 - **Finish:** Foundry's own "End combat". If the fight began, each imported Encounter is marked Completed and, in XP mode, the full XP is split between the Present PCs with one chat line. Every imported token and actor is removed either way.
 - **Token-less PCs:** a player rolling initiative from the tracker or sheet updates their existing combatant instead of adding a second one.
@@ -24,7 +24,7 @@ Status: **v0.3 (carousel)**. See [PLAN.md](PLAN.md) for the full spec and roadma
 
 ## What v0.3 adds
 
-- **Carousel:** the running fight across the top of the screen, for the whole table. Square portrait cards hang from the top edge in initiative order; the current one is larger and named, with the round on the left. Heroes (player characters and anything a player owns) get a slim gold trim underneath. Initiative sits in a gold-stroked box in the corner, and statuses and conditions show as plain icons down the right edge, with Foundry's own icons (a "+N" when they don't fit).
+- **Carousel:** the running fight across the top of the screen, for the whole table. Square portrait cards hang from the top edge in initiative order; the current one is larger and named, with the round on the left. Heroes (player characters and anything a player owns) get a slim gold trim underneath. Initiative sits in a gold-stroked box in the corner, and statuses and conditions show as plain icons down the left edge under it, with Foundry's own icons. When they don't fit, a gold "+N" box opens a list of all of them under the card. AC shows in gold in the top-right corner (heroes only, for players).
 - **Who sees what:** the GM gets quiet Previous/Next Turn arrows beside the strip, every initiative and every HP bar; a click selects and pans to a token, a double-click on a monster opens its Stat Block. Players and the table display never see monster initiative or HP: a monster at half HP or less glows a pulsing red from the bottom of its card (**Bloodied**). Hidden combatants are GM-only.
 - **Show the carousel to** (module setting): Everyone (default), GM and players but not the table display (the user Monk's Common Display shows the map on), or GM only.
 - **Carousel Combat Tracker:** if it's active, Encounter Deck asks once whether to turn it off. Until it's off, our carousel stays hidden so there are never two.

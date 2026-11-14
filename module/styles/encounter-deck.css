@@ -12,6 +12,7 @@
   --ed-over: #b8324a;
   --ed-builder-width: 640px;
   --ed-handle-width: 26px;
+  --ed-gold: #d8b45a;
 }
 
 /* -------------------------------------------- */
@@ -379,12 +380,15 @@
   font-size: var(--font-size-12, 12px);
   font-variant-numeric: tabular-nums;
 }
-.encounter-deck-tab .combatant .ed-ac { display: inline-flex; align-items: center; gap: 2px; color: var(--ed-muted); min-width: 26px; }
+.encounter-deck-tab .combatant .ed-ac { display: inline-flex; align-items: center; gap: 2px; color: var(--ed-gold); font-weight: 700; min-width: 26px; }
 /* With the extra columns, long names wrap (the token number must stay visible); keep the initiative die its own size. */
 .encounter-deck-tab .combatant:has(> .ed-stats) > .token-name { min-width: 0; }
 .encounter-deck-tab .combatant:has(> .ed-stats) > .token-initiative { align-self: center; height: 32px; }
 .encounter-deck-tab .combatant:has(> .ed-stats) > .token-initiative > button { height: 32px; }
 .encounter-deck-tab .combatant .ed-ac i { font-size: 10px; }
+/* Visibility, defeated and ping sit close together so the row reads as one line of controls. */
+.encounter-deck-tab .combatant .combatant-controls { gap: 0; }
+.encounter-deck-tab .combatant .combatant-controls > .combatant-control { flex: 0 0 18px; width: 18px; padding: 0; }
 .encounter-deck-tab .combatant .ed-hp { display: inline-flex; align-items: baseline; }
 .encounter-deck-tab .combatant .ed-hp-input {
   width: 32px;
@@ -514,8 +518,60 @@
   border: 1px solid var(--ed-gold);
   border-radius: 3px;
 }
-/* Statuses and conditions: just the icons, down the right edge. */
-.ed-car-statuses { list-style: none; margin: 0; padding: 0; position: absolute; top: 4px; right: 4px; display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
+/* Statuses and conditions: just the icons, down the left edge under the initiative. */
+.ed-car-statuses { list-style: none; margin: 0; padding: 0; position: absolute; top: 4px; left: 4px; display: flex; flex-direction: column; gap: 3px; }
+.ed-car-init ~ .ed-car-statuses { top: 31px; }
+/* More than fit: a small gold-stroked box that opens the full list under the card. */
+.ed-car-more {
+  pointer-events: all;
+  width: 22px;
+  height: 18px;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  color: #f4f1ea;
+  background: rgba(12, 12, 14, 0.9);
+  border: 1px solid var(--ed-gold);
+  border-radius: 3px;
+}
+.ed-car-more:hover, .ed-car-more:focus-visible { color: #1a1209; background: var(--ed-gold); }
+.ed-car-popover {
+  position: absolute;
+  z-index: 5;
+  pointer-events: all;
+  min-width: 150px;
+  max-width: 240px;
+  padding: 6px 8px 8px;
+  box-sizing: border-box;
+  background: rgba(16, 16, 20, 0.96);
+  border: 1px solid var(--ed-gold);
+  border-radius: 6px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
+}
+.ed-car-popover h3 { margin: 0 0 4px; padding: 0 0 4px; border-bottom: 1px solid rgba(216, 180, 90, 0.4); font-size: 13px; font-weight: 700; color: var(--ed-gold); }
+.ed-car-popover ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; max-height: 260px; overflow-y: auto; }
+.ed-car-popover li { margin: 0; display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.ed-car-popover img { flex: none; width: 20px; height: 20px; object-fit: contain; border: none; }
+.ed-car-popover img.svg { filter: brightness(0) invert(1); }
+/* Armor Class in the top-right corner, in gold. */
+.ed-car-ac {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ed-gold);
+  text-shadow: 0 0 3px #000, 0 0 2px #000, 0 0 1px #000;
+}
+.ed-car-ac i { font-size: 11px; }
 .ed-car-statuses li { margin: 0; display: flex; align-items: center; font-size: 11px; font-weight: 700; text-shadow: 0 0 3px #000, 0 0 2px #000; }
 .ed-car-statuses img { width: 18px; height: 18px; object-fit: contain; filter: drop-shadow(0 0 1px #000) drop-shadow(0 0 2px #000); }
 /* Foundry's and dnd5e's condition icons are single-colour SVGs: draw them white, with a dark edge so they read on any portrait. */
