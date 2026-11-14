@@ -409,8 +409,8 @@
 /* Square portrait cards hanging from the top edge, centred over the canvas. Only the cards and buttons take clicks. */
 #ui-top:has(> #encounter-deck-carousel) { position: relative; }
 #encounter-deck-carousel {
-  --ed-card-w: 64px;
-  --ed-card-h: 96px;
+  --ed-card-w: 80px;
+  --ed-card-h: 120px;
   --ed-gold: #d8b45a;
   position: absolute;
   top: 0;
@@ -424,22 +424,26 @@
 }
 #encounter-deck-carousel.ed-hidden { display: none; }
 .ed-car-strip { display: flex; align-items: flex-start; gap: 10px; }
+/* The GM's turn arrows: quiet chevrons beside the strip, brightening to gold on hover. */
 .ed-car-nav {
   pointer-events: all;
   flex: none;
-  width: 32px;
-  height: 32px;
-  margin-top: 8px;
+  width: 28px;
+  height: 40px;
+  margin-top: 36px;
   padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #ece8e1;
-  background: rgba(12, 12, 14, 0.85);
-  border: 1px solid var(--ed-gold);
-  border-radius: 4px;
+  font-size: 20px;
+  color: rgba(244, 241, 234, 0.55);
+  background: none;
+  border: none;
+  box-shadow: none;
+  text-shadow: 0 0 3px #000, 0 0 2px #000;
+  transition: color 0.15s ease;
 }
-.ed-car-nav.next { color: #1a1209; background: var(--ed-gold); }
+.ed-car-nav:hover, .ed-car-nav:focus-visible { color: var(--ed-gold); background: none; box-shadow: none; }
 .ed-car-list {
   /* A long fight scrolls sideways (the wheel works too), keeping the current card in view. */
   position: relative;
@@ -459,16 +463,16 @@
 .ed-car-list > li { flex: none; }
 .ed-car-round {
   flex: none;
-  width: 22px;
+  width: 24px;
   height: var(--ed-card-h);
-  padding-top: 30px;
+  padding-top: 40px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 4px;
   border-right: 2px solid rgba(216, 180, 90, 0.8);
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 700;
   text-shadow: 0 0 3px #000, 0 0 2px #000;
 }
@@ -497,37 +501,26 @@
   position: absolute;
   top: 3px;
   left: 3px;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 3px;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 4px;
   box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   background: rgba(12, 12, 14, 0.9);
   border: 1px solid var(--ed-gold);
   border-radius: 3px;
 }
-.ed-car-statuses { list-style: none; margin: 0; padding: 0; position: absolute; top: 3px; right: 3px; display: flex; flex-direction: column; gap: 2px; }
-.ed-car-statuses li {
-  margin: 0;
-  width: 18px;
-  height: 18px;
-  box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 9px;
-  font-weight: 700;
-  background: rgba(12, 12, 14, 0.88);
-  border: 1px solid var(--ed-gold);
-  border-radius: 3px;
-}
-.ed-car-statuses img { width: 13px; height: 13px; object-fit: contain; }
-/* Foundry's and dnd5e's condition icons are single-colour SVGs: draw them white on the dark box. Images keep their colours. */
-.ed-car-statuses img.svg { filter: brightness(0) invert(1); }
+/* Statuses and conditions: just the icons, down the left edge under the initiative. */
+.ed-car-statuses { list-style: none; margin: 0; padding: 0; position: absolute; top: 4px; left: 4px; display: flex; flex-direction: column; gap: 3px; }
+.ed-car-init ~ .ed-car-statuses { top: 31px; }
+.ed-car-statuses li { margin: 0; display: flex; align-items: center; font-size: 11px; font-weight: 700; text-shadow: 0 0 3px #000, 0 0 2px #000; }
+.ed-car-statuses img { width: 18px; height: 18px; object-fit: contain; filter: drop-shadow(0 0 1px #000) drop-shadow(0 0 2px #000); }
+/* Foundry's and dnd5e's condition icons are single-colour SVGs: draw them white, with a dark edge so they read on any portrait. */
+.ed-car-statuses img.svg { filter: brightness(0) invert(1) drop-shadow(0 0 1px #000) drop-shadow(0 0 2px #000); }
 .ed-car-name {
   position: absolute;
   left: 0;
@@ -535,31 +528,31 @@
   bottom: 7px;
   padding: 2px 3px;
   font-family: "Modesto Condensed", var(--font-h1, serif), serif;
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.05;
   text-align: center;
   text-shadow: 0 0 3px #000, 0 0 2px #000;
 }
 .ed-car-dead { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.5); }
-.ed-car-dead img { width: 30px; height: 30px; filter: brightness(0) invert(1); }
+.ed-car-dead img { width: 36px; height: 36px; filter: brightness(0) invert(1); }
+/* Bloodied (what players see for a monster at half HP or less): a red glow rising from the bottom edge, pulsing. */
 .ed-car-bloodied {
   position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
-  height: 15px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  background: rgba(150, 24, 24, 0.85);
+  height: 50%;
+  background: linear-gradient(to top, rgba(210, 20, 20, 0.9), rgba(210, 20, 20, 0.35) 45%, rgba(210, 20, 20, 0));
+  pointer-events: none;
+  animation: ed-bloodied-pulse 1.6s ease-in-out infinite alternate;
 }
-.ed-car-bar { position: absolute; left: 0; right: 0; bottom: 0; height: 4px; background: rgba(0, 0, 0, 0.6); }
+@keyframes ed-bloodied-pulse { from { opacity: 0.35; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .ed-car-bloodied { animation: none; opacity: 0.8; } }
+.ed-car-bar { position: absolute; left: 0; right: 0; bottom: 0; height: 5px; background: rgba(0, 0, 0, 0.6); }
 .ed-car-bar > span { display: block; height: 100%; background: #41aa7d; }
 .ed-car-bar > span.low { background: #d23b2a; }
-.ed-car-trim { position: relative; z-index: 1; width: calc(var(--ed-card-w) + 26px); max-width: none; margin-top: -5px; border: none; pointer-events: none; }
-.ed-car-item.current .ed-car-trim { width: calc(var(--ed-card-w) * 1.2 + 26px); }
-.ed-car-hp { margin-top: 1px; font-size: 11px; font-weight: 600; text-shadow: 0 0 3px #000, 0 0 2px #000; }
+/* The hero trim, drawn larger than the card and cut to its width so the centrepiece reads at table distance. */
+.ed-car-trim { position: relative; z-index: 1; width: var(--ed-card-w); margin-top: -7px; overflow: hidden; display: flex; justify-content: center; pointer-events: none; }
+.ed-car-item.current .ed-car-trim { width: calc(var(--ed-card-w) * 1.2); }
+.ed-car-trim img { flex: none; width: 175%; max-width: none; border: none; }
+.ed-car-hp { margin-top: 1px; font-size: 12px; font-weight: 600; text-shadow: 0 0 3px #000, 0 0 2px #000; }
