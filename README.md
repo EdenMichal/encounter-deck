@@ -2,7 +2,7 @@
 
 A Foundry VTT v14 (dnd5e 5.3+) module for preparing encounters ahead of time, organized by campaign, without putting anything on a scene until you need it. Prep is GM-only; the carousel is for the whole table.
 
-Status: **v0.4 (Sources)**. See [PLAN.md](PLAN.md) for the full spec and roadmap, [CONTEXT.md](CONTEXT.md) for the terms, and [docs/adr/](docs/adr/) for the decisions.
+Status: **v0.5 (legendary)**. See [PLAN.md](PLAN.md) for the full spec and roadmap, [CONTEXT.md](CONTEXT.md) for the terms, and [docs/adr/](docs/adr/) for the decisions.
 
 ## What v0.1 does
 
@@ -34,6 +34,13 @@ Status: **v0.4 (Sources)**. See [PLAN.md](PLAN.md) for the full spec and roadmap
 
 - **Sources dialog:** the Builder's Sources button opens Encounter Deck's own checklist with only the compendiums that hold monsters (no item, spell or hero packs, and empty ones hidden). They're grouped by the system, module or world they come from, with a switch for a whole group, and each shows its monster count, source book and rules version (2014 or 2024). It still saves to dnd5e's Compendium Browser checklist, so the two stay in step; "All compendiums…" opens dnd5e's full list.
 - **Where a monster comes from:** every result shows a source tag such as "SRD 5.1 · 2014" or "SRD 5.2 · 2024" (or the monster's own book, like "Monster Manual 2024", when DDB Importer sets it), with the compendium's name on hover. A **Source** filter sits beside CR, Type, Size and Habitat.
+
+## What v0.5 adds
+
+- **Legendary pips:** a legendary monster's card in the Carousel shows its legendary actions left as gold pips under it, for the GM only.
+- **Legendary Prompt:** when a turn ends, a GM-only strip under the Carousel lists every legendary monster that didn't just act, with its pips and its legendary actions as buttons. A click uses the action through dnd5e, which spends the uses; actions that cost more than what's left are greyed out. Close it with ✕; it clears at the next turn anyway. dnd5e still gives the uses back after the monster's own turn.
+- **Recharge:** during a monster's own turn, the Prompt also lists its recharge abilities as ready or spent ("Fire Breath 5–6"). Encounter Deck asks once whether to turn on dnd5e's Auto-recharge, which rolls them at the start of the monster's turn.
+- **In its lair:** a checkbox on the Encounter (2024 lair rules). Import puts every monster with a lair inside it, on its own token, so it gets one more legendary action and legendary resistance. There's no Lair turn at initiative 20.
 
 ## Develop
 

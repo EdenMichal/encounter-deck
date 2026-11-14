@@ -40,7 +40,7 @@ export function browserContext(ui: BrowserUi) {
     return {
       id: e._id, name: e.name, status, statusLabel: STATUS_LABELS[status], isLibrary,
       tags: flags.tags ?? [], count: totalCount(entries), xp: fmt(xp), band, bandLabel: BAND_LABELS[band],
-      missing: entries.some(en => en.missing), linked: !!flags.link, active: ui.openEncounter === e._id,
+      missing: entries.some(en => en.missing), linked: !!flags.link, inLair: !!flags.inLair, active: ui.openEncounter === e._id,
       summary: entries.map(en => `${en.name} ×${en.count}`).join(", "),
     };
   };

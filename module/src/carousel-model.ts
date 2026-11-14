@@ -3,6 +3,7 @@
  * see a monster's initiative or HP; a monster at half HP or less shows Bloodied instead. No Foundry here, so it can
  * be tested.
  */
+import { pips, type Legendary } from "./legendary";
 
 /** The "Show the carousel to" setting. */
 export type Audience = "everyone" | "players" | "gm";
@@ -34,6 +35,8 @@ export interface CombatantInput {
   hp: { value: number; max: number } | null;
   ac: number | null;
   statuses: StatusIcon[];
+  /** Legendary actions left, for a monster that has them. */
+  legendary?: Legendary | null;
 }
 
 export interface CardView {
@@ -55,6 +58,8 @@ export interface CardView {
   /** How many more statuses didn't fit; the +N box opens the full list. */
   more: number;
   allStatuses: (StatusIcon & { svg: boolean })[];
+  /** Legendary uses as pips (filled = left), for the GM only. */
+  legendary: boolean[] | null;
 }
 
 /** At or below half HP, and still up. */
@@ -89,6 +94,7 @@ export function buildCards(list: CombatantInput[], currentId: string | null, isG
         statuses: shown,
         more: all.length - shown.length,
         allStatuses: all,
+        legendary: isGM && c.legendary && !c.defeated ? pips(c.legendary) : null,
       };
     });
 }

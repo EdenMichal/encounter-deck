@@ -34,6 +34,19 @@ export async function showStatBlock(combatant: any, { toggle = false } = {}): Pr
   sheet.bringToFront?.();
 }
 
+/**
+ * The Carousel grew (the Legendary Prompt appeared under it) after the sheet was placed: if they now overlap, move
+ * the sheet down just below. A sheet the GM dragged clear of the Carousel stays where it is.
+ */
+export function keepStatBlockClear(): void {
+  const el: HTMLElement | undefined = shown?.sheet.rendered ? shown.sheet.element : undefined;
+  const carousel = document.getElementById("encounter-deck-carousel");
+  if (!el || !carousel || carousel.classList.contains("ed-hidden")) return;
+  const a = el.getBoundingClientRect(), b = carousel.getBoundingClientRect();
+  const overlaps = a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
+  if (overlaps) shown!.sheet.setPosition({ top: Math.round(b.bottom + GAP) });
+}
+
 export function closeStatBlock(): void {
   if (shown?.sheet.rendered) shown.sheet.close();
   shown = null;

@@ -3,11 +3,16 @@
  * hang from the top edge in initiative order; the current one is larger and named. Heroes get a gold trim, statuses
  * and conditions show with Foundry's own icons, and only the GM gets turn controls, monster initiative and monster
  * HP (players see Bloodied). It replaces the Carousel Combat Tracker module, and stays hidden while that is active.
+ *
+ * For the GM it also shows legendary uses as pips under a monster's card, and the Legendary Prompt under the strip:
+ * when a turn ends, every legendary monster that didn't just act, with its legendary actions as buttons, plus the
+ * recharge abilities of the monster whose turn it is.
  */
 import { MODULE_ID, T } from "../constants";
 import { buildCards, canSeeCarousel, type Audience, type CombatantInput } from "../carousel-model";
+import { legendaryActions, legendaryOf, promptRows, rechargeAbilities, type PromptCandidate } from "../legendary";
 import { setSetting, setting } from "../settings";
-import { isMonster, showStatBlock } from "./statblocks";
+import { isMonster, keepStatBlockClear, showStatBlock } from "./statblocks";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 const OLD_CAROUSEL = "combat-tracker-dock";
@@ -19,11 +24,24 @@ export function startCarousel(): void {
   instance = new Carousel();
   instance.render({ force: true });
   const refresh = foundry.utils.debounce(() => instance?.render(), 50);
+  // Before the refresh, so the Legendary Prompt knows whose turn just ended.
+  Hooks.on("updateCombat", (combat: any, changed: any, options: any) => instance?.onCombatUpdate(combat, changed, options));
   for (const hook of [
     "createCombat", "updateCombat", "deleteCombat", "createCombatant", "updateCombatant", "deleteCombatant",
     "updateActor", "updateToken", "createActiveEffect", "updateActiveEffect", "deleteActiveEffect", "canvasReady", "createSetting", "updateSetting",
+    // An imported token's actor is synthetic: spending legendary actions or a recharge updates its delta and items.
+    "updateActorDelta", "createItem", "updateItem", "deleteItem",
   ]) Hooks.on(hook, refresh);
 }
+
+/** Where a fight stands: which combatant's turn it is, in which round. */
+interface TurnMark { combatId: string; combatantId: string | null; round: number; turn: number | null }
+const markOf = (combat: any): TurnMark | null =>
+  combat ? { combatId: combat.id, combatantId: combat.combatant?.id ?? null, round: combat.round, turn: combat.turn } : null;
+const sameTurn = (a: TurnMark | null, b: TurnMark | null) =>
+  !!a && !!b && a.combatId === b.combatId && a.round === b.round && a.turn === b.turn;
+
+const isPlainMonster = (c: any): boolean => isMonster(c) && !c.hasPlayerOwner;
 
 /** The user Monk's Common Display shows the map on. */
 function isTableDisplay(): boolean {
@@ -68,6 +86,7 @@ function inputOf(c: any): CombatantInput {
     hp: hp && Number.isFinite(hp.max) ? { value: Number(hp.value) || 0, max: Number(hp.max) } : null,
     ac: Number.isFinite(ac) ? ac : null,
     statuses,
+    legendary: isPlainMonster(c) ? legendaryOf(c.actor?.system) : null,
   };
 }
 
@@ -86,13 +105,71 @@ class Carousel extends HandlebarsApplicationMixin(ApplicationV2) {
         this.expanded = this.expanded === id ? null : id;
         return this.render();
       },
+      edLegendary: function (this: Carousel, event: Event, target: HTMLElement) { return this.useLegendary(event, target); },
+      edDismissPrompt: function (this: Carousel) { this.dismissed = true; return this.render(); },
     },
   };
+
+  /** The turn on screen, and the one before it: whose turn just ended is who the Legendary Prompt leaves out. */
+  turn: TurnMark | null = markOf(shownCombat());
+  ended: TurnMark | null = null;
+  /** The Prompt belongs to this turn; it clears when the turn changes, or when the GM closes it. */
+  promptFor: TurnMark | null = null;
+  dismissed = false;
 
   /** The card whose full list of statuses is open under it. */
   expanded: string | null = null;
 
-  static PARTS = { strip: { template: T("carousel") } };
+  static PARTS = { strip: { template: T("carousel") }, prompt: { template: T("legendary-prompt") } };
+
+  /**
+   * Every client sees every turn change. Moving forward (Next Turn, End Turn, a new round, Begin Combat) raises the
+   * Prompt for the new turn; going back clears it.
+   */
+  onCombatUpdate(combat: any, changed: any, options: any): void {
+    if (!("turn" in changed) && !("round" in changed)) return;
+    if (combat !== shownCombat()) return;
+    const now = markOf(combat);
+    if (sameTurn(now, this.turn)) return;
+    const forward = options?.direction !== -1;
+    const before = this.turn;
+    this.ended = forward && before && before.combatId === combat.id && before.round >= 1 ? before : null;
+    this.turn = now;
+    this.promptFor = forward ? now : null;
+    this.dismissed = false;
+  }
+
+  /** The Legendary Prompt for the GM, or null when there's nothing to show. */
+  promptContext(combat: any) {
+    if (!game.user.isGM || this.dismissed || !combat?.started || !sameTurn(this.promptFor, markOf(combat))) return null;
+    const candidates: PromptCandidate[] = combat.turns
+      .filter((c: any) => isPlainMonster(c) && legendaryOf(c.actor?.system))
+      .map((c: any) => ({
+        id: c.id, name: c.name, img: c.img || c.actor?.img || CONST.DEFAULT_TOKEN, defeated: !!c.isDefeated,
+        legendary: legendaryOf(c.actor.system), actions: legendaryActions(c.actor.items),
+      }));
+    const rows = this.ended?.combatantId ? promptRows(candidates, this.ended.combatantId) : [];
+    const current = combat.combatant;
+    const recharge = isPlainMonster(current) && !current.isDefeated ? rechargeAbilities(current.actor?.items) : [];
+    if (!rows.length && !recharge.length) return null;
+    return {
+      rows: rows.map(r => ({ ...r, actions: r.actions.map(a => ({ ...a, showCost: a.cost > 1 })) })),
+      recharge: recharge.length ? { name: current.name, abilities: recharge } : null,
+      autoRecharge: game.settings.get("dnd5e", "autoRecharge") !== "no",
+    };
+  }
+
+  /**
+   * A legendary action button: use that activity through dnd5e, which spends the legendary uses. The button already
+   * shows the cost, so skip dnd5e's "Consume Legendary Action?" dialog.
+   */
+  async useLegendary(event: Event, target: HTMLElement): Promise<void> {
+    const { combatantId, itemId, activityId } = target.dataset;
+    const actor = shownCombat()?.combatants.get(combatantId)?.actor;
+    const activity = actor?.items.get(itemId)?.system.activities?.get(activityId);
+    if (!activity) return void ui.notifications.warn("That legendary action is gone.");
+    await activity.use({ event }, { configure: false });
+  }
 
   async _insertElement(element: HTMLElement) {
     const existing = document.getElementById(element.id);
@@ -105,7 +182,7 @@ class Carousel extends HandlebarsApplicationMixin(ApplicationV2) {
     const isGM = game.user.isGM;
     const show = !!combat?.started && !oldCarouselActive()
       && canSeeCarousel(setting("carouselAudience") as Audience, { isGM, isTable: isTableDisplay() });
-    if (!show) return { show: false };
+    if (!show) return { show: false, prompt: null };
     const cards = buildCards(combat.turns.map(inputOf), combat.combatant?.id ?? null, isGM);
     const open = cards.find(c => c.id === this.expanded && c.more > 0);
     if (!open) this.expanded = null;
@@ -117,6 +194,7 @@ class Carousel extends HandlebarsApplicationMixin(ApplicationV2) {
       popover: open ? { id: open.id, name: open.name, statuses: open.allStatuses } : null,
       trim: TRIM,
       deadIcon: CONFIG.controlIcons?.defeated ?? "icons/svg/skull.svg",
+      prompt: this.promptContext(combat),
     };
   }
 
@@ -130,6 +208,7 @@ class Carousel extends HandlebarsApplicationMixin(ApplicationV2) {
       list.scrollLeft = current.offsetLeft - (list.clientWidth - current.offsetWidth) / 2;
     }
     this.placePopover();
+    if (context.prompt) keepStatBlockClear();
   }
 
   /** Put the open list of statuses just under its card, kept inside the carousel. */
@@ -202,4 +281,25 @@ export async function checkCarouselTakeover(): Promise<void> {
   const config = game.settings.get("core", "moduleConfiguration") ?? {};
   await game.settings.set("core", "moduleConfiguration", { ...config, [OLD_CAROUSEL]: false });
   foundry.applications.settings.SettingsConfig.reloadConfirm({ world: true });
+}
+
+/**
+ * dnd5e rolls a monster's recharge at the start of its turn, but only once its "Auto-recharge" setting is on (it
+ * starts off). Ask once whether to turn it on, so the Legendary Prompt's recharge list stays true by itself.
+ */
+export async function checkAutoRecharge(): Promise<void> {
+  if (setting("rechargeAsked")) return;
+  let current: string;
+  try { current = game.settings.get("dnd5e", "autoRecharge"); } catch { return; }
+  if (current !== "no") return void setSetting("rechargeAsked", true);
+  const turnOn = await foundry.applications.api.DialogV2.confirm({
+    window: { title: "Encounter Deck" },
+    content: `<p>dnd5e can roll a monster's recharge (like a dragon's breath, 5–6) at the start of its turn, but that's switched off in this world.</p>
+      <p>Turn on dnd5e's Auto-recharge? Encounter Deck's Legendary Prompt then shows which abilities are ready. You won't be asked again.</p>`,
+    yes: { label: "Turn it on", icon: "fa-solid fa-bolt" },
+    no: { label: "Keep it off" },
+    rejectClose: false,
+  }).catch(() => false);
+  await setSetting("rechargeAsked", true);
+  if (turnOn) await game.settings.set("dnd5e", "autoRecharge", "yes");
 }

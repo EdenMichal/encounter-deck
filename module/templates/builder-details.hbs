@@ -1,6 +1,9 @@
 <section class="ed-details">
   {{#if open}}
   <label class="ed-field">Tags <input type="text" name="tags" value="{{tags}}" placeholder="ambush, forest, boss"></label>
+  <label class="ed-toggle ed-lair-toggle" data-tooltip="Import puts every monster that has a lair inside it: one more legendary action and legendary resistance (2024 rules)">
+    <input type="checkbox" name="inLair" {{#if inLair}}checked{{/if}}> <i class="fa-solid fa-dungeon" inert></i> In its lair
+  </label>
   <div class="ed-field">Link
     <div class="ed-dropzone ed-link-zone" data-zone="link">
       {{#if link}}

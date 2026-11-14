@@ -30,6 +30,7 @@ export function registerSettings(): void {
   });
   // Whether the GM has been asked once about turning off Carousel Combat Tracker.
   game.settings.register(MODULE_ID, "carouselTakeoverAsked", { scope: "world", config: false, type: Boolean, default: false });
+  game.settings.register(MODULE_ID, "rechargeAsked", { scope: "world", config: false, type: Boolean, default: false });
   game.settings.register(MODULE_ID, "builderCollapsed", { scope: "client", config: false, type: Boolean, default: false });
 }
 

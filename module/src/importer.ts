@@ -7,6 +7,7 @@ import { MODULE_ID } from "./constants";
 import { activeCampaign, partyOf } from "./campaigns";
 import { readEntries, totalXp } from "./entries";
 import { hasMargin, marginSlots, tokenNames, type Footprint } from "./fight";
+import { lairDelta } from "./legendary";
 import { lookupMonster } from "./sources";
 import { copyEncounter, encounterFlags, getEncounter, isInLibrary, rootOf } from "./store";
 
@@ -109,6 +110,7 @@ export async function importEncounter(id: string): Promise<boolean> {
   const state = combatFlags(combat);
   const counts = new Map(state.counts.map(c => [c.uuid, c.n]));
   const tokenData: object[] = [];
+  const lair = (actor: any) => lairDelta(!!actor.system?.resources?.lair?.value, !!flags.inLair);
   let slot = 0;
   for (const { entry, actor } of usable) {
     const already = counts.get(entry.uuid) ?? 0;
@@ -119,6 +121,8 @@ export async function importEncounter(id: string): Promise<boolean> {
       const token = await actor.getTokenDocument({
         x, y, name, actorLink: false, appendNumber: false, prependAdjective: false, hidden: false,
         flags: { [MODULE_ID]: { combat: combat.id, source: entry.uuid } },
+        // Unlinked, so the lair goes on this token's own copy and never on a world actor.
+        ...(lair(actor) ? { delta: lair(actor) } : {}),
       }, { parent: scene });
       tokenData.push(token.toObject());
     }

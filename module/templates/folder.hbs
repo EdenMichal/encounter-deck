@@ -16,6 +16,7 @@
       <div class="ed-row-top">
         <span class="ed-row-name">{{name}}</span>
         {{#if linked}}<i class="fa-solid fa-link ed-row-icon" data-tooltip="Linked to a journal page or scene" inert></i>{{/if}}
+        {{#if inLair}}<i class="fa-solid fa-dungeon ed-row-icon" data-tooltip="In its lair"></i>{{/if}}
         {{#if missing}}<i class="fa-solid fa-triangle-exclamation ed-row-icon ed-missing" data-tooltip="Has missing monsters"></i>{{/if}}
         <button type="button" class="icon fa-solid fa-play ed-import" data-action="edImport" data-tooltip="Import into the scene you're viewing{{#if isLibrary}} (copies it into the Active Campaign first){{/if}}" aria-label="Import"></button>
         {{#if isLibrary}}

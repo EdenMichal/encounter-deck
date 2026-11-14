@@ -60,6 +60,14 @@ _Avoid_: Dock, initiative bar, combat strip
 A player character, or anything a player owns. Heroes get the gold trim on the Carousel and players see their numbers.
 _Avoid_: PC (fine in prose, but a companion is a Hero too), ally, party member
 
+**Legendary Prompt**:
+The GM-only strip under the Carousel that appears when a turn ends. It lists the legendary monsters that can still act, with their remaining uses and their legendary actions as buttons, plus the recharge abilities of the monster whose turn it is.
+_Avoid_: Legendary reminder, legendary bar
+
+**In its lair**:
+An Encounter whose monsters fight inside their lair. Under the 2024 rules each one with a lair gets one more legendary action and legendary resistance; there is no Lair turn.
+_Avoid_: Lair mode, lair action turn
+
 **Builder**:
 The screen for creating and editing Encounters: search and filter monsters, add them, and see the difficulty live.
 _Avoid_: Creator, editor, suite
