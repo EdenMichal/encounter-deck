@@ -18,10 +18,10 @@
 /*  Combat tab                                  */
 /* -------------------------------------------- */
 
-#combat [data-application-part="edBrowser"] { display: none; }
+.encounter-deck-tab [data-application-part="edBrowser"] { display: none; }
 /* Hide the tracker parts and anything other modules add to them while the browser shows. */
-#combat.ed-browser-mode > :not([data-application-part="edBrowser"]) { display: none !important; }
-#combat.ed-browser-mode > [data-application-part="edBrowser"] {
+.encounter-deck-tab.ed-browser-mode > :not([data-application-part="edBrowser"]) { display: none !important; }
+.encounter-deck-tab.ed-browser-mode > [data-application-part="edBrowser"] {
   display: flex;
   flex-direction: column;
   flex: 1;
@@ -200,6 +200,9 @@
 }
 #encounter-deck-builder.ed-hidden { display: none; }
 #encounter-deck-builder.collapsed {
+  /* Only as tall as the handle, so the empty space below it doesn't block what's underneath (the Stat Block Tabs). */
+  height: auto;
+  max-height: 60%;
   width: var(--ed-handle-width);
   padding-right: 0;
   grid-template-columns: var(--ed-handle-width);
@@ -360,18 +363,22 @@
 .ed-row .ed-import:focus-visible { opacity: 1; }
 
 /* AC and HP columns in the tracker. */
-#combat .combatant .ed-stats {
+.encounter-deck-tab .combatant .ed-stats {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   flex: none;
   font-size: var(--font-size-12, 12px);
   font-variant-numeric: tabular-nums;
 }
-#combat .combatant .ed-ac { display: inline-flex; align-items: center; gap: 3px; color: var(--ed-muted); min-width: 30px; }
-#combat .combatant .ed-ac i { font-size: 10px; }
-#combat .combatant .ed-hp { display: inline-flex; align-items: baseline; }
-#combat .combatant .ed-hp-input {
+.encounter-deck-tab .combatant .ed-ac { display: inline-flex; align-items: center; gap: 2px; color: var(--ed-muted); min-width: 26px; }
+/* With the extra columns, long names wrap (the token number must stay visible); keep the initiative die its own size. */
+.encounter-deck-tab .combatant:has(> .ed-stats) > .token-name { min-width: 0; }
+.encounter-deck-tab .combatant:has(> .ed-stats) > .token-initiative { align-self: center; height: 32px; }
+.encounter-deck-tab .combatant:has(> .ed-stats) > .token-initiative > button { height: 32px; }
+.encounter-deck-tab .combatant .ed-ac i { font-size: 10px; }
+.encounter-deck-tab .combatant .ed-hp { display: inline-flex; align-items: baseline; }
+.encounter-deck-tab .combatant .ed-hp-input {
   width: 32px;
   height: 20px;
   padding: 0 2px;
@@ -380,22 +387,24 @@
   background: transparent;
   border: 1px solid transparent;
 }
-#combat .combatant .ed-hp-input:hover,
-#combat .combatant .ed-hp-input:focus { border-color: var(--ed-line); background: rgba(0, 0, 0, 0.25); }
-#combat .combatant .ed-hp-max { color: var(--ed-muted); }
-#combat .combatant .ed-hp.bloodied .ed-hp-input { color: var(--ed-moderate); }
-#combat .combatant .ed-hp.down .ed-hp-input { color: var(--ed-over); }
-#combat .combatant .ed-sb-button { flex: none; }
+.encounter-deck-tab .combatant .ed-hp-input:hover,
+.encounter-deck-tab .combatant .ed-hp-input:focus { border-color: var(--ed-line); background: rgba(0, 0, 0, 0.25); }
+.encounter-deck-tab .combatant .ed-hp-max { color: var(--ed-muted); }
+.encounter-deck-tab .combatant .ed-hp.bloodied .ed-hp-input { color: var(--ed-moderate); }
+.encounter-deck-tab .combatant .ed-hp.down .ed-hp-input { color: var(--ed-over); }
+.encounter-deck-tab .combatant .ed-sb-button { flex: none; }
 
-/* Stat Block Tabs: a strip of portraits hanging off the sidebar's left edge, at the bottom. */
+/* Stat Block Tabs: a strip of portraits hanging off the sidebar's left edge, below the Builder handle and clear of the chat box. */
 #sidebar:has(> #encounter-deck-statblocks) { position: relative; }
 #encounter-deck-statblocks {
   position: absolute;
   right: 100%;
-  bottom: 8px;
+  top: 96px;
   z-index: 2;
+  /* The sidebar column passes clicks through to the canvas; take them back, as the Builder does. */
+  pointer-events: all;
   width: 44px;
-  max-height: 55%;
+  max-height: calc(100% - 300px);
   display: flex;
   flex-direction: column;
   background: var(--sidebar-background, rgba(20, 20, 26, 0.95));

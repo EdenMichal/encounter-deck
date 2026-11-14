@@ -39,5 +39,5 @@ Reuse what Foundry and dnd5e already do (the combat tracker, actor sheets, compe
 
 ## To verify during the build
 
-- A player rolling initiative from their sheet or ve-mobile updates their token-less combatant.
-- A PC's initiative entry works with no token on the scene. ve-mobile rows already handle missing tokens (`ve-mobile/src/foundry/combat-gateway.mjs:388-412`).
+- A player rolling initiative from their sheet or ve-mobile updates their token-less combatant. **Verified for the tracker (v0.2).** Foundry's `Actor#rollInitiative({createCombatants: true})` adds a new combatant for a token-less actor every time, so Encounter Deck blocks that duplicate on every client (`module/src/combatants.ts`). ve-mobile still to check.
+- A PC's initiative entry works with no token on the scene. **Verified (v0.2).** ve-mobile rows already handle missing tokens (`ve-mobile/src/foundry/combat-gateway.mjs:388-412`).

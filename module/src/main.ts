@@ -1,4 +1,5 @@
 import { CHANGED_HOOK, MODULE_ID } from "./constants";
+import { preventTokenlessDuplicates } from "./combatants";
 import { registerSettings } from "./settings";
 import { ensureStorage, watchChanges } from "./store";
 import { createCombatTab } from "./ui/combat-tab";
@@ -10,6 +11,8 @@ Hooks.once("init", () => {
   registerSettings();
   // Subclass whatever the Combat tab is (dnd5e's CombatTracker5e), so ui.combat stays a real tracker.
   CONFIG.ui.combat = createCombatTab(CONFIG.ui.combat);
+  // Every client, players included: their initiative rolls are where the duplicate would come from.
+  preventTokenlessDuplicates();
 
   // Foundry caches module.json until the world is relaunched; make sure the stylesheet is there either way.
   const css = `modules/${MODULE_ID}/styles/encounter-deck.css`;

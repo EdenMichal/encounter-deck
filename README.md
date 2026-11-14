@@ -2,7 +2,7 @@
 
 A Foundry VTT v14 (dnd5e 5.3+) module for preparing encounters ahead of time, organized by campaign, without putting anything on a scene until you need it. GM-only.
 
-Status: **v0.1 (prep)**. See [PLAN.md](PLAN.md) for the full spec and roadmap, [CONTEXT.md](CONTEXT.md) for the terms, and [docs/adr/](docs/adr/) for the decisions.
+Status: **v0.2 (running the fight)**. See [PLAN.md](PLAN.md) for the full spec and roadmap, [CONTEXT.md](CONTEXT.md) for the terms, and [docs/adr/](docs/adr/) for the decisions.
 
 ## What v0.1 does
 
@@ -12,6 +12,15 @@ Status: **v0.1 (prep)**. See [PLAN.md](PLAN.md) for the full spec and roadmap, [
 - **Builder:** a collapsible drawer docked beside the Combat tab. Search the Sources by name, then filter by CR range, type, size and habitat. Add monsters with + or by dragging, change counts with +/−, and watch the live 2024 difficulty meter for the Present PCs.
 - **Encounters:** tags, notes, tactics, Status (Draft, Ready, Completed; Completed hidden behind "Show completed"), duplicate, a link to a journal page or scene, copy-on-use from the Shared Library, and "missing" rows (with swap) for monsters whose Source is gone.
 - **Sources:** dnd5e's own Compendium Browser source checklist, so there's one list for the whole world.
+
+## What v0.2 adds
+
+- **Import:** the ▶ button on an encounter row (on hover), its right-click menu, or the Builder. Compendium monsters are copied into a hidden *Encounter Deck: In Combat* Actors folder (world actors are used as they are), numbered tokens go into the Margin of the scene you're viewing, and they plus the Present PCs (without tokens) join the combat. Import again mid-fight for reinforcements; numbering continues (Goblin 5, 6…). A Master Copy is copied into the Active Campaign first. A scene with no padding is refused (ADR 0002).
+- **Tracker:** AC and HP on every row for the GM. Type `-7` for damage, `+5` for healing or `12` for a new value, like dnd5e's token HUD.
+- **Stat Block Tabs:** a strip of monster portraits on the sidebar's left edge. A tab opens that monster's own dnd5e sheet in one fixed spot (click again to close it). Next/Previous Turn follows the monster whose turn it is and leaves PC turns alone; double-clicking a monster in the tracker or its book button selects it too.
+- **Finish:** Foundry's own "End combat". If the fight began, each imported Encounter is marked Completed and, in XP mode, the full XP is split between the Present PCs with one chat line. Every imported token and actor is removed either way.
+- **Token-less PCs:** a player rolling initiative from the tracker or sheet updates their existing combatant instead of adding a second one.
+- **Monk's TokenBar:** if its "Show XP Dialog" is on, Encounter Deck asks once whether to turn it off, so XP isn't awarded twice.
 
 ## Develop
 
