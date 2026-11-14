@@ -16,7 +16,7 @@ import { parseHp } from "../fight";
 import { importEncounter } from "../importer";
 import { browserContext, type BrowserUi } from "./browser-model";
 import { builder, openBuilder } from "./builder";
-import { isMonster, statBlockTabs } from "./statblocks";
+import { isMonster, showStatBlock } from "./statblocks";
 
 const { DialogV2 } = foundry.applications.api;
 const esc = (s: string) => foundry.utils.escapeHTML(s ?? "");
@@ -168,7 +168,7 @@ export function createCombatTab(Base: any) {
         edShowBrowser: act((app) => { app.ui.forceBrowser = true; app.render(); }),
         edBackToTracker: act((app) => { app.ui.forceBrowser = false; app.render(); }),
         edImport: act((_app, t) => runImport(encounterOf(t))),
-        edStatBlock: act((_app, t) => statBlockTabs()?.select(t.closest<HTMLElement>("[data-combatant-id]")!.dataset.combatantId!, { toggle: true })),
+        edStatBlock: act((app, t) => showStatBlock(app.viewed?.combatants.get(t.closest<HTMLElement>("[data-combatant-id]")!.dataset.combatantId!), { toggle: true })),
       },
     };
 
@@ -287,11 +287,11 @@ export function createCombatTab(Base: any) {
       return combatant.actor.modifyTokenAttribute("attributes.hp", parsed.value, parsed.isDelta, true);
     }
 
-    /** Double-clicking a monster selects its Stat Block Tab (which opens its sheet in the fixed spot). */
+    /** Double-clicking a monster opens its stat block in the fixed spot. */
     _onCombatantMouseDown(event: any, target: HTMLElement) {
       if (event.type === "dblclick" && game.user.isGM) {
         const combatant = this.viewed?.combatants.get(target?.dataset.combatantId);
-        if (isMonster(combatant) && statBlockTabs()) return void statBlockTabs()!.select(combatant.id);
+        if (isMonster(combatant)) return void showStatBlock(combatant);
       }
       return super._onCombatantMouseDown(event, target);
     }

@@ -25,7 +25,7 @@ Reuse what Foundry and dnd5e already do (the combat tracker, actor sheets, compe
 - **Import** (ADR 0002): one click copies the monsters into a hidden Actors folder and places their tokens in the Margin of the scene you're viewing. It adds them and the present PCs (no tokens) to the combat tracker. You then press Foundry's own "Begin Combat".
 - **Reinforcements:** you can import any encounter, including the same one again, any number of times into a running fight. Token numbering continues (Goblin 5, 6…).
 - **Combat tab:** replaces the vanilla tab's UI but keeps Foundry's combat running underneath. It shows the browser when nothing is running, and the tracker plus AC, HP and a stat block button during a fight.
-- **Stat Block Tabs:** a side tab strip. Next/Previous Turn selects the current monster, skipping PCs, and double-clicking a row selects that monster.
+- **Stat Blocks:** a monster's own sheet opens in one fixed spot beside the sidebar, replacing the last one. The tracker's book button and a double-click on a monster row open it, and Next/Previous Turn opens the current monster, skipping PCs. (A side strip of monster tabs was built and dropped: the tracker already does its job.)
 - **Finish = Foundry's "End combat" confirmation.** In XP mode, every imported encounter's full XP is split between present PCs automatically and announced in a short public chat line, with no undo. Each encounter is marked Completed, then the imported tokens and actors are removed. An encounter that never reaches combat stays Ready.
 - **Monk's TokenBar:** if its "Show XP dialog" setting is on, Encounter Deck asks once whether to turn it off, to avoid double XP.
 - **Music Deck** keeps working because it listens for `combatStart` and `deleteCombat` (`music-deck 2/module/src/combat.ts:261-262`).
@@ -33,7 +33,7 @@ Reuse what Foundry and dnd5e already do (the combat tracker, actor sheets, compe
 ## Roadmap
 
 - **v0.1, prep:** storage, Campaigns, Shared Library, browser, Builder (Sources, filters, difficulty).
-- **v0.2, running the fight:** Import, the enhanced tracker, Stat Block Tabs, Finish and XP.
+- **v0.2, running the fight:** Import, the enhanced tracker, Stat Blocks, Finish and XP.
 - **v0.3, carousel:** our own carousel initiative tracker across the top. It shows portraits, the current turn, the round, PC HP, monster HP only as "bloodied", hidden enemy initiative, and Next/Previous turn for the GM. It gets a design pass, and it replaces the Carousel Combat Tracker module.
 - **v0.4, integrations:** foundry-mcp tools.
 

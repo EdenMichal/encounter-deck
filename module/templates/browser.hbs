@@ -1,4 +1,5 @@
 <section class="ed-browser">
+  {{#if inCombat}}<button type="button" class="ed-back-to-tracker" data-action="edBackToTracker"><i class="fa-solid fa-swords" inert></i> Back to the combat tracker</button>{{/if}}
   {{#if ready}}
   <header class="ed-head">
     <div class="ed-campaign-row">
@@ -41,9 +42,6 @@
     {{/if}}
     {{#if library}}{{> "modules/encounter-deck/templates/folder.hbs" node=library}}{{/if}}
   </div>
-  {{#if inCombat}}
-  <footer class="ed-foot"><button type="button" data-action="edBackToTracker"><i class="fa-solid fa-swords" inert></i> Back to the combat tracker</button></footer>
-  {{/if}}
   {{else}}
   {{#unless inactive}}<p class="ed-empty-note">Encounter Deck is setting up its compendium…</p>{{/unless}}
   {{/if}}

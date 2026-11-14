@@ -28,11 +28,13 @@
   min-height: 0;
 }
 
+/* Encounters (in the tracker) and Back to the combat tracker (in the browser) sit in the same spot, so one click toggles between them. */
 .ed-show-browser {
   width: calc(100% - 8px);
   margin: 4px;
   font-size: var(--font-size-12, 12px);
 }
+.ed-back-to-tracker { flex: none; width: calc(100% - 16px); margin: 6px 8px 0; font-size: var(--font-size-12, 12px); }
 
 .ed-browser { display: flex; flex-direction: column; flex: 1; min-height: 0; gap: var(--ed-gap); padding: 6px 4px 4px; }
 .ed-head { display: flex; flex-direction: column; gap: var(--ed-gap); flex: none; }
@@ -162,8 +164,6 @@
 
 .ed-empty, .ed-empty-note, .ed-hint { list-style: none; color: var(--ed-muted); font-style: italic; font-size: 12px; }
 .ed-empty-note { margin: 8px 4px; }
-.ed-foot { flex: none; }
-.ed-foot button { width: 100%; }
 
 /* -------------------------------------------- */
 /*  Builder drawer                              */
@@ -200,7 +200,7 @@
 }
 #encounter-deck-builder.ed-hidden { display: none; }
 #encounter-deck-builder.collapsed {
-  /* Only as tall as the handle, so the empty space below it doesn't block what's underneath (the Stat Block Tabs). */
+  /* Only as tall as the handle, so the empty space below it doesn't block what's underneath. */
   height: auto;
   max-height: 60%;
   width: var(--ed-handle-width);
@@ -393,42 +393,3 @@
 .encounter-deck-tab .combatant .ed-hp.bloodied .ed-hp-input { color: var(--ed-moderate); }
 .encounter-deck-tab .combatant .ed-hp.down .ed-hp-input { color: var(--ed-over); }
 .encounter-deck-tab .combatant .ed-sb-button { flex: none; }
-
-/* Stat Block Tabs: a strip of portraits hanging off the sidebar's left edge, below the Builder handle and clear of the chat box. */
-#sidebar:has(> #encounter-deck-statblocks) { position: relative; }
-#encounter-deck-statblocks {
-  position: absolute;
-  right: 100%;
-  top: 96px;
-  z-index: 2;
-  /* The sidebar column passes clicks through to the canvas; take them back, as the Builder does. */
-  pointer-events: all;
-  width: 44px;
-  max-height: calc(100% - 300px);
-  display: flex;
-  flex-direction: column;
-  background: var(--sidebar-background, rgba(20, 20, 26, 0.95));
-  border: 1px solid var(--ed-line);
-  border-right: none;
-  border-radius: var(--ed-radius) 0 0 var(--ed-radius);
-  box-shadow: -3px 0 8px rgba(0, 0, 0, 0.4);
-}
-#encounter-deck-statblocks.ed-hidden { display: none; }
-/* Out of the way while the Builder drawer is open. */
-#sidebar:has(> #encounter-deck-builder:not(.collapsed):not(.ed-hidden)) > #encounter-deck-statblocks { display: none; }
-.ed-sb-tabs { list-style: none; margin: 0; padding: 4px; display: flex; flex-direction: column; gap: 4px; overflow-y: auto; }
-.ed-sb-tabs li { margin: 0; }
-.ed-sb-tab {
-  position: relative;
-  width: 34px;
-  height: 34px;
-  padding: 0;
-  border: 2px solid transparent;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.4);
-  overflow: hidden;
-}
-.ed-sb-tab img { width: 100%; height: 100%; object-fit: cover; border: none; border-radius: 50%; }
-.ed-sb-tab.turn { border-color: var(--ed-low); }
-.ed-sb-tab.selected { border-color: var(--ed-accent); box-shadow: 0 0 6px var(--ed-accent); }
-.ed-sb-tab.defeated img { filter: grayscale(1); opacity: 0.45; }
