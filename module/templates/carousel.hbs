@@ -24,8 +24,12 @@
       </div>
       {{#if hero}}<div class="ed-car-trim"><img src="{{@root.trim}}" alt=""></div>{{/if}}
       {{#if hp}}<span class="ed-car-hp">{{hp.text}}</span>{{/if}}
-      {{#if legendary}}<span class="ed-car-legendary" data-tooltip="Legendary actions left" role="img" aria-label="Legendary actions left">{{#each legendary}}<i class="{{#if this}}on{{/if}}"></i>{{/each}}</span>{{/if}}
-      {{#if resistance}}<span class="ed-car-resistance" data-tooltip="Legendary resistances left" role="img" aria-label="Legendary resistances left">{{#each resistance}}<i class="{{#if this}}on{{/if}}"></i>{{/each}}</span>{{/if}}
+      {{#if (or legendary resistance)}}
+      <div class="ed-car-legend" aria-label="Legendary actions and resistances left: hover for the Legendary Menu">
+        {{#if legendary}}<span class="ed-car-legendary" role="img" aria-label="Legendary actions left">{{#each legendary}}<i class="{{#if this}}on{{/if}}"></i>{{/each}}</span>{{/if}}
+        {{#if resistance}}<span class="ed-car-resistance" role="img" aria-label="Legendary resistances left">{{#each resistance}}<i class="{{#if this}}on{{/if}}"></i>{{/each}}</span>{{/if}}
+      </div>
+      {{/if}}
     </li>
     {{/each}}
   </ol>
@@ -35,6 +39,47 @@
     <ul>
       {{#each popover.statuses}}<li><img class="{{#if svg}}svg{{/if}}" src="{{img}}" alt=""><span>{{name}}</span></li>{{/each}}
     </ul>
+  </div>
+  {{/if}}
+  {{#if legend}}
+  <div class="ed-car-lm" data-for="{{legend.id}}" role="dialog" aria-label="Legendary Menu of {{legend.name}}">
+    <h3><i class="fa-solid fa-crown" inert></i> {{legend.name}}</h3>
+    {{#if legend.legendary}}
+    <div class="ed-lm-line">
+      <span class="ed-lm-label">Legendary actions</span>
+      <span class="ed-lm-pips">{{#each legend.pips}}<i class="{{#if this}}on{{/if}}"></i>{{/each}}</span>
+      <span class="ed-lm-count">{{legend.legendary.value}}/{{legend.legendary.max}}</span>
+    </div>
+    <div class="ed-lm-actions">
+      {{#each legend.actions}}
+      <button type="button" data-action="edLegendary" data-combatant-id="{{@root.legend.id}}" data-item-id="{{itemId}}" data-activity-id="{{activityId}}"
+        {{#unless usable}}disabled data-tooltip="Costs {{cost}}: not enough left"{{/unless}}>
+        <img src="{{img}}" alt=""><span>{{name}}</span>{{#if showCost}}<span class="ed-lm-cost">{{cost}}</span>{{/if}}
+      </button>
+      {{else}}
+      <span class="ed-lm-none">No legendary actions on its sheet</span>
+      {{/each}}
+    </div>
+    {{#if legend.ownTurn}}<p class="ed-lm-none">It's its own turn: legendary actions come at the end of another creature's turn.</p>{{/if}}
+    {{/if}}
+    {{#if legend.resistance}}
+    <div class="ed-lm-line">
+      <span class="ed-lm-label">Legendary resistance</span>
+      <span class="ed-lm-shields">{{#each legend.shields}}<i class="{{#if this}}on{{/if}}"></i>{{/each}}</span>
+      <span class="ed-lm-count">{{legend.resistance.value}}/{{legend.resistance.max}}</span>
+    </div>
+    {{/if}}
+    {{#if legend.recharge.length}}
+    <div class="ed-lm-line ed-lm-recharge">
+      <span class="ed-lm-label"><i class="fa-solid fa-bolt" inert></i> Recharge</span>
+    </div>
+    <div class="ed-lm-abilities">
+      {{#each legend.recharge}}
+      <span class="ed-lm-ability {{#if ready}}ready{{else}}spent{{/if}}">{{name}} <span class="ed-lm-cost">{{label}}</span> <span class="ed-lm-state">{{#if ready}}ready{{else}}spent{{/if}}</span></span>
+      {{/each}}
+      {{#unless legend.autoRecharge}}<span class="ed-lm-none">dnd5e's Auto-recharge is off: roll recharge yourself</span>{{/unless}}
+    </div>
+    {{/if}}
   </div>
   {{/if}}
   {{#if isGM}}

@@ -2,7 +2,7 @@
 
 A Foundry VTT v14 (dnd5e 5.3+) module for preparing encounters ahead of time, organized by campaign, without putting anything on a scene until you need it. Prep is GM-only; the carousel is for the whole table.
 
-Status: **v0.8 (initiative for latecomers)**. See [PLAN.md](PLAN.md) for the full spec and roadmap, [CONTEXT.md](CONTEXT.md) for the terms, and [docs/adr/](docs/adr/) for the decisions.
+Status: **v0.9 (Legendary Menu)**. See [PLAN.md](PLAN.md) for the full spec and roadmap, [CONTEXT.md](CONTEXT.md) for the terms, and [docs/adr/](docs/adr/) for the decisions.
 
 ## What v0.1 does
 
@@ -38,7 +38,7 @@ Status: **v0.8 (initiative for latecomers)**. See [PLAN.md](PLAN.md) for the ful
 ## What v0.5 adds
 
 - **Legendary pips:** a legendary monster's card in the Carousel shows its legendary actions left as gold pips under it, for the GM only.
-- **Legendary Prompt:** when a turn ends, a GM-only strip under the Carousel lists every legendary monster that didn't just act, with its pips and its legendary actions as buttons. A click uses the action through dnd5e, which spends the uses; actions that cost more than what's left are greyed out. Close it with ✕; it clears at the next turn anyway. dnd5e still gives the uses back after the monster's own turn.
+- **Legendary Menu:** hover a legendary monster's pips on the Carousel and a small GM-only window opens under them, with its legendary actions as buttons, its legendary resistances left and its recharge abilities (ready or spent). A click uses the action through dnd5e, which spends the uses; actions that cost more than what's left are greyed out. dnd5e still gives the uses back after the monster's own turn.
 - **Recharge:** during a monster's own turn, the Prompt also lists its recharge abilities as ready or spent ("Fire Breath 5–6"). Encounter Deck asks once whether to turn on dnd5e's Auto-recharge, which rolls them at the start of the monster's turn.
 - **In its lair:** a checkbox on the Encounter (2024 lair rules). Import puts every monster with a lair inside it, on its own token, so it gets one more legendary action and legendary resistance. There's no Lair turn at initiative 20.
 
@@ -47,6 +47,11 @@ Status: **v0.8 (initiative for latecomers)**. See [PLAN.md](PLAN.md) for the ful
 - **The fight's Encounter:** a row at the top of the combat tracker (GM only) names the Encounter the fight started with, with every later Import listed as reinforcements, every monster added mid-fight as added, and the XP Finish will award. Click a name to open that Encounter in the Builder.
 - **Add on the fly:** during a fight, drop a monster on the tracker (from the Builder's results, the Actors tab or a compendium). It gets a numbered token in the Margin and joins the combat, and it's saved into the fight's Encounter, so the Encounter records what was fought. Drop an Encounter from the browser (with the tracker popped out) to import it as reinforcements. The tracker shows a dashed gold outline while you drag over it.
 - **Legendary resistance pips:** under a legendary monster's legendary action pips on the Carousel, small gold shields show its legendary resistances left (GM only).
+
+## What v0.9 adds
+
+- **Legendary Menu:** the Legendary Prompt strip under the Carousel is gone. Instead, hover a legendary monster's pips (or its resistance shields) and a small window opens right under them, on top of any Stat Block: its legendary actions as one-click buttons, its legendary resistances left, and its recharge abilities, ready or spent. Move onto the window to use it; it closes when the mouse leaves.
+- **Stat Block placement (v0.8.1):** the sheet's side tabs no longer cover the tracker.
 
 ## What v0.8 adds
 

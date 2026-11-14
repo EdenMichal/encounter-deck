@@ -634,72 +634,75 @@
 .ed-sources-hint { font-size: 11px; color: var(--ed-muted); }
 .ed-sources-foot .ed-link-button { flex: none; }
 
-/* Legendary uses under a monster's card (GM only): gold pips, filled for each use left. */
-.ed-car-legendary, .ed-lp-pips { display: flex; gap: 3px; justify-content: center; }
-.ed-car-legendary { margin-top: 2px; }
-.ed-car-legendary i, .ed-lp-pips i {
+/* Legendary uses under a monster's card (GM only): gold pips, filled for each use left. Hovering them (with the
+   resistance shields under them) opens the Legendary Menu. */
+.ed-car-legend { pointer-events: all; padding: 2px 4px 3px; margin: 0 auto; width: max-content; border-radius: 4px; cursor: pointer; }
+.ed-car-legend:hover { background: rgba(216, 180, 90, 0.18); }
+.ed-car-legendary, .ed-lm-pips { display: flex; gap: 3px; justify-content: center; }
+.ed-car-legendary i, .ed-lm-pips i {
   width: 8px; height: 8px; border-radius: 50%;
   border: 1px solid var(--ed-gold); background: rgba(0, 0, 0, 0.55);
   box-shadow: 0 0 2px #000;
 }
-.ed-car-legendary i.on, .ed-lp-pips i.on { background: var(--ed-gold); }
+.ed-car-legendary i.on, .ed-lm-pips i.on { background: var(--ed-gold); }
 
-/* The Legendary Prompt: a GM-only strip under the Carousel, raised when a turn ends. */
-.ed-legendary-prompt {
+/* The Legendary Menu: a small GM-only window under a monster's pips while they (or it) are hovered. It sits on the
+   page's top layer, above every window. */
+.ed-car-lm {
+  position: fixed;
+  z-index: calc(var(--z-index-tooltip, 9999) - 1);
   pointer-events: all;
-  position: relative;
   width: max-content;
-  max-width: 100%;
-  margin: 8px auto 0;
-  padding: 6px 30px 6px 10px;
+  min-width: 200px;
+  max-width: 300px;
+  padding: 6px 8px 8px;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  background: rgba(20, 16, 24, 0.88);
-  border: 1px solid rgba(216, 180, 90, 0.55);
+  gap: 5px;
+  background: rgba(16, 16, 20, 0.96);
+  border: 1px solid var(--ed-gold);
   border-radius: 6px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
   font-size: 13px;
+  color: #f4f1ea;
 }
-.ed-legendary-prompt[hidden] { display: none; }
-.ed-lp-close {
-  position: absolute; top: 4px; right: 4px;
-  width: 20px; height: 20px; min-height: 0; padding: 0;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 12px; color: rgba(244, 241, 234, 0.6);
-  background: none; border: none; box-shadow: none;
+.ed-car-lm h3 { margin: 0; padding: 0 0 4px; border-bottom: 1px solid rgba(216, 180, 90, 0.4); font-size: 13px; font-weight: 700; color: var(--ed-gold); white-space: nowrap; }
+.ed-lm-line { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+.ed-lm-label { flex: 1; color: rgba(244, 241, 234, 0.8); }
+.ed-lm-count { min-width: 3ch; text-align: right; font-variant-numeric: tabular-nums; color: var(--ed-gold); }
+.ed-lm-shields { display: flex; gap: 3px; }
+.ed-lm-actions { display: flex; flex-direction: column; gap: 3px; }
+.ed-lm-actions button {
+  width: 100%; height: auto; min-height: 0;
+  display: flex; align-items: center; gap: 6px;
+  padding: 3px 6px; font-size: 12px; line-height: 1.3; text-align: left;
+  color: #f4f1ea; background: rgba(216, 180, 90, 0.12);
+  border: 1px solid rgba(216, 180, 90, 0.5); border-radius: 4px;
 }
-.ed-lp-close:hover { color: var(--ed-gold); background: none; }
-.ed-lp-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.ed-lp-who { display: flex; align-items: center; gap: 6px; min-width: 0; }
-.ed-lp-icon { color: var(--ed-gold); font-size: 12px; }
-.ed-lp-name { font-weight: 600; white-space: nowrap; }
-.ed-lp-actions { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
-.ed-lp-actions button {
-  width: auto; height: auto; min-height: 0;
-  padding: 2px 8px; font-size: 12px; line-height: 1.4;
-  color: #f4f1ea; background: rgba(216, 180, 90, 0.14);
-  border: 1px solid rgba(216, 180, 90, 0.6); border-radius: 4px;
-}
-.ed-lp-actions button:hover:not(:disabled) { background: rgba(216, 180, 90, 0.32); }
-.ed-lp-actions button:disabled { opacity: 0.4; cursor: default; }
-.ed-lp-cost { color: var(--ed-gold); font-size: 11px; }
-.ed-lp-none { font-size: 11px; font-style: italic; color: rgba(244, 241, 234, 0.6); }
-.ed-lp-ability { padding: 1px 6px; font-size: 12px; border-radius: 4px; border: 1px solid; }
-.ed-lp-ability.ready { border-color: var(--ed-low); }
-.ed-lp-ability.spent { border-color: rgba(244, 241, 234, 0.25); color: rgba(244, 241, 234, 0.55); }
-.ed-lp-recharge .ed-lp-icon { color: #f0c24a; }
+.ed-lm-actions button span:first-of-type { flex: 1; }
+.ed-lm-actions button img { flex: none; width: 18px; height: 18px; border: none; border-radius: 3px; object-fit: cover; }
+.ed-lm-actions button:hover:not(:disabled) { background: rgba(216, 180, 90, 0.32); }
+.ed-lm-actions button:disabled { opacity: 0.4; cursor: default; }
+.ed-lm-cost { color: var(--ed-gold); font-size: 11px; }
+.ed-lm-none { margin: 0; font-size: 11px; font-style: italic; color: rgba(244, 241, 234, 0.6); }
+.ed-lm-recharge .ed-lm-label i { color: #f0c24a; }
+.ed-lm-abilities { display: flex; flex-direction: column; gap: 3px; }
+.ed-lm-ability { padding: 2px 6px; font-size: 12px; border-radius: 4px; border: 1px solid; }
+.ed-lm-ability.ready { border-color: var(--ed-low); }
+.ed-lm-ability.spent { border-color: rgba(244, 241, 234, 0.25); color: rgba(244, 241, 234, 0.55); }
+.ed-lm-state { float: right; font-size: 11px; }
 
 /* Legendary resistances under the legendary pips: small gold shields, filled for each one left. */
 .ed-car-resistance { display: flex; gap: 3px; justify-content: center; margin-top: 3px; }
-.ed-car-resistance i {
+.ed-car-resistance i, .ed-lm-shields i {
   width: 8px; height: 9px;
   border: 1px solid var(--ed-gold);
   border-radius: 2px 2px 50% 50% / 2px 2px 60% 60%;
   background: rgba(0, 0, 0, 0.55);
   box-shadow: 0 0 2px #000;
 }
-.ed-car-resistance i.on { background: var(--ed-gold); }
+.ed-car-resistance i.on, .ed-lm-shields i.on { background: var(--ed-gold); }
 
 /* The fight's Encounter, at the top of the tracker (GM only). The tracker takes drops during a fight. */
 .ed-fight-row {
