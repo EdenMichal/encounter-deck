@@ -2,7 +2,7 @@
 
 A Foundry VTT v14 (dnd5e 5.3+) module for preparing encounters ahead of time, organized by campaign, without putting anything on a scene until you need it. Prep is GM-only; the carousel is for the whole table.
 
-Status: **v0.7 (loot)**. See [PLAN.md](PLAN.md) for the full spec and roadmap, [CONTEXT.md](CONTEXT.md) for the terms, and [docs/adr/](docs/adr/) for the decisions.
+Status: **v0.8 (initiative for latecomers)**. See [PLAN.md](PLAN.md) for the full spec and roadmap, [CONTEXT.md](CONTEXT.md) for the terms, and [docs/adr/](docs/adr/) for the decisions.
 
 ## What v0.1 does
 
@@ -47,6 +47,10 @@ Status: **v0.7 (loot)**. See [PLAN.md](PLAN.md) for the full spec and roadmap, [
 - **The fight's Encounter:** a row at the top of the combat tracker (GM only) names the Encounter the fight started with, with every later Import listed as reinforcements, every monster added mid-fight as added, and the XP Finish will award. Click a name to open that Encounter in the Builder.
 - **Add on the fly:** during a fight, drop a monster on the tracker (from the Builder's results, the Actors tab or a compendium). It gets a numbered token in the Margin and joins the combat, and it's saved into the fight's Encounter, so the Encounter records what was fought. Drop an Encounter from the browser (with the tracker popped out) to import it as reinforcements. The tracker shows a dashed gold outline while you drag over it.
 - **Legendary resistance pips:** under a legendary monster's legendary action pips on the Carousel, small gold shields show its legendary resistances left (GM only).
+
+## What v0.8 adds
+
+- **Initiative for latecomers:** once a fight has started, monsters that join it (reinforcements, or monsters and Encounters dropped onto the tracker) roll initiative straight away. The rolls are GM-only, the newcomers slot into the order, and the current turn doesn't move. Before round 1 you roll as usual, and PCs always roll their own.
 
 ## What v0.7 adds
 

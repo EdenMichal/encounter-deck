@@ -118,3 +118,14 @@ export function summarizeFight(records: FightRecord[]): FightSummary | null {
 
 /** The Encounter a monster dropped onto the tracker joins: the one the fight started with. */
 export const mainEncounterOf = (records: FightRecord[]): string | null => records.find(r => r.kind !== "added")?.encounterId ?? null;
+
+/** The parts of a combatant `rollNow` reads. */
+export interface NewCombatant { id: string; isNPC: boolean; initiative: number | null }
+
+/**
+ * Which new combatants get their initiative rolled for them: once the fight has started, every monster that joined
+ * without one (dropped onto the tracker or imported as reinforcements). Before round 1 the GM rolls as usual, and PCs
+ * always roll their own.
+ */
+export const rollNow = (started: boolean, combatants: NewCombatant[]): string[] =>
+  started ? combatants.filter(c => c.isNPC && (c.initiative === null || c.initiative === undefined)).map(c => c.id) : [];

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { hasMargin, mainEncounterOf, marginSlots, parseHp, splitXp, summarizeFight, tokenNames, type SceneArea } from "../src/fight";
+import { hasMargin, mainEncounterOf, marginSlots, parseHp, rollNow, splitXp, summarizeFight, tokenNames, type SceneArea } from "../src/fight";
 
 // A 10×8 cell canvas (100px cells) with a 2-cell margin all round: the background is cells 2–7 × 2–5.
 const area: SceneArea = { width: 1000, height: 800, size: 100, sceneRect: { x: 200, y: 200, width: 600, height: 400 } };
@@ -82,5 +82,19 @@ describe("summarizeFight", () => {
   it("sends a dropped monster to the Encounter the fight started with", () => {
     expect(mainEncounterOf([ambush, wolves])).toBe("a");
     expect(mainEncounterOf([])).toBeNull();
+  });
+});
+
+describe("rollNow", () => {
+  const joined = [
+    { id: "goblin", isNPC: true, initiative: null },
+    { id: "rolled", isNPC: true, initiative: 14 },
+    { id: "pc", isNPC: false, initiative: null },
+  ];
+  it("rolls for monsters without initiative once the fight has started", () => {
+    expect(rollNow(true, joined)).toEqual(["goblin"]);
+  });
+  it("leaves it to the GM before round 1", () => {
+    expect(rollNow(false, joined)).toEqual([]);
   });
 });

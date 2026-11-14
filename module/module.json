@@ -2,7 +2,7 @@
   "id": "encounter-deck",
   "title": "Encounter Deck",
   "description": "Encounter prep and running for dnd5e: Campaigns, a Shared Library and a Builder with a live 2024 difficulty meter inside the Combat tab, plus a carousel initiative tracker across the top for the whole table.",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "compatibility": {
     "minimum": "14",
     "verified": "14.360"
