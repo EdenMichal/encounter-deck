@@ -31,6 +31,7 @@ export async function showStatBlock(combatant: any, { toggle = false } = {}): Pr
   if (shown && shown.sheet !== sheet && shown.sheet.rendered) shown.sheet.close();
   shown = { sheet, combatantId: combatant.id, combatId: combatant.parent.id };
   await sheet.render({ force: true, position: spotFor(sheet) });
+  clearOfEdge(sheet);
   sheet.bringToFront?.();
 }
 
@@ -52,9 +53,8 @@ export function closeStatBlock(): void {
   shown = null;
 }
 
-/** The fixed spot: near the top, just left of the sidebar, or of the floating combat tracker when that's open. */
-function spotFor(sheet: any): { left: number; top: number } {
-  const width = Number(sheet.position?.width) || Number(sheet.options?.position?.width) || 600;
+/** The left edge the sheet must stay clear of: the sidebar, or the floating combat tracker when that's open. */
+function rightEdge(): number {
   const sidebar = document.getElementById("sidebar")?.getBoundingClientRect();
   let edge = sidebar?.left ?? window.innerWidth;
   const popout = ui.combat?.popout;
@@ -62,6 +62,29 @@ function spotFor(sheet: any): { left: number; top: number } {
     const r = popout.element.getBoundingClientRect();
     if (r.width && r.left < edge) edge = r.left;
   }
+  return edge;
+}
+
+/**
+ * dnd5e's sheets hang their tabs off the right edge of the window, so a sheet placed by its width alone covers the
+ * sidebar's edge with them. Once it's drawn, move it left by however far anything sticks out past that edge.
+ */
+function clearOfEdge(sheet: any): void {
+  const el: HTMLElement | undefined = sheet.rendered ? sheet.element : undefined;
+  if (!el) return;
+  let right = el.getBoundingClientRect().right;
+  for (const child of el.querySelectorAll<HTMLElement>("nav.tabs, .tabs, [data-application-part=tabs]")) {
+    const r = child.getBoundingClientRect();
+    if (r.width) right = Math.max(right, r.right);
+  }
+  const over = right - (rightEdge() - GAP);
+  if (over > 0) sheet.setPosition({ left: Math.max(GAP, Math.round(Number(sheet.position.left) - over)) });
+}
+
+/** The fixed spot: near the top, just left of the sidebar (or the floating tracker), below the Carousel. */
+function spotFor(sheet: any): { left: number; top: number } {
+  const width = Number(sheet.position?.width) || Number(sheet.options?.position?.width) || 600;
+  const edge = rightEdge();
   // Below the carousel while it shows, so the sheet never covers the turn order.
   const carousel = document.getElementById("encounter-deck-carousel");
   const below = carousel && !carousel.classList.contains("ed-hidden") ? carousel.getBoundingClientRect().bottom + GAP : 0;
