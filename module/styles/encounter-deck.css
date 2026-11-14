@@ -719,3 +719,19 @@
 .ed-fight-hint { display: none; margin: 4px 0 0; font-size: 11px; color: var(--ed-gold, #d8b45a); }
 [data-application-part='tracker'].ed-drop { outline: 2px dashed rgba(216, 180, 90, 0.8); outline-offset: -2px; }
 [data-application-part='tracker'].ed-drop .ed-fight-hint { display: block; }
+
+/* On the sidebar the Builder opens from its own tab, under the sidebar's tabs, so the drawer drops its handle column
+   and, while collapsed, isn't drawn at all. The pop-out tracker has no tab strip and keeps the handle. */
+#sidebar-tabs > menu > li.ed-builder-tab { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--ed-line, rgba(255, 255, 255, 0.15)); }
+#sidebar-tabs > menu > li.ed-builder-tab[hidden] { display: none; }
+#encounter-deck-builder.ed-tabbed > [data-application-part="handle"] { display: none; }
+#encounter-deck-builder.ed-tabbed:not(.collapsed) {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  grid-template-areas:
+    "search head"
+    "search entries"
+    "results entries"
+    "results details";
+  padding-left: 8px;
+}
+#encounter-deck-builder.ed-tabbed.collapsed { display: none; }
