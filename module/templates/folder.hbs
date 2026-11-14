@@ -1,5 +1,6 @@
 <div class="ed-folder {{#if node.root}}ed-root{{/if}} {{#if node.isLibrary}}ed-library{{/if}} {{#if node.collapsed}}collapsed{{/if}}" data-folder-id="{{node.id}}">
-  <div class="ed-folder-head" data-action="edToggleFolder" data-can-nest="{{node.canNest}}">
+  <div class="ed-folder-head" data-action="edToggleFolder" data-can-nest="{{node.canNest}}" aria-expanded="{{#if node.collapsed}}false{{else}}true{{/if}}">
+    {{#if node.root}}<i class="fa-solid {{#if node.collapsed}}fa-chevron-right{{else}}fa-chevron-down{{/if}} fa-fw ed-folder-caret" inert></i>{{/if}}
     <i class="fa-solid {{#if node.root}}{{#if node.isLibrary}}fa-book-bookmark{{else}}fa-chess-rook{{/if}}{{else}}{{#if node.collapsed}}fa-folder{{else}}fa-folder-open{{/if}}{{/if}} fa-fw" inert></i>
     <span class="ed-folder-name">{{node.name}}</span>
     <span class="ed-folder-controls">

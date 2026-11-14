@@ -20,7 +20,7 @@
 
 .encounter-deck-tab [data-application-part="edBrowser"] { display: none; }
 /* Hide the tracker parts and anything other modules add to them while the browser shows. */
-.encounter-deck-tab.ed-browser-mode > :not([data-application-part="edBrowser"]):not(.window-header):not(.window-content),
+.encounter-deck-tab.ed-browser-mode > :not([data-application-part="edBrowser"]):not(.window-header):not(.window-content):not(#encounter-deck-builder),
 .encounter-deck-tab.ed-browser-mode > .window-content > :not([data-application-part="edBrowser"]) { display: none !important; }
 /* The floating pop-out keeps its title bar; its parts sit one level down, in .window-content. */
 .encounter-deck-tab.ed-browser-mode > [data-application-part="edBrowser"],
@@ -113,7 +113,8 @@
   border-bottom: 1px solid var(--ed-line);
   border-radius: 0;
 }
-.ed-folder.ed-library > .ed-folder-head i:first-child { color: var(--ed-accent); }
+.ed-folder.ed-library > .ed-folder-head i:nth-child(2) { color: var(--ed-accent); }
+.ed-folder-caret { flex: none; font-size: 10px; width: 12px; color: var(--ed-muted); }
 .ed-folder-head:hover { background: var(--sidebar-entry-hover-bg, rgba(255, 255, 255, 0.08)); }
 .ed-folder-head.ed-drop { outline: 2px dashed var(--ed-accent); }
 .ed-folder-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -241,8 +242,9 @@
   background: rgba(0, 0, 0, 0.25);
 }
 #encounter-deck-builder.collapsed .ed-handle {
+  /* As tall as its label; the drawer's own max-height caps a long Encounter name, which then ends in an ellipsis. */
   height: auto;
-  max-height: 60%;
+  max-height: 100%;
   border: 1px solid var(--ed-line);
   border-right: none;
   background: var(--sidebar-background, rgba(20, 20, 26, 0.95));
