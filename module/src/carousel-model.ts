@@ -37,6 +37,8 @@ export interface CombatantInput {
   statuses: StatusIcon[];
   /** Legendary actions left, for a monster that has them. */
   legendary?: Legendary | null;
+  /** Legendary resistances left, for a monster that has them. */
+  resistance?: Legendary | null;
 }
 
 export interface CardView {
@@ -60,6 +62,8 @@ export interface CardView {
   allStatuses: (StatusIcon & { svg: boolean })[];
   /** Legendary uses as pips (filled = left), for the GM only. */
   legendary: boolean[] | null;
+  /** Legendary resistances as pips under those, for the GM only. */
+  resistance: boolean[] | null;
 }
 
 /** At or below half HP, and still up. */
@@ -95,6 +99,7 @@ export function buildCards(list: CombatantInput[], currentId: string | null, isG
         more: all.length - shown.length,
         allStatuses: all,
         legendary: isGM && c.legendary && !c.defeated ? pips(c.legendary) : null,
+        resistance: isGM && c.resistance && !c.defeated ? pips(c.resistance) : null,
       };
     });
 }

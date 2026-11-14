@@ -41,7 +41,7 @@ One line in an Encounter: a reference to an actor plus how many of it appear ("G
 _Avoid_: Token, combatant, monster
 
 **Import**:
-Bringing an Encounter's creatures into the world for a fight: their actors go into a hidden folder, their tokens go into the scene's margin, and they (plus the present PCs) join the combat tracker. It can be repeated during a fight for reinforcements, and it is undone at Finish.
+Bringing an Encounter's creatures into the world for a fight: their actors go into a hidden folder, their tokens go into the scene's margin, and they (plus the present PCs) join the combat tracker. It can be repeated during a fight for reinforcements, and it is undone at Finish. A single monster dropped on the tracker mid-fight is imported the same way and added to the fight's Encounter.
 _Avoid_: Deploy, spawn, stage
 
 **Margin**:

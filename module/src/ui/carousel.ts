@@ -10,7 +10,7 @@
  */
 import { MODULE_ID, T } from "../constants";
 import { buildCards, canSeeCarousel, type Audience, type CombatantInput } from "../carousel-model";
-import { legendaryActions, legendaryOf, promptRows, rechargeAbilities, type PromptCandidate } from "../legendary";
+import { legendaryActions, legendaryOf, promptRows, rechargeAbilities, resistanceOf, type PromptCandidate } from "../legendary";
 import { setSetting, setting } from "../settings";
 import { isMonster, keepStatBlockClear, showStatBlock } from "./statblocks";
 
@@ -87,6 +87,7 @@ function inputOf(c: any): CombatantInput {
     ac: Number.isFinite(ac) ? ac : null,
     statuses,
     legendary: isPlainMonster(c) ? legendaryOf(c.actor?.system) : null,
+    resistance: isPlainMonster(c) ? resistanceOf(c.actor?.system) : null,
   };
 }
 
