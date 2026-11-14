@@ -18,21 +18,26 @@
 /*  Combat tab                                  */
 /* -------------------------------------------- */
 
-#combat [data-application-part="edBrowser"] { display: none; }
+.encounter-deck-tab [data-application-part="edBrowser"] { display: none; }
 /* Hide the tracker parts and anything other modules add to them while the browser shows. */
-#combat.ed-browser-mode > :not([data-application-part="edBrowser"]) { display: none !important; }
-#combat.ed-browser-mode > [data-application-part="edBrowser"] {
+.encounter-deck-tab.ed-browser-mode > :not([data-application-part="edBrowser"]):not(.window-header):not(.window-content):not(#encounter-deck-builder),
+.encounter-deck-tab.ed-browser-mode > .window-content > :not([data-application-part="edBrowser"]) { display: none !important; }
+/* The floating pop-out keeps its title bar; its parts sit one level down, in .window-content. */
+.encounter-deck-tab.ed-browser-mode > [data-application-part="edBrowser"],
+.encounter-deck-tab.ed-browser-mode > .window-content > [data-application-part="edBrowser"] {
   display: flex;
   flex-direction: column;
   flex: 1;
   min-height: 0;
 }
 
+/* Encounters (in the tracker) and Back to the combat tracker (in the browser) sit in the same spot, so one click toggles between them. */
 .ed-show-browser {
   width: calc(100% - 8px);
   margin: 4px;
   font-size: var(--font-size-12, 12px);
 }
+.ed-back-to-tracker { flex: none; width: calc(100% - 16px); margin: 6px 8px 0; font-size: var(--font-size-12, 12px); }
 
 .ed-browser { display: flex; flex-direction: column; flex: 1; min-height: 0; gap: var(--ed-gap); padding: 6px 4px 4px; }
 .ed-head { display: flex; flex-direction: column; gap: var(--ed-gap); flex: none; }
@@ -108,7 +113,8 @@
   border-bottom: 1px solid var(--ed-line);
   border-radius: 0;
 }
-.ed-folder.ed-library > .ed-folder-head i:first-child { color: var(--ed-accent); }
+.ed-folder.ed-library > .ed-folder-head i:nth-child(2) { color: var(--ed-accent); }
+.ed-folder-caret { flex: none; font-size: 10px; width: 12px; color: var(--ed-muted); }
 .ed-folder-head:hover { background: var(--sidebar-entry-hover-bg, rgba(255, 255, 255, 0.08)); }
 .ed-folder-head.ed-drop { outline: 2px dashed var(--ed-accent); }
 .ed-folder-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -162,15 +168,14 @@
 
 .ed-empty, .ed-empty-note, .ed-hint { list-style: none; color: var(--ed-muted); font-style: italic; font-size: 12px; }
 .ed-empty-note { margin: 8px 4px; }
-.ed-foot { flex: none; }
-.ed-foot button { width: 100%; }
 
 /* -------------------------------------------- */
 /*  Builder drawer                              */
 /* -------------------------------------------- */
 
-/* The drawer lives inside #sidebar and hangs off its left edge. */
+/* The drawer lives inside #sidebar, or the floating combat tracker while that's open, and hangs off its left edge. */
 #sidebar:has(> #encounter-deck-builder) { position: relative; }
+#combat-popout:has(> #encounter-deck-builder) { overflow: visible; }
 #encounter-deck-builder {
   position: absolute;
   top: 0;
@@ -200,6 +205,9 @@
 }
 #encounter-deck-builder.ed-hidden { display: none; }
 #encounter-deck-builder.collapsed {
+  /* Only as tall as the handle, so the empty space below it doesn't block what's underneath. */
+  height: auto;
+  max-height: 60%;
   width: var(--ed-handle-width);
   padding-right: 0;
   grid-template-columns: var(--ed-handle-width);
@@ -234,8 +242,9 @@
   background: rgba(0, 0, 0, 0.25);
 }
 #encounter-deck-builder.collapsed .ed-handle {
+  /* As tall as its label; the drawer's own max-height caps a long Encounter name, which then ends in an ellipsis. */
   height: auto;
-  max-height: 60%;
+  max-height: 100%;
   border: 1px solid var(--ed-line);
   border-right: none;
   background: var(--sidebar-background, rgba(20, 20, 26, 0.95));
@@ -320,6 +329,8 @@
   border-radius: var(--ed-radius);
 }
 .ed-dropzone.ed-drop { border-color: var(--ed-accent) !important; background: rgba(238, 155, 58, 0.08); }
+/* An Encounter from the browser is being dragged over the drawer. */
+#encounter-deck-builder.ed-drop-encounter { outline: 2px dashed var(--ed-accent); outline-offset: -2px; }
 .ed-entry.missing .ed-entry-name { color: var(--ed-high); }
 .ed-entry.swapping { outline: 1px solid var(--ed-accent); }
 .ed-entry-ghost { flex: none; width: 32px; text-align: center; font-size: 18px; color: var(--ed-muted); }
@@ -349,3 +360,44 @@
 .ed-link-zone a { flex: 1; cursor: pointer; }
 .ed-details-foot { display: flex; gap: 6px; }
 .ed-details-foot button { flex: 1; }
+
+/* -------------------------------------------- */
+/*  Running a fight                             */
+/* -------------------------------------------- */
+
+/* Import shows on hover (and on keyboard focus), so rows stay calm while browsing. */
+.ed-row .ed-import { opacity: 0; transition: opacity 120ms ease-out; color: var(--ed-accent); }
+.ed-row:hover .ed-import,
+.ed-row .ed-import:focus-visible { opacity: 1; }
+
+/* AC and HP columns in the tracker. */
+.encounter-deck-tab .combatant .ed-stats {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: none;
+  font-size: var(--font-size-12, 12px);
+  font-variant-numeric: tabular-nums;
+}
+.encounter-deck-tab .combatant .ed-ac { display: inline-flex; align-items: center; gap: 2px; color: var(--ed-muted); min-width: 26px; }
+/* With the extra columns, long names wrap (the token number must stay visible); keep the initiative die its own size. */
+.encounter-deck-tab .combatant:has(> .ed-stats) > .token-name { min-width: 0; }
+.encounter-deck-tab .combatant:has(> .ed-stats) > .token-initiative { align-self: center; height: 32px; }
+.encounter-deck-tab .combatant:has(> .ed-stats) > .token-initiative > button { height: 32px; }
+.encounter-deck-tab .combatant .ed-ac i { font-size: 10px; }
+.encounter-deck-tab .combatant .ed-hp { display: inline-flex; align-items: baseline; }
+.encounter-deck-tab .combatant .ed-hp-input {
+  width: 32px;
+  height: 20px;
+  padding: 0 2px;
+  text-align: right;
+  font-size: var(--font-size-12, 12px);
+  background: transparent;
+  border: 1px solid transparent;
+}
+.encounter-deck-tab .combatant .ed-hp-input:hover,
+.encounter-deck-tab .combatant .ed-hp-input:focus { border-color: var(--ed-line); background: rgba(0, 0, 0, 0.25); }
+.encounter-deck-tab .combatant .ed-hp-max { color: var(--ed-muted); }
+.encounter-deck-tab .combatant .ed-hp.bloodied .ed-hp-input { color: var(--ed-moderate); }
+.encounter-deck-tab .combatant .ed-hp.down .ed-hp-input { color: var(--ed-over); }
+.encounter-deck-tab .combatant .ed-sb-button { flex: none; }

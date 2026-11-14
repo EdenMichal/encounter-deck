@@ -3,16 +3,16 @@
  * with + or drag, edits Creature Entries and shows a live 2024 difficulty meter for the Active Campaign's
  * present PCs. Every edit saves straight to the Encounter in the compendium.
  */
-import { CHANGED_HOOK, MODULE_ID, STATUSES, STATUS_LABELS, T, type EncounterFlags, type Status } from "../constants";
+import { CHANGED_HOOK, ENCOUNTER_DRAG_MIME, ENCOUNTER_DRAG_TYPE, MODULE_ID, STATUSES, STATUS_LABELS, T, type EncounterFlags, type Status } from "../constants";
 import { activeCampaign, advancementOf } from "../campaigns";
 import { meter } from "../difficulty";
-import { addEntry, changeCount, readEntries, removeEntry, swapEntry, toSource, totalCount, totalXp, type CreatureEntry } from "../entries";
+import { addEntry, changeCount, mergeEntries, readEntries, removeEntry, swapEntry, toSource, totalCount, totalXp, type CreatureEntry } from "../entries";
 import { CR_STEPS, EMPTY_FILTER, filterMonsters, formatCr, type Monster, type MonsterFilter } from "../monsters";
 import { setSetting, setting } from "../settings";
 import { cachedMonsters, invalidateMonsters, loadMonsters, lookupMonster, openSourcesConfig, sourcePacks, xpForCr } from "../sources";
 import { encounterFlags, getEncounter, isInLibrary, pack, rootOf, folderById } from "../store";
 import { partyContext } from "./browser-model";
-import { duplicate, openLink, removeEncounter, setStatus } from "./combat-tab";
+import { duplicate, openLink, removeEncounter, runImport, setStatus } from "./combat-tab";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 const RESULT_LIMIT = 100;
@@ -40,6 +40,8 @@ export function startBuilder(): void {
   const sync = () => instance?.syncVisibility();
   Hooks.on("changeSidebarTab", sync);
   Hooks.on("collapseSidebar", sync);
+  // The floating combat tracker opening, closing or minimizing moves the drawer between it and the sidebar.
+  for (const hook of ["renderCombatTracker", "closeCombatTracker", "minimizeCombatTracker", "maximizeCombatTracker"]) Hooks.on(hook, () => setTimeout(sync, 0));
   // dnd5e's Sources checklist is a world setting: the first save creates it, later saves update it.
   const onSources = (s: any) => {
     if (s.key !== "dnd5e.packSourceConfiguration") return;
@@ -82,6 +84,7 @@ class Builder extends HandlebarsApplicationMixin(ApplicationV2) {
       edDuplicate: act(app => app.encounterId && duplicate(app.encounterId)),
       edDelete: act(app => app.encounterId && removeEncounter(app.encounterId)),
       edCloseEncounter: act(app => app.closeEncounter()),
+      edImport: act(async app => { if (!app.encounterId) return; await app.settled(); return runImport(app.encounterId); }),
     },
   };
 
@@ -105,6 +108,11 @@ class Builder extends HandlebarsApplicationMixin(ApplicationV2) {
   #pending = 0;
   #renderResults = foundry.utils.debounce(() => this.render({ parts: ["results"] }), 120);
 
+  /** Resolves once every save in flight has landed, so Import reads the latest entries. */
+  async settled(): Promise<void> {
+    for (let i = 0; this.#pending > 0 && i < 50; i++) await new Promise(r => setTimeout(r, 50));
+  }
+
   get flags(): EncounterFlags | null {
     return this.doc ? encounterFlags(this.doc) : null;
   }
@@ -117,13 +125,23 @@ class Builder extends HandlebarsApplicationMixin(ApplicationV2) {
   async _insertElement(element: HTMLElement) {
     const existing = document.getElementById(element.id);
     if (existing) existing.replaceWith(element);
-    else (document.getElementById("sidebar") ?? document.body).append(element);
+    else this.host().append(element);
   }
 
-  /** Only on the Combat tab, and only while the sidebar is expanded. */
+  /** The floating combat tracker while it's open, so the drawer goes where the GM is looking; otherwise the sidebar. */
+  host(): HTMLElement {
+    const popout = ui.combat?.popout;
+    if (popout?.rendered && popout.element?.isConnected && !popout.minimized) return popout.element;
+    return document.getElementById("sidebar") ?? document.body;
+  }
+
+  /** Dock on the current host. On the sidebar it shows only on the Combat tab while expanded; on the pop-out, always. */
   syncVisibility(): void {
     if (!this.element) return;
-    const show = !!ui.sidebar?.expanded && ui.sidebar?.tabGroups?.primary === "combat";
+    const host = this.host();
+    if (this.element.parentElement !== host) host.append(this.element);
+    const onPopout = host.id !== "sidebar";
+    const show = onPopout || (!!ui.sidebar?.expanded && ui.sidebar?.tabGroups?.primary === "combat");
     this.element.classList.toggle("ed-hidden", !show);
   }
 
@@ -403,14 +421,32 @@ class Builder extends HandlebarsApplicationMixin(ApplicationV2) {
       e.dataTransfer.effectAllowed = "copy";
     });
     const zoneOf = (e: DragEvent) => (e.target as HTMLElement).closest?.<HTMLElement>(".ed-dropzone");
+    const isEncounterDrag = (e: DragEvent) => !!e.dataTransfer?.types.includes(ENCOUNTER_DRAG_MIME);
+    // An Encounter row from the browser can be dropped anywhere on the drawer, handle included.
     el.addEventListener("dragover", (e: DragEvent) => {
+      if (isEncounterDrag(e)) {
+        e.preventDefault();
+        if (e.dataTransfer) e.dataTransfer.dropEffect = "copy";
+        el.classList.add("ed-drop-encounter");
+        return;
+      }
       const zone = zoneOf(e);
       if (!zone || !this.doc) return;
       e.preventDefault();
       zone.classList.add("ed-drop");
     });
-    el.addEventListener("dragleave", (e: DragEvent) => zoneOf(e)?.classList.remove("ed-drop"));
+    el.addEventListener("dragleave", (e: DragEvent) => {
+      zoneOf(e)?.classList.remove("ed-drop");
+      if (!el.contains(e.relatedTarget as Node | null)) el.classList.remove("ed-drop-encounter");
+    });
     el.addEventListener("drop", async (e: DragEvent) => {
+      if (isEncounterDrag(e)) {
+        e.preventDefault();
+        el.classList.remove("ed-drop-encounter");
+        const data = foundry.applications.ux.TextEditor.implementation.getDragEventData(e);
+        if (data?.type === ENCOUNTER_DRAG_TYPE && data.id) return this.dropEncounter(data.id);
+        return;
+      }
       const zone = zoneOf(e);
       if (!zone || !this.doc) return;
       e.preventDefault();
@@ -423,6 +459,35 @@ class Builder extends HandlebarsApplicationMixin(ApplicationV2) {
       if (row) this.swapTarget = row.dataset.uuid!;
       return this.addMonster(data.uuid);
     });
+  }
+
+  /**
+   * An Encounter dropped from the browser. With nothing open it opens; with another Encounter open, ask whether to
+   * add its creatures to that one or open it instead.
+   */
+  async dropEncounter(id: string): Promise<void> {
+    if (id === this.encounterId) return;
+    if (!this.doc) return this.openEncounter(id);
+    const dropped = await getEncounter(id);
+    if (!dropped) return void ui.notifications.warn("That Encounter is gone.");
+    const esc = foundry.utils.escapeHTML;
+    const choice = await foundry.applications.api.DialogV2.wait({
+      window: { title: `Drop "${dropped.name}"` },
+      position: { width: 400 },
+      content: `<p>"${esc(this.doc.name)}" is open in the Builder. Add the creatures from "${esc(dropped.name)}" to it, or open "${esc(dropped.name)}" instead?</p>`,
+      buttons: [
+        { action: "add", label: "Add its creatures", icon: "fa-solid fa-plus", default: true },
+        { action: "open", label: "Open it instead", icon: "fa-solid fa-folder-open" },
+      ],
+      rejectClose: false,
+    }).catch(() => null);
+    if (choice === "open") return this.openEncounter(id);
+    if (choice !== "add") return;
+    const incoming = readEntries(dropped._source.system?.members ?? [], encounterFlags(dropped).entries, lookupMonster);
+    const count = totalCount(incoming);
+    if (!count) return void ui.notifications.info(`"${dropped.name}" has no creatures to add.`);
+    await this.editEntries(e => mergeEntries(e, incoming));
+    ui.notifications.info(`Added ${count} creature${count === 1 ? "" : "s"} from "${dropped.name}".`);
   }
 
   async dropLink(data: any): Promise<void> {

@@ -1,13 +1,18 @@
 import { CHANGED_HOOK, MODULE_ID } from "./constants";
+import { preventTokenlessDuplicates } from "./combatants";
 import { registerSettings } from "./settings";
 import { ensureStorage, watchChanges } from "./store";
 import { createCombatTab } from "./ui/combat-tab";
 import { startBuilder } from "./ui/builder";
+import { checkTokenBar, startFinish } from "./finish";
+import { startStatBlocks } from "./ui/statblocks";
 
 Hooks.once("init", () => {
   registerSettings();
   // Subclass whatever the Combat tab is (dnd5e's CombatTracker5e), so ui.combat stays a real tracker.
   CONFIG.ui.combat = createCombatTab(CONFIG.ui.combat);
+  // Every client, players included: their initiative rolls are where the duplicate would come from.
+  preventTokenlessDuplicates();
 
   // Foundry caches module.json until the world is relaunched; make sure the stylesheet is there either way.
   const css = `modules/${MODULE_ID}/styles/encounter-deck.css`;
@@ -26,5 +31,8 @@ Hooks.once("ready", async () => {
     ui.notifications.error("Encounter Deck could not create its compendium. See the console for details.");
   }
   startBuilder();
+  startStatBlocks();
+  startFinish();
   Hooks.callAll(CHANGED_HOOK);
+  checkTokenBar();
 });

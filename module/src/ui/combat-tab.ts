@@ -3,7 +3,7 @@
  * running underneath and ui.combat stays a real tracker. For the GM, the encounter browser replaces the tracker's
  * parts while no combat is viewed (PLAN.md "Combat tab"); players always get the vanilla tracker.
  */
-import { CHANGED_HOOK, MODULE_ID, STATUSES, STATUS_LABELS, T, type Status } from "../constants";
+import { CHANGED_HOOK, ENCOUNTER_DRAG_MIME, ENCOUNTER_DRAG_TYPE, MODULE_ID, STATUSES, STATUS_LABELS, T, type Status } from "../constants";
 import {
   activeCampaign, actorFolderChoices, campaignFlags, createCampaign, deleteCampaign, setActiveCampaign, togglePresent,
 } from "../campaigns";
@@ -12,12 +12,14 @@ import {
   copyEncounter, createEncounter, createFolder, deleteEncounter, deleteFolder, folderById, getEncounter,
   isInLibrary, kindOf, moveEncounter, pack, rootOf,
 } from "../store";
+import { parseHp } from "../fight";
+import { importEncounter } from "../importer";
 import { browserContext, type BrowserUi } from "./browser-model";
 import { builder, openBuilder } from "./builder";
+import { isMonster, showStatBlock } from "./statblocks";
 
 const { DialogV2 } = foundry.applications.api;
 const esc = (s: string) => foundry.utils.escapeHTML(s ?? "");
-const DRAG_TYPE = "EncounterDeckEncounter";
 
 type Handler = (this: any, event: Event, target: HTMLElement) => unknown;
 const act = (fn: (app: any, target: HTMLElement, event: Event) => unknown): Handler =>
@@ -129,6 +131,18 @@ export async function removeEncounter(id: string): Promise<void> {
   await deleteEncounter(id);
 }
 
+/** Import, then show the tracker and fold the Builder away so the fight has room. */
+export async function runImport(id: string): Promise<void> {
+  if (!(await importEncounter(id))) return;
+  for (const tab of [ui.combat, ui.combat?.popout]) {
+    if (!tab?.ui) continue;
+    tab.ui.forceBrowser = false;
+    if (tab.rendered) tab.render();
+  }
+  const drawer = builder();
+  if (drawer && !drawer.collapsed) drawer.setCollapsed(true);
+}
+
 export async function openLink(uuid: string | null | undefined): Promise<void> {
   if (!uuid) return;
   const doc = await fromUuid(uuid);
@@ -154,13 +168,17 @@ export function createCombatTab(Base: any) {
         edUseMaster: act((_app, t) => useMaster(encounterOf(t))),
         edShowBrowser: act((app) => { app.ui.forceBrowser = true; app.render(); }),
         edBackToTracker: act((app) => { app.ui.forceBrowser = false; app.render(); }),
+        edImport: act((_app, t) => runImport(encounterOf(t))),
+        edStatBlock: act((app, t) => showStatBlock(app.viewed?.combatants.get(t.closest<HTMLElement>("[data-combatant-id]")!.dataset.combatantId!), { toggle: true })),
       },
     };
 
     ui: BrowserUi & { forceBrowser: boolean } = { query: "", openEncounter: null, forceBrowser: false };
     #changedHook?: number;
     #browserFresh = false;
+    #actorHook?: number;
     #renderQuery = foundry.utils.debounce(() => this.render({ parts: ["edBrowser"] }), 150);
+    #renderTracker = foundry.utils.debounce(() => { if (!this.browserMode) this.render({ parts: ["tracker"] }); }, 50);
 
     /** The GM sees the browser while no combat is viewed, or after asking for it from the tracker. */
     get browserMode(): boolean {
@@ -192,6 +210,10 @@ export function createCombatTab(Base: any) {
         if (this.browserMode) this.render({ parts: ["edBrowser"] });
         else this.#browserFresh = false;
       });
+      // Keep the AC and HP columns current: a PC's sheet edit or a monster's damage changes the actor, not the combat.
+      this.#actorHook = Hooks.on("updateActor", (actor: any) => {
+        if (this.viewed?.combatants.some((c: any) => c.actor === actor || c.actorId === actor.id)) this.#renderTracker();
+      });
       const el: HTMLElement = this.element;
       el.addEventListener("change", (e: Event) => {
         const t = e.target as HTMLInputElement;
@@ -213,6 +235,7 @@ export function createCombatTab(Base: any) {
     _onClose(options: any) {
       super._onClose(options);
       if (this.#changedHook !== undefined) Hooks.off(CHANGED_HOOK, this.#changedHook);
+      if (this.#actorHook !== undefined) Hooks.off("updateActor", this.#actorHook);
     }
 
     async _onRender(context: any, options: any) {
@@ -222,11 +245,56 @@ export function createCombatTab(Base: any) {
       if (!game.user.isGM) return;
       // The browser part was last rendered while hidden: bring it up to date now that it shows.
       if (this.browserMode && !this.#browserFresh) this.render({ parts: ["edBrowser"] });
-      // In the tracker, a button to get back to the browser.
-      const header = el.querySelector<HTMLElement>(":scope > [data-application-part='header']");
+      // In the tracker, a button to get back to the browser (the sidebar tab and its floating pop-out alike).
+      const header = el.querySelector<HTMLElement>("[data-application-part='header']");
       if (header && !this.browserMode && !header.querySelector(".ed-show-browser")) {
         header.insertAdjacentHTML("afterbegin", `<button type="button" class="ed-show-browser" data-action="edShowBrowser"><i class="fa-solid fa-book-skull" inert></i> Encounters</button>`);
       }
+      if (!this.browserMode) this.addStatColumns(el);
+    }
+
+    /** AC and HP on every row of the running fight, HP typed in like the token HUD, and a stat block button for monsters. */
+    addStatColumns(el: HTMLElement): void {
+      const combat = this.viewed;
+      if (!combat) return;
+      for (const li of el.querySelectorAll<HTMLElement>("li.combatant[data-combatant-id]")) {
+        const combatant = combat.combatants.get(li.dataset.combatantId);
+        const actor = combatant?.actor;
+        const hp = actor?.system?.attributes?.hp;
+        if (!actor || !hp || li.querySelector(":scope > .ed-stats")) continue;
+        const ac = actor.system.attributes.ac?.value ?? "—";
+        const low = hp.max && hp.value <= hp.max / 2 ? "bloodied" : "";
+        const stats = document.createElement("div");
+        stats.className = "ed-stats";
+        stats.innerHTML = `
+          <span class="ed-ac" data-tooltip="Armor Class"><i class="fa-solid fa-shield" inert></i>${esc(String(ac))}</span>
+          <span class="ed-hp ${low} ${hp.value <= 0 ? "down" : ""}" data-tooltip="Hit Points: type -7 for damage, +5 for healing, or a new value">
+            <input type="text" class="ed-hp-input" value="${hp.value}" inputmode="numeric" aria-label="Hit Points of ${esc(combatant.name)}"><span class="ed-hp-max">/${hp.max ?? "?"}</span>
+          </span>
+          ${isMonster(combatant) ? `<button type="button" class="inline-control icon fa-solid fa-book-open ed-sb-button" data-action="edStatBlock" data-tooltip="Stat block" aria-label="Stat block of ${esc(combatant.name)}"></button>` : ""}`;
+        li.querySelector(":scope > .token-initiative")?.before(stats);
+      }
+    }
+
+    _onChangeInput(event: Event) {
+      const input = event.target as HTMLInputElement;
+      if (!input.classList?.contains("ed-hp-input")) return super._onChangeInput(event);
+      const combatant = this.viewed?.combatants.get(input.closest<HTMLElement>("[data-combatant-id]")?.dataset.combatantId);
+      const parsed = parseHp(input.value);
+      if (!combatant?.actor || !parsed) {
+        input.value = String(combatant?.actor?.system.attributes.hp.value ?? "");
+        return;
+      }
+      return combatant.actor.modifyTokenAttribute("attributes.hp", parsed.value, parsed.isDelta, true);
+    }
+
+    /** Double-clicking a monster opens its stat block in the fixed spot. */
+    _onCombatantMouseDown(event: any, target: HTMLElement) {
+      if (event.type === "dblclick" && game.user.isGM) {
+        const combatant = this.viewed?.combatants.get(target?.dataset.combatantId);
+        if (isMonster(combatant)) return void showStatBlock(combatant);
+      }
+      return super._onCombatantMouseDown(event, target);
     }
 
     toggleFolder(id: string): void {
@@ -243,6 +311,7 @@ export function createCombatTab(Base: any) {
       const library = (li: HTMLElement) => li.dataset.library === "true";
       return [
         { label: "Open in Builder", icon: "fa-solid fa-hammer", onClick: (_e: Event, li: HTMLElement) => openBuilder(id(li)) },
+        { label: "Import into this scene", icon: "fa-solid fa-play", onClick: (_e: Event, li: HTMLElement) => runImport(id(li)) },
         { label: `Use in Active Campaign`, icon: "fa-solid fa-copy", visible: (li: HTMLElement) => library(li) && !!activeCampaign(),
           onClick: (_e: Event, li: HTMLElement) => useMaster(id(li)) },
         { label: "Duplicate", icon: "fa-solid fa-clone", onClick: (_e: Event, li: HTMLElement) => duplicate(id(li)) },
@@ -290,7 +359,8 @@ export function createCombatTab(Base: any) {
       el.addEventListener("dragstart", (e: DragEvent) => {
         const row = (e.target as HTMLElement).closest?.<HTMLElement>(".ed-row");
         if (!row || !e.dataTransfer) return;
-        e.dataTransfer.setData("text/plain", JSON.stringify({ type: DRAG_TYPE, id: row.dataset.encounterId }));
+        e.dataTransfer.setData("text/plain", JSON.stringify({ type: ENCOUNTER_DRAG_TYPE, id: row.dataset.encounterId }));
+        e.dataTransfer.setData(ENCOUNTER_DRAG_MIME, row.dataset.encounterId!);
         e.dataTransfer.effectAllowed = "copyMove";
       });
       el.addEventListener("dragover", (e: DragEvent) => {
@@ -308,7 +378,7 @@ export function createCombatTab(Base: any) {
         head.classList.remove("ed-drop");
         let data: any;
         try { data = JSON.parse(e.dataTransfer?.getData("text/plain") ?? ""); } catch { return; }
-        if (data?.type !== DRAG_TYPE || !data.id) return;
+        if (data?.type !== ENCOUNTER_DRAG_TYPE || !data.id) return;
         e.preventDefault();
         const target = folderOf(head);
         const entry = pack()?.index.get(data.id);

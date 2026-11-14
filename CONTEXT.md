@@ -48,8 +48,8 @@ _Avoid_: Deploy, spawn, stage
 The empty area of a scene outside the background image, where imported tokens sit so they never appear on the table display.
 _Avoid_: Padding, off-map
 
-**Stat Block Tabs**:
-A tab strip down the side with one tab per monster in the running fight. Next/Previous Turn selects the monster whose turn it is (skipping PCs), and double-clicking a tracker row selects that monster.
+**Stat Block**:
+A monster's own dnd5e sheet, opened in one fixed spot beside the sidebar and replacing the previous one. The tracker's book button and a double-click on a monster row open it, and Next/Previous Turn opens the monster whose turn it is (skipping PCs).
 _Avoid_: Follow turn, auto-open
 
 **Builder**:
