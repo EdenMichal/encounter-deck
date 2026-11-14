@@ -65,7 +65,7 @@ The screen for creating and editing Encounters: search and filter monsters, add 
 _Avoid_: Creator, editor, suite
 
 **Source**:
-A compendium the GM has switched on as a place monsters come from. The Builder only searches Sources.
+A compendium of monsters the GM has switched on as a place to search. The Builder only searches Sources, and labels each monster with where it comes from (its book and rules version, such as "SRD 5.1 · 2014").
 _Avoid_: Pack, library
 
 **Finish**:

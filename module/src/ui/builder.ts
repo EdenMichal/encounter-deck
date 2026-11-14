@@ -9,10 +9,12 @@ import { meter } from "../difficulty";
 import { addEntry, changeCount, mergeEntries, readEntries, removeEntry, swapEntry, toSource, totalCount, totalXp, type CreatureEntry } from "../entries";
 import { CR_STEPS, EMPTY_FILTER, filterMonsters, formatCr, type Monster, type MonsterFilter } from "../monsters";
 import { setSetting, setting } from "../settings";
-import { cachedMonsters, invalidateMonsters, loadMonsters, lookupMonster, openSourcesConfig, sourcePacks, xpForCr } from "../sources";
+import { sourceOptions } from "../source-list";
+import { cachedMonsters, invalidateMonsters, loadMonsters, lookupMonster, monsterPackCount, xpForCr } from "../sources";
 import { encounterFlags, getEncounter, isInLibrary, pack, rootOf, folderById } from "../store";
 import { partyContext } from "./browser-model";
 import { duplicate, openLink, removeEncounter, runImport, setStatus } from "./combat-tab";
+import { openSourcesDialog, refreshSourcesDialog } from "./sources-dialog";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 const RESULT_LIMIT = 100;
@@ -46,6 +48,7 @@ export function startBuilder(): void {
   const onSources = (s: any) => {
     if (s.key !== "dnd5e.packSourceConfiguration") return;
     invalidateMonsters();
+    refreshSourcesDialog();
     instance?.render({ parts: ["search"] });
     instance?.refreshResults();
   };
@@ -77,7 +80,7 @@ class Builder extends HandlebarsApplicationMixin(ApplicationV2) {
       edRemove: act((app, t) => { if (app.swapTarget === uuidOf(t)) app.swapTarget = null; return app.editEntries(e => removeEntry(e, uuidOf(t))); }),
       edSwap: act((app, t) => { const u = uuidOf(t); app.swapTarget = app.swapTarget === u ? null : u; app.render({ parts: ["entries", "results"] }); }),
       edSheet: act((_app, t) => fromUuid(uuidOf(t)).then((a: any) => a?.sheet.render({ force: true }))),
-      edSources: act(() => openSourcesConfig()),
+      edSources: act(() => openSourcesDialog()),
       edClearFilters: act(app => { app.filter = { ...EMPTY_FILTER }; app.render({ parts: ["search", "results"] }); }),
       edOpenLink: act(app => openLink(app.flags?.link)),
       edClearLink: act(app => app.saveFlags({ link: null }, true)),
@@ -233,12 +236,13 @@ class Builder extends HandlebarsApplicationMixin(ApplicationV2) {
       return null;
     }
     const cr = actor.system.details?.cr ?? null;
-    return { uuid: actor.uuid, name: actor.name, img: actor.img, cr, xp: xpForCr(cr), type: "", size: "", habitats: [], pack: actor.pack ?? "" };
+    return { uuid: actor.uuid, name: actor.name, img: actor.img, cr, xp: xpForCr(cr), type: "", size: "", habitats: [], pack: actor.pack ?? "", source: "" };
   }
 
   refreshResults(): void {
     if (this.collapsed) return;
-    if (!cachedMonsters()) loadMonsters().then(() => this.render({ parts: ["results"] }));
+    // Once loaded, the search part learns the source tags and the Sources count.
+    if (!cachedMonsters()) loadMonsters().then(() => this.render({ parts: ["search", "results"] }));
     this.render({ parts: ["results"] });
   }
 
@@ -269,9 +273,17 @@ class Builder extends HandlebarsApplicationMixin(ApplicationV2) {
       types: mark(choices(CONFIG.DND5E.creatureTypes), f.type),
       sizes: mark(choices(CONFIG.DND5E.actorSizes), f.size),
       habitats: mark(choices(CONFIG.DND5E.habitats), f.habitat),
-      sourceCount: sourcePacks().length,
+      sources: mark(this.sourceChoices(), f.source),
+      sourceCount: monsterPackCount() ?? "…",
       filtered: this.filtered,
     };
+  }
+
+  /** Every source tag among the loaded monsters. A chosen one whose compendium was switched off stays listed (at 0). */
+  sourceChoices(): { value: string; label: string }[] {
+    const options = sourceOptions(cachedMonsters() ?? []);
+    if (this.filter.source && !options.some(o => o.value === this.filter.source)) options.unshift({ value: this.filter.source, label: this.filter.source, count: 0 });
+    return options.map(o => ({ value: o.value, label: `${o.label} (${fmt(o.count)})` }));
   }
 
   get filtered(): boolean {
@@ -301,7 +313,7 @@ class Builder extends HandlebarsApplicationMixin(ApplicationV2) {
       limit: RESULT_LIMIT,
       results: found.slice(0, RESULT_LIMIT).map(m => ({
         ...m, crLabel: formatCr(m.cr), xpLabel: fmt(m.xp),
-        subtitle: [size(m.size), type(m.type)].filter(Boolean).join(" "), packLabel: packLabel(m.pack),
+        subtitle: [size(m.size), type(m.type)].filter(Boolean).join(" "), packLabel: packLabel(m.pack), source: m.source || packLabel(m.pack),
       })),
     };
   }
@@ -401,6 +413,7 @@ class Builder extends HandlebarsApplicationMixin(ApplicationV2) {
         case "edType": this.filter.type = t.value; break;
         case "edSize": this.filter.size = t.value; break;
         case "edHabitat": this.filter.habitat = t.value; break;
+        case "edSource": this.filter.source = t.value; break;
         case "name": if (t.value.trim()) this.doc?.update({ name: t.value.trim() }); return;
         case "status": if (this.encounterId) setStatus(this.encounterId, t.value as Status); return;
         case "tags": this.saveFlags({ tags: [...new Set(t.value.split(",").map(s => s.trim()).filter(Boolean))] }); return;

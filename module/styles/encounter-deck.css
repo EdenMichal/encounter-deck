@@ -267,6 +267,7 @@
 .ed-cr-range { display: flex; align-items: center; gap: 2px; }
 .ed-cr-range select { min-width: 0; }
 .ed-search-foot { display: flex; justify-content: space-between; gap: 4px; }
+.ed-search-grid .ed-search-source { grid-column: 1 / -1; }
 
 .ed-results-wrap { display: flex; flex-direction: column; flex: 1; min-height: 0; }
 .ed-results-count { margin: 6px 0 4px; font-size: 11px; color: var(--ed-muted); }
@@ -611,3 +612,24 @@
 .ed-car-item.current .ed-car-trim { width: calc(var(--ed-card-w) * 1.2); }
 .ed-car-trim img { flex: none; width: 175%; max-width: none; border: none; }
 .ed-car-hp { margin-top: 1px; font-size: 12px; font-weight: 600; text-shadow: 0 0 3px #000, 0 0 2px #000; }
+
+/* Sources dialog: only compendiums with monsters, grouped by where they come from. */
+.ed-sources-app .window-content { padding: 8px 10px; }
+.ed-sources { display: flex; flex-direction: column; gap: 6px; min-height: 0; }
+.ed-sources-app.ed-busy .ed-sources { opacity: 0.7; pointer-events: none; }
+.ed-sources-summary { margin: 0; font-size: 12px; color: var(--ed-muted); }
+.ed-sources-summary strong { color: var(--color-text-primary, inherit); }
+.ed-source-groups { display: flex; flex-direction: column; gap: 6px; max-height: 60vh; overflow-y: auto; }
+.ed-source-group { margin: 0; padding: 2px 6px 4px; border: 1px solid var(--ed-line); border-radius: var(--ed-radius); }
+.ed-source-group legend { padding: 0 4px; }
+.ed-source-package { display: flex; align-items: center; gap: 4px; font-weight: bold; font-size: 12px; }
+.ed-source-row { display: flex; align-items: center; gap: 6px; padding: 2px 0; font-size: 12px; cursor: pointer; }
+.ed-source-row input, .ed-source-package input { margin: 0; flex: none; }
+.ed-source-row.is-off .ed-source-name { color: var(--ed-muted); }
+.ed-source-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ed-source-book { font-size: 11px; color: var(--ed-muted); white-space: nowrap; }
+.ed-source-rules { font-size: 10px; padding: 0 4px; border: 1px solid var(--ed-gold); border-radius: 3px; color: var(--ed-gold); }
+.ed-source-count { min-width: 3ch; text-align: right; font-variant-numeric: tabular-nums; color: var(--ed-muted); }
+.ed-sources-foot { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.ed-sources-hint { font-size: 11px; color: var(--ed-muted); }
+.ed-sources-foot .ed-link-button { flex: none; }

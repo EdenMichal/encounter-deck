@@ -1,6 +1,8 @@
 /**
  * Monster search over the Sources' compendium indexes. Pure: sources.ts feeds it index entries.
  */
+import { sourceTag } from "./source-list";
+
 export interface Monster {
   uuid: string;
   name: string;
@@ -11,6 +13,8 @@ export interface Monster {
   size: string;
   habitats: string[];
   pack: string;
+  /** Where it comes from, e.g. "SRD 5.1 · 2014" (see sourceTag). */
+  source: string;
 }
 
 export interface MonsterFilter {
@@ -20,9 +24,10 @@ export interface MonsterFilter {
   type: string;
   size: string;
   habitat: string;
+  source: string;
 }
 
-export const EMPTY_FILTER: MonsterFilter = { name: "", crMin: null, crMax: null, type: "", size: "", habitat: "" };
+export const EMPTY_FILTER: MonsterFilter = { name: "", crMin: null, crMax: null, type: "", size: "", habitat: "", source: "" };
 
 /** "1/4" → 0.25, "3" → 3, 0.5 → 0.5. */
 export function parseCr(value: unknown): number | null {
@@ -36,7 +41,8 @@ export function parseCr(value: unknown): number | null {
 const get = (obj: any, path: string) => path.split(".").reduce((o, k) => o?.[k], obj);
 
 /** An index entry from an Actor compendium, or null when it isn't an NPC. */
-export function monsterFromIndex(entry: any, pack: string, crToXp: (cr: number | null) => number): Monster | null {
+export function monsterFromIndex(entry: any, pack: string, crToXp: (cr: number | null) => number,
+  packInfo: { sourceBook?: string; label?: string } = {}): Monster | null {
   if (entry?.type !== "npc") return null;
   const cr = parseCr(get(entry, "system.details.cr"));
   const habitat = get(entry, "system.details.habitat");
@@ -50,6 +56,7 @@ export function monsterFromIndex(entry: any, pack: string, crToXp: (cr: number |
     size: get(entry, "system.traits.size") ?? "",
     habitats: Array.isArray(habitat?.value) ? habitat.value.map((h: any) => h?.type).filter(Boolean) : [],
     pack,
+    source: sourceTag(entry, { ...packInfo, id: pack }),
   };
 }
 
@@ -66,6 +73,7 @@ export function filterMonsters(list: Monster[], f: MonsterFilter): Monster[] {
     if (f.size && m.size !== f.size) return false;
     // A creature that lives "any"where matches every habitat.
     if (f.habitat && !m.habitats.includes(f.habitat) && !m.habitats.includes("any")) return false;
+    if (f.source && m.source !== f.source) return false;
     return true;
   });
 }

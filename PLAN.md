@@ -17,7 +17,7 @@ Reuse what Foundry and dnd5e already do (the combat tracker, actor sheets, compe
 - **Advancement Mode:** XP or Milestone, set per Campaign and defaulting to a world setting.
 - **Encounter:** Creature Entries (an actor UUID plus a count), notes and tactics, tags, Status (Draft, Ready or Completed), and an optional link to a journal page or scene. Encounters can be duplicated.
 - **Builder:** a collapsible drawer docked on the side of the Combat tab. Name search, then filters for CR range, type, size and habitat. Results have a + button and can be dragged, with quantity +/−. A live 2024 difficulty meter for present PCs.
-- **Sources:** one checklist for the whole world, with every monster compendium on by default. It is dnd5e's own Compendium Browser source checklist (ADR 0003).
+- **Sources:** one checklist for the whole world, with every monster compendium on by default. It is dnd5e's own Compendium Browser source checklist (ADR 0003), edited in our own Sources dialog (v0.4) that shows only compendiums holding monsters, grouped by the system, module or world they come from, with each one's monster count, source book and rules version. Each Builder result carries a source tag ("SRD 5.1 · 2014", "SRD 5.2 · 2024", or the monster's own book when DDB Importer sets one) and a Source filter sits beside the others, so two Goblins are easy to tell apart. "All compendiums…" still opens dnd5e's full checklist.
 - **Missing monsters:** the row keeps its saved name and CR and is marked "missing". You can remove it or swap in another monster.
 
 ## Running a fight
@@ -36,8 +36,9 @@ Reuse what Foundry and dnd5e already do (the combat tracker, actor sheets, compe
 - **v0.1, prep:** storage, Campaigns, Shared Library, browser, Builder (Sources, filters, difficulty).
 - **v0.2, running the fight:** Import, the enhanced tracker, Stat Blocks, Finish and XP.
 - **v0.3, carousel:** our own carousel initiative tracker across the top. It shows portraits, the current turn, the round, PC HP, monster HP only as "bloodied", hidden enemy initiative, and Next/Previous turn for the GM. It gets a design pass, and it replaces the Carousel Combat Tracker module.
+- **v0.4, Sources:** our own Sources dialog with only monster compendiums, source tags on results and a Source filter.
 
 ## To verify during the build
 
-- A player rolling initiative from their sheet or ve-mobile updates their token-less combatant. **Verified for the tracker (v0.2).** Foundry's `Actor#rollInitiative({createCombatants: true})` adds a new combatant for a token-less actor every time, so Encounter Deck blocks that duplicate on every client (`module/src/combatants.ts`). ve-mobile still to check.
-- A PC's initiative entry works with no token on the scene. **Verified (v0.2).** ve-mobile rows already handle missing tokens (`ve-mobile/src/foundry/combat-gateway.mjs:388-412`).
+- A player rolling initiative from their sheet or Mobile Deck updates their token-less combatant. **Verified (v0.2 tracker, v0.4 Mobile Deck).** Foundry's `Actor#rollInitiative({createCombatants: true})` adds a new combatant for a token-less actor every time, so Encounter Deck blocks that duplicate on every client (`module/src/combatants.ts`). Mobile Deck (which replaced ve-mobile) calls `actor.rollInitiative()` from its character screen and `combat.rollInitiative([id])` from its combat view, neither of which creates a combatant; both were checked live in test-5e-world and land on the existing one.
+- A PC's initiative entry works with no token on the scene. **Verified (v0.2).** Mobile Deck rows already handle missing tokens (`mobile-deck/src/foundry/combat-gateway.mjs:388-412`).

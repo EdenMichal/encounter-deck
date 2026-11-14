@@ -2,16 +2,16 @@
 
 A Foundry VTT v14 (dnd5e 5.3+) module for preparing encounters ahead of time, organized by campaign, without putting anything on a scene until you need it. Prep is GM-only; the carousel is for the whole table.
 
-Status: **v0.3 (carousel)**. See [PLAN.md](PLAN.md) for the full spec and roadmap, [CONTEXT.md](CONTEXT.md) for the terms, and [docs/adr/](docs/adr/) for the decisions.
+Status: **v0.4 (Sources)**. See [PLAN.md](PLAN.md) for the full spec and roadmap, [CONTEXT.md](CONTEXT.md) for the terms, and [docs/adr/](docs/adr/) for the decisions.
 
 ## What v0.1 does
 
 - **Storage:** the first time a GM loads the world, the module creates a world compendium, *Encounter Deck*. Each Encounter is a dnd5e Encounter actor inside it (ADR 0001, ADR 0003). Campaigns and the Shared Library are its top-level folders.
 - **Combat tab:** while no combat is viewed, the GM sees the encounter browser instead of the tracker. Foundry's combat keeps running underneath (`CONFIG.ui.combat` is subclassed, not replaced). During a combat the tracker shows, with an **Encounters** button to get back to the browser. Players always see the normal tracker.
 - **Campaigns:** a switcher in the header (remembered per world), folders inside each Campaign, a Party Folder per Campaign with Present toggles, and an Advancement Mode (XP or Milestone, defaulting to a world setting).
-- **Builder:** a collapsible drawer docked beside the Combat tab. Search the Sources by name, then filter by CR range, type, size and habitat. Add monsters with + or by dragging, change counts with +/−, and watch the live 2024 difficulty meter for the Present PCs. Drag an encounter from the browser onto the Builder to open it; if another encounter is open, you choose between adding its creatures and opening it instead. While the combat tracker is popped out, the Builder docks on that floating window instead of the sidebar.
+- **Builder:** a collapsible drawer docked beside the Combat tab. Search the Sources by name, then filter by CR range, type, size, habitat and source. Add monsters with + or by dragging, change counts with +/−, and watch the live 2024 difficulty meter for the Present PCs. Drag an encounter from the browser onto the Builder to open it; if another encounter is open, you choose between adding its creatures and opening it instead. While the combat tracker is popped out, the Builder docks on that floating window instead of the sidebar.
 - **Encounters:** tags, notes, tactics, Status (Draft, Ready, Completed; Completed hidden behind "Show completed"), duplicate, a link to a journal page or scene, copy-on-use from the Shared Library, and "missing" rows (with swap) for monsters whose Source is gone.
-- **Sources:** dnd5e's own Compendium Browser source checklist, so there's one list for the whole world.
+- **Sources:** dnd5e's own Compendium Browser source checklist, so there's one list for the whole world (shown in our own dialog since v0.4).
 
 ## What v0.2 adds
 
@@ -29,6 +29,11 @@ Status: **v0.3 (carousel)**. See [PLAN.md](PLAN.md) for the full spec and roadma
 - **Show the carousel to** (module setting): Everyone (default), GM and players but not the table display (the user Monk's Common Display shows the map on), or GM only.
 - **Carousel Combat Tracker:** if it's active, Encounter Deck asks once whether to turn it off. Until it's off, our carousel stays hidden so there are never two.
 - A long fight scrolls sideways (the mouse wheel works) and keeps the current card in view; Stat Blocks open below the carousel.
+
+## What v0.4 adds
+
+- **Sources dialog:** the Builder's Sources button opens Encounter Deck's own checklist with only the compendiums that hold monsters (no item, spell or hero packs, and empty ones hidden). They're grouped by the system, module or world they come from, with a switch for a whole group, and each shows its monster count, source book and rules version (2014 or 2024). It still saves to dnd5e's Compendium Browser checklist, so the two stay in step; "All compendiums…" opens dnd5e's full list.
+- **Where a monster comes from:** every result shows a source tag such as "SRD 5.1 · 2014" or "SRD 5.2 · 2024" (or the monster's own book, like "Monster Manual 2024", when DDB Importer sets it), with the compendium's name on hover. A **Source** filter sits beside CR, Type, Size and Habitat.
 
 ## Develop
 

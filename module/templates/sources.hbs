@@ -1,0 +1,34 @@
+<div class="ed-sources">
+  <p class="ed-sources-summary">
+    <strong>{{on}} of {{total}}</strong> compendiums on · {{monsters}} monsters to search
+  </p>
+  <div class="ed-source-groups">
+    {{#each groups}}
+    <fieldset class="ed-source-group">
+      <legend>
+        <label class="ed-source-package">
+          <input type="checkbox" data-ids="{{ids}}" {{#if all}}checked{{/if}} {{#if some}}data-some{{/if}} aria-label="Switch all of {{title}}">
+          <span>{{title}}</span>
+        </label>
+      </legend>
+      {{#each packs}}
+      <label class="ed-source-row {{#unless on}}is-off{{/unless}}">
+        <input type="checkbox" data-ids="{{id}}" {{#if on}}checked{{/if}}>
+        <span class="ed-source-name">{{label}}</span>
+        {{#if sourceBook}}<span class="ed-source-book">{{sourceBook}}</span>{{/if}}
+        {{#each rules}}<span class="ed-source-rules">{{this}}</span>{{/each}}
+        <span class="ed-source-count" data-tooltip="Monsters">{{count}}</span>
+      </label>
+      {{/each}}
+    </fieldset>
+    {{else}}
+    <p class="ed-empty-note">No compendium holds any monsters yet.</p>
+    {{/each}}
+  </div>
+  <footer class="ed-sources-foot">
+    <span class="ed-sources-hint" {{#if hidden}}data-tooltip="{{hiddenNames}}"{{/if}}>
+      Shared with dnd5e's Compendium Browser.{{#if hidden}} {{hidden}} Actor compendiums with no monsters are hidden.{{/if}}
+    </span>
+    <button type="button" class="ed-link-button" data-action="edAllCompendiums" data-tooltip="dnd5e's checklist of every compendium, items and spells included">All compendiums…</button>
+  </footer>
+</div>
