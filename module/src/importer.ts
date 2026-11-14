@@ -6,7 +6,7 @@
 import { MODULE_ID } from "./constants";
 import { activeCampaign, partyOf } from "./campaigns";
 import { addEntry, readEntries, toSource, totalXp } from "./entries";
-import { hasMargin, mainEncounterOf, marginSlots, tokenNames, type FightRecord, type Footprint } from "./fight";
+import { hasMargin, mainEncounterOf, marginSlots, rollNow, tokenNames, type FightRecord, type Footprint } from "./fight";
 import { lairDelta } from "./legendary";
 import { lookupMonster, xpForCr } from "./sources";
 import { copyEncounter, encounterFlags, getEncounter, isInLibrary, rootOf } from "./store";
@@ -154,7 +154,8 @@ export async function importEncounter(id: string): Promise<boolean> {
     const token = scene.tokens.find((t: any) => t.actorId === actor.id);
     combatants.push(token ? { tokenId: token.id, sceneId: scene.id, actorId: actor.id } : { actorId: actor.id });
   }
-  await combat.createEmbeddedDocuments("Combatant", combatants);
+  const created = await combat.createEmbeddedDocuments("Combatant", combatants);
+  await rollForNewMonsters(combat, created);
 
   const record: ImportRecord = { encounterId: encounter.id, name: encounter.name, xp: totalXp(live), campaignId: campaign?.id ?? null, kind: "import" };
   await combat.update({ [`flags.${MODULE_ID}`]: { imports: [...state.imports, record], counts } });
@@ -192,7 +193,8 @@ export async function addToFight(uuid: string, combat: any): Promise<boolean> {
 
   const flags = encounterFlags(encounter);
   const { tokens, counts } = await placeTokens(scene, combat, list, slots, !!flags.inLair);
-  await combat.createEmbeddedDocuments("Combatant", tokens.map((t: any) => ({ tokenId: t.id, sceneId: scene.id, actorId: t.actorId })));
+  const created = await combat.createEmbeddedDocuments("Combatant", tokens.map((t: any) => ({ tokenId: t.id, sceneId: scene.id, actorId: t.actorId })));
+  await rollForNewMonsters(combat, created);
 
   // Save it into the Encounter as a Creature Entry (or one more of an entry it already has).
   // From the full document, not the index: the index may not have its CR loaded yet.
@@ -207,6 +209,21 @@ export async function addToFight(uuid: string, combat: any): Promise<boolean> {
   await combat.update({ [`flags.${MODULE_ID}`]: { imports: [...state.imports, record], counts } });
   ui.notifications.info(`Added ${record.name} to the fight and to "${encounter.name}".`);
   return true;
+}
+
+/**
+ * Mid-fight, monsters that join roll initiative straight away, so they slot into the turn order and the current
+ * turn stays where it is. The rolls are GM-only, like a hidden monster's.
+ */
+async function rollForNewMonsters(combat: any, created: any[]): Promise<void> {
+  const ids = rollNow(!!combat.started, created.map((c: any) => ({ id: c.id, isNPC: !!c.isNPC, initiative: c.initiative ?? null })));
+  if (!ids.length) return;
+  try {
+    await combat.rollInitiative(ids, { updateTurn: true, messageMode: "gm" });
+  } catch (err) {
+    console.error("Encounter Deck | Couldn't roll initiative for the new monsters", err);
+    ui.notifications.warn("Encounter Deck couldn't roll initiative for the new monsters. Roll it from the tracker.");
+  }
 }
 
 const noMargin = (scene: any) =>

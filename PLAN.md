@@ -24,6 +24,7 @@ Reuse what Foundry and dnd5e already do (the combat tracker, actor sheets, compe
 
 - **Import** (ADR 0002): one click copies the monsters into a hidden Actors folder and places their tokens in the Margin of the scene you're viewing. It adds them and the present PCs (no tokens) to the combat tracker. You then press Foundry's own "Begin Combat".
 - **Reinforcements:** you can import any encounter, including the same one again, any number of times into a running fight. Token numbering continues (Goblin 5, 6…).
+- **Initiative for latecomers (v0.8):** once the fight has started (round 1 or later), monsters that join it, imported as reinforcements or dropped onto the tracker, roll initiative straight away. The rolls are GM-only, they slot into the order, and the current turn stays where it is. Before round 1 the GM rolls as usual, and PCs always roll their own.
 - **The fight's Encounter (v0.6):** a GM-only row at the top of the tracker names the Encounter the fight started with (click to open it in the Builder), every later Import as "reinforcements", every monster added on the fly as "added", and the XP Finish will award.
 - **Add on the fly (v0.6):** during a fight the tracker takes drops. A monster (from the Builder's results, the Actors tab or a compendium) gets a numbered token in the Margin and a combatant, and is saved into the fight's Encounter as a Creature Entry, so the Encounter records what was actually fought; its XP counts at Finish. An Encounter dragged from the browser (with the tracker popped out) is imported as reinforcements.
 - **Combat tab:** replaces the vanilla tab's UI but keeps Foundry's combat running underneath. It shows the browser when nothing is running, and the tracker plus AC, HP and a stat block button during a fight. The popped-out (floating) tracker gets the same browser and Encounters button, and the Builder docks on it while it's open.
@@ -44,6 +45,7 @@ Reuse what Foundry and dnd5e already do (the combat tracker, actor sheets, compe
 - **v0.5, legendary:** legendary pips on the Carousel, the Legendary Prompt, recharge reminders, and In its lair (2024 lair rules).
 - **v0.6, on the fly:** the fight's Encounter row in the tracker, dropping monsters and Encounters onto the tracker, and legendary resistance pips.
 - **v0.7, loot:** Distribute Loot in TokenBar's loot dialog (party inventory with Mobile Deck, else a pick dialog for the Present PCs), and the Builder's tab under the sidebar tabs.
+- **v0.8, initiative for latecomers:** monsters that join a started fight roll initiative automatically (GM-only rolls), keeping the current turn.
 
 ## To verify during the build
 
