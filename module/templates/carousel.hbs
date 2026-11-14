@@ -24,6 +24,7 @@
       </div>
       {{#if hero}}<div class="ed-car-trim"><img src="{{@root.trim}}" alt=""></div>{{/if}}
       {{#if hp}}<span class="ed-car-hp">{{hp.text}}</span>{{/if}}
+      {{#if legendary}}<span class="ed-car-legendary" data-tooltip="Legendary actions left" role="img" aria-label="Legendary actions left">{{#each legendary}}<i class="{{#if this}}on{{/if}}"></i>{{/each}}</span>{{/if}}
     </li>
     {{/each}}
   </ol>

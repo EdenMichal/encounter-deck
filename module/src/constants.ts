@@ -37,6 +37,8 @@ export interface EncounterFlags {
   entries: EntryCache[];
   /** The Master Copy this Encounter was copied from, if any. */
   copiedFrom?: string | null;
+  /** In its lair: Import puts every monster that has a lair inside it (2024 rules, +1 legendary action and resistance). */
+  inLair?: boolean;
 }
 
 export const T = (name: string) => `modules/${MODULE_ID}/templates/${name}.hbs`;

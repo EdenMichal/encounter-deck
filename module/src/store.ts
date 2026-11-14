@@ -110,7 +110,7 @@ export async function deleteFolder(id: string): Promise<void> {
 export const encounterFlags = (doc: any): EncounterFlags => ({ ...defaultFlags(), ...(doc?.flags?.[MODULE_ID] ?? {}) });
 
 export function defaultFlags(): EncounterFlags {
-  return { status: "draft", tags: [], notes: "", tactics: "", link: null, entries: [], copiedFrom: null };
+  return { status: "draft", tags: [], notes: "", tactics: "", link: null, entries: [], copiedFrom: null, inLair: false };
 }
 
 /** Index entries of the Encounters directly inside a folder. */

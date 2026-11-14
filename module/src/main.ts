@@ -6,7 +6,7 @@ import { createCombatTab } from "./ui/combat-tab";
 import { startBuilder } from "./ui/builder";
 import { checkTokenBar, startFinish } from "./finish";
 import { startStatBlocks } from "./ui/statblocks";
-import { checkCarouselTakeover, startCarousel } from "./ui/carousel";
+import { checkAutoRecharge, checkCarouselTakeover, startCarousel } from "./ui/carousel";
 
 Hooks.once("init", () => {
   registerSettings();
@@ -39,4 +39,5 @@ Hooks.once("ready", async () => {
   Hooks.callAll(CHANGED_HOOK);
   checkTokenBar();
   checkCarouselTakeover();
+  checkAutoRecharge();
 });

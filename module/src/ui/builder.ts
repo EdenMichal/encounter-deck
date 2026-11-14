@@ -335,6 +335,7 @@ class Builder extends HandlebarsApplicationMixin(ApplicationV2) {
       tags: flags.tags.join(", "),
       notes: flags.notes,
       tactics: flags.tactics,
+      inLair: !!flags.inLair,
       link: flags.link ? { uuid: flags.link, name: link?.name ?? "Missing document", missing: !link, icon: link?.documentName === "Scene" ? "fa-map" : "fa-book-open" } : null,
       copiedFrom: flags.copiedFrom ? fromUuidSync(flags.copiedFrom, { strict: false })?.name ?? null : null,
     };
@@ -419,6 +420,7 @@ class Builder extends HandlebarsApplicationMixin(ApplicationV2) {
         case "tags": this.saveFlags({ tags: [...new Set(t.value.split(",").map(s => s.trim()).filter(Boolean))] }); return;
         case "notes": this.saveFlags({ notes: t.value }); return;
         case "tactics": this.saveFlags({ tactics: t.value }); return;
+        case "inLair": this.saveFlags({ inLair: t.checked }); return;
         default: return;
       }
       this.syncClearButton();
