@@ -12,7 +12,7 @@
       <div class="ed-result-text">
         <a class="ed-result-name" data-action="edSheet" data-tooltip="Open the stat block">{{name}}</a>
         <span class="ed-result-sub">CR {{crLabel}} · {{xpLabel}} XP · {{subtitle}}</span>
-        <span class="ed-result-pack">{{packLabel}}</span>
+        <span class="ed-result-pack" data-tooltip="Compendium: {{packLabel}}">{{source}}</span>
       </div>
       <button type="button" class="icon fa-solid {{#if ../swapping}}fa-right-left{{else}}fa-plus{{/if}}" data-action="edAdd"
         {{#unless ../canAdd}}disabled{{/unless}} data-tooltip="{{#if ../swapping}}Swap in{{else}}Add to the Encounter{{/if}}" aria-label="Add {{name}}"></button>

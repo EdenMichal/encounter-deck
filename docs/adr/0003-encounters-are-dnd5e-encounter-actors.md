@@ -4,7 +4,7 @@ The module's world compendium (ADR 0001) is an Actor compendium, and each Encoun
 
 Campaigns, their subfolders and the Shared Library are Actor folders inside that compendium. A Campaign folder's flags hold its Party Folder, its Advancement Mode and which party members are absent.
 
-The Builder's Sources reuse dnd5e's world-wide Compendium Browser source checklist (the `dnd5e.packSourceConfiguration` setting, where every pack is on unless switched off), so there is one checklist for the whole world.
+The Builder's Sources reuse dnd5e's world-wide Compendium Browser source checklist (the `dnd5e.packSourceConfiguration` setting, where every pack is on unless switched off), so there is one checklist for the whole world. Since v0.4 the Builder edits it through its own Sources dialog, which shows only the compendiums that hold monsters; dnd5e's full checklist is one click away.
 
 ## Considered Options
 

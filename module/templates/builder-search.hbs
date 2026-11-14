@@ -19,9 +19,12 @@
     <label>Habitat
       <select name="edHabitat"><option value="">Any</option>{{#each habitats}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select>
     </label>
+    <label class="ed-search-source">Source
+      <select name="edSource"><option value="">Any</option>{{#each sources}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select>
+    </label>
   </div>
   <div class="ed-search-foot">
-    <button type="button" class="ed-link-button" data-action="edSources" data-tooltip="The world-wide checklist of compendiums to search (shared with dnd5e's Compendium Browser)">
+    <button type="button" class="ed-link-button" data-action="edSources" data-tooltip="Which compendiums of monsters to search (shared with dnd5e's Compendium Browser)">
       <i class="fa-solid fa-book-open-reader" inert></i> Sources ({{sourceCount}})
     </button>
     <button type="button" class="ed-link-button ed-clear-filters" data-action="edClearFilters" {{#unless filtered}}hidden{{/unless}}>Clear filters</button>
