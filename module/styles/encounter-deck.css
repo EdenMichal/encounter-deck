@@ -12,6 +12,7 @@
   --ed-over: #b8324a;
   --ed-builder-width: 640px;
   --ed-handle-width: 26px;
+  --ed-gold: #d8b45a;
 }
 
 /* -------------------------------------------- */
@@ -379,12 +380,15 @@
   font-size: var(--font-size-12, 12px);
   font-variant-numeric: tabular-nums;
 }
-.encounter-deck-tab .combatant .ed-ac { display: inline-flex; align-items: center; gap: 2px; color: var(--ed-muted); min-width: 26px; }
+.encounter-deck-tab .combatant .ed-ac { display: inline-flex; align-items: center; gap: 2px; color: var(--ed-gold); font-weight: 700; min-width: 26px; }
 /* With the extra columns, long names wrap (the token number must stay visible); keep the initiative die its own size. */
 .encounter-deck-tab .combatant:has(> .ed-stats) > .token-name { min-width: 0; }
 .encounter-deck-tab .combatant:has(> .ed-stats) > .token-initiative { align-self: center; height: 32px; }
 .encounter-deck-tab .combatant:has(> .ed-stats) > .token-initiative > button { height: 32px; }
 .encounter-deck-tab .combatant .ed-ac i { font-size: 10px; }
+/* Visibility, defeated and ping sit close together so the row reads as one line of controls. */
+.encounter-deck-tab .combatant .combatant-controls { gap: 0; }
+.encounter-deck-tab .combatant .combatant-controls > .combatant-control { flex: 0 0 18px; width: 18px; padding: 0; }
 .encounter-deck-tab .combatant .ed-hp { display: inline-flex; align-items: baseline; }
 .encounter-deck-tab .combatant .ed-hp-input {
   width: 32px;
@@ -401,3 +405,209 @@
 .encounter-deck-tab .combatant .ed-hp.bloodied .ed-hp-input { color: var(--ed-moderate); }
 .encounter-deck-tab .combatant .ed-hp.down .ed-hp-input { color: var(--ed-over); }
 .encounter-deck-tab .combatant .ed-sb-button { flex: none; }
+
+/* -------------------------------------------- */
+/*  Carousel                                    */
+/* -------------------------------------------- */
+
+/* Square portrait cards hanging from the top edge, centred over the canvas. Only the cards and buttons take clicks. */
+#ui-top:has(> #encounter-deck-carousel) { position: relative; }
+#encounter-deck-carousel {
+  --ed-card-w: 80px;
+  --ed-card-h: 120px;
+  --ed-gold: #d8b45a;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  /* The middle column runs under the sidebar's tab strip on the right; stay clear of it. */
+  max-width: calc(100% - 64px);
+  pointer-events: none;
+  color: #f4f1ea;
+}
+#encounter-deck-carousel.ed-hidden { display: none; }
+.ed-car-strip { display: flex; align-items: flex-start; gap: 10px; }
+/* The GM's turn arrows: quiet chevrons beside the strip, brightening to gold on hover. */
+.ed-car-nav {
+  pointer-events: all;
+  flex: none;
+  width: 28px;
+  height: 40px;
+  margin-top: 36px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: rgba(244, 241, 234, 0.55);
+  background: none;
+  border: none;
+  box-shadow: none;
+  text-shadow: 0 0 3px #000, 0 0 2px #000;
+  transition: color 0.15s ease;
+}
+.ed-car-nav:hover, .ed-car-nav:focus-visible { color: var(--ed-gold); background: none; box-shadow: none; }
+.ed-car-list {
+  /* A long fight scrolls sideways (the wheel works too), keeping the current card in view. */
+  position: relative;
+  min-width: 0;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  pointer-events: all;
+}
+.ed-car-list::-webkit-scrollbar { display: none; }
+.ed-car-list > li { flex: none; }
+.ed-car-round {
+  flex: none;
+  width: 24px;
+  height: var(--ed-card-h);
+  padding-top: 40px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  border-right: 2px solid rgba(216, 180, 90, 0.8);
+  font-size: 17px;
+  font-weight: 700;
+  text-shadow: 0 0 3px #000, 0 0 2px #000;
+}
+.ed-car-round i { font-size: 11px; }
+.ed-car-item { margin: 0; display: flex; flex-direction: column; align-items: center; }
+.ed-car-card {
+  pointer-events: all;
+  position: relative;
+  width: var(--ed-card-w);
+  height: var(--ed-card-h);
+  box-sizing: border-box;
+  overflow: hidden;
+  background: #26262b;
+  border: 1px solid #000;
+  border-top-width: 0;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.45);
+  cursor: pointer;
+  transition: width 0.2s ease, height 0.2s ease;
+}
+.ed-car-item.current .ed-car-card { width: calc(var(--ed-card-w) * 1.2); height: calc(var(--ed-card-h) * 1.2); border-color: #f6e2b0; }
+.ed-car-item.defeated .ed-car-card { opacity: 0.6; }
+.ed-car-item.secret .ed-car-card { opacity: 0.5; outline: 1px dashed rgba(255, 255, 255, 0.6); outline-offset: -1px; }
+.ed-car-card img { border: none; }
+.ed-car-portrait { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top center; }
+.ed-car-init {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 4px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  background: rgba(12, 12, 14, 0.9);
+  border: 1px solid var(--ed-gold);
+  border-radius: 3px;
+}
+/* Statuses and conditions: just the icons, down the left edge under the initiative. */
+.ed-car-statuses { list-style: none; margin: 0; padding: 0; position: absolute; top: 4px; left: 4px; display: flex; flex-direction: column; gap: 3px; }
+.ed-car-init ~ .ed-car-statuses { top: 31px; }
+/* More than fit: a small gold-stroked box that opens the full list under the card. */
+.ed-car-more {
+  pointer-events: all;
+  width: 22px;
+  height: 18px;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  color: #f4f1ea;
+  background: rgba(12, 12, 14, 0.9);
+  border: 1px solid var(--ed-gold);
+  border-radius: 3px;
+}
+.ed-car-more:hover, .ed-car-more:focus-visible { color: #1a1209; background: var(--ed-gold); }
+.ed-car-popover {
+  position: absolute;
+  z-index: 5;
+  pointer-events: all;
+  min-width: 150px;
+  max-width: 240px;
+  padding: 6px 8px 8px;
+  box-sizing: border-box;
+  background: rgba(16, 16, 20, 0.96);
+  border: 1px solid var(--ed-gold);
+  border-radius: 6px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
+}
+.ed-car-popover h3 { margin: 0 0 4px; padding: 0 0 4px; border-bottom: 1px solid rgba(216, 180, 90, 0.4); font-size: 13px; font-weight: 700; color: var(--ed-gold); }
+.ed-car-popover ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; max-height: 260px; overflow-y: auto; }
+.ed-car-popover li { margin: 0; display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.ed-car-popover img { flex: none; width: 20px; height: 20px; object-fit: contain; border: none; }
+.ed-car-popover img.svg { filter: brightness(0) invert(1); }
+/* Armor Class in the top-right corner, in gold. */
+.ed-car-ac {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ed-gold);
+  text-shadow: 0 0 3px #000, 0 0 2px #000, 0 0 1px #000;
+}
+.ed-car-ac i { font-size: 11px; }
+.ed-car-statuses li { margin: 0; display: flex; align-items: center; font-size: 11px; font-weight: 700; text-shadow: 0 0 3px #000, 0 0 2px #000; }
+.ed-car-statuses img { width: 18px; height: 18px; object-fit: contain; filter: drop-shadow(0 0 1px #000) drop-shadow(0 0 2px #000); }
+/* Foundry's and dnd5e's condition icons are single-colour SVGs: draw them white, with a dark edge so they read on any portrait. */
+.ed-car-statuses img.svg { filter: brightness(0) invert(1) drop-shadow(0 0 1px #000) drop-shadow(0 0 2px #000); }
+.ed-car-name {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 7px;
+  padding: 2px 3px;
+  font-family: "Modesto Condensed", var(--font-h1, serif), serif;
+  font-size: 16px;
+  line-height: 1.05;
+  text-align: center;
+  text-shadow: 0 0 3px #000, 0 0 2px #000;
+}
+.ed-car-dead { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.5); }
+.ed-car-dead img { width: 36px; height: 36px; filter: brightness(0) invert(1); }
+/* Bloodied (what players see for a monster at half HP or less): a red glow rising from the bottom edge, pulsing. */
+.ed-car-bloodied {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 50%;
+  background: linear-gradient(to top, rgba(210, 20, 20, 0.9), rgba(210, 20, 20, 0.35) 45%, rgba(210, 20, 20, 0));
+  pointer-events: none;
+  animation: ed-bloodied-pulse 1.6s ease-in-out infinite alternate;
+}
+@keyframes ed-bloodied-pulse { from { opacity: 0.35; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .ed-car-bloodied { animation: none; opacity: 0.8; } }
+.ed-car-bar { position: absolute; left: 0; right: 0; bottom: 0; height: 5px; background: rgba(0, 0, 0, 0.6); }
+.ed-car-bar > span { display: block; height: 100%; background: #41aa7d; }
+.ed-car-bar > span.low { background: #d23b2a; }
+/* The hero trim, drawn larger than the card and cut to its width so the centrepiece reads at table distance. */
+.ed-car-trim { position: relative; z-index: 1; width: var(--ed-card-w); margin-top: -7px; overflow: hidden; display: flex; justify-content: center; pointer-events: none; }
+.ed-car-item.current .ed-car-trim { width: calc(var(--ed-card-w) * 1.2); }
+.ed-car-trim img { flex: none; width: 175%; max-width: none; border: none; }
+.ed-car-hp { margin-top: 1px; font-size: 12px; font-weight: 600; text-shadow: 0 0 3px #000, 0 0 2px #000; }

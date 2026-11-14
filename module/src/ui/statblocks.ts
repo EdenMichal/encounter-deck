@@ -49,5 +49,8 @@ function spotFor(sheet: any): { left: number; top: number } {
     const r = popout.element.getBoundingClientRect();
     if (r.width && r.left < edge) edge = r.left;
   }
-  return { left: Math.max(GAP, edge - GAP - width), top: 60 };
+  // Below the carousel while it shows, so the sheet never covers the turn order.
+  const carousel = document.getElementById("encounter-deck-carousel");
+  const below = carousel && !carousel.classList.contains("ed-hidden") ? carousel.getBoundingClientRect().bottom + GAP : 0;
+  return { left: Math.max(GAP, edge - GAP - width), top: Math.max(60, Math.round(below)) };
 }

@@ -6,6 +6,7 @@ import { createCombatTab } from "./ui/combat-tab";
 import { startBuilder } from "./ui/builder";
 import { checkTokenBar, startFinish } from "./finish";
 import { startStatBlocks } from "./ui/statblocks";
+import { checkCarouselTakeover, startCarousel } from "./ui/carousel";
 
 Hooks.once("init", () => {
   registerSettings();
@@ -22,6 +23,8 @@ Hooks.once("init", () => {
 });
 
 Hooks.once("ready", async () => {
+  // Everyone at the table gets the carousel; the rest is the GM's.
+  startCarousel();
   if (!game.user.isGM) return;
   watchChanges();
   try {
@@ -35,4 +38,5 @@ Hooks.once("ready", async () => {
   startFinish();
   Hooks.callAll(CHANGED_HOOK);
   checkTokenBar();
+  checkCarouselTakeover();
 });

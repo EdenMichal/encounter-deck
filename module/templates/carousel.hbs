@@ -1,0 +1,42 @@
+<div class="ed-car-strip">
+  {{#if show}}
+  {{#if isGM}}
+  <button type="button" class="ed-car-nav" data-action="edPrevTurn" data-tooltip="Previous turn" aria-label="Previous turn"><i class="fa-solid fa-chevron-left" inert></i></button>
+  {{/if}}
+  <div class="ed-car-round" aria-label="Round {{round}}"><i class="fa-solid fa-chevron-right" inert></i><span>{{round}}</span></div>
+  <ol class="ed-car-list">
+    {{#each cards}}
+    <li class="ed-car-item {{#if current}}current{{/if}} {{#if hero}}hero{{/if}} {{#if defeated}}defeated{{/if}} {{#if secret}}secret{{/if}}" data-combatant-id="{{id}}">
+      <div class="ed-car-card" data-action="edCard" data-tooltip="{{name}}" aria-label="{{name}}">
+        <img class="ed-car-portrait" src="{{img}}" alt="">
+        {{#if bloodied}}<span class="ed-car-bloodied" role="img" aria-label="Bloodied"></span>{{/if}}
+        {{#if defeated}}<span class="ed-car-dead"><img src="{{@root.deadIcon}}" alt="Defeated"></span>{{/if}}
+        {{#if init}}<span class="ed-car-init" aria-label="Initiative {{init}}">{{init}}</span>{{/if}}
+        {{#if ac}}<span class="ed-car-ac" aria-label="Armor Class {{ac}}"><i class="fa-solid fa-shield" inert></i>{{ac}}</span>{{/if}}
+        {{#if statuses.length}}
+        <ul class="ed-car-statuses">
+          {{#each statuses}}<li data-tooltip="{{name}}"><img class="{{#if svg}}svg{{/if}}" src="{{img}}" alt="{{name}}"></li>{{/each}}
+          {{#if more}}<li><button type="button" class="ed-car-more" data-action="edMoreStatuses" data-tooltip="Show all statuses" aria-label="Show all {{allStatuses.length}} statuses">+{{more}}</button></li>{{/if}}
+        </ul>
+        {{/if}}
+        {{#if current}}<span class="ed-car-name">{{name}}</span>{{/if}}
+        {{#if hp}}<span class="ed-car-bar"><span class="{{#if hp.low}}low{{/if}}" style="width: {{hp.pct}}%"></span></span>{{/if}}
+      </div>
+      {{#if hero}}<div class="ed-car-trim"><img src="{{@root.trim}}" alt=""></div>{{/if}}
+      {{#if hp}}<span class="ed-car-hp">{{hp.text}}</span>{{/if}}
+    </li>
+    {{/each}}
+  </ol>
+  {{#if popover}}
+  <div class="ed-car-popover" data-for="{{popover.id}}" role="dialog" aria-label="Statuses of {{popover.name}}">
+    <h3>{{popover.name}}</h3>
+    <ul>
+      {{#each popover.statuses}}<li><img class="{{#if svg}}svg{{/if}}" src="{{img}}" alt=""><span>{{name}}</span></li>{{/each}}
+    </ul>
+  </div>
+  {{/if}}
+  {{#if isGM}}
+  <button type="button" class="ed-car-nav next" data-action="edNextTurn" data-tooltip="Next turn" aria-label="Next turn"><i class="fa-solid fa-chevron-right" inert></i></button>
+  {{/if}}
+  {{/if}}
+</div>
