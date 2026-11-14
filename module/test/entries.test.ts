@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { addEntry, changeCount, readEntries, removeEntry, swapEntry, toSource, totalXp } from "../src/entries";
+import { addEntry, changeCount, mergeEntries, readEntries, removeEntry, swapEntry, toSource, totalXp } from "../src/entries";
 
 const goblin = { uuid: "Compendium.a.Actor.g", name: "Goblin", img: "g", cr: 0.25, xp: 50 };
 const ogre = { uuid: "Compendium.a.Actor.o", name: "Ogre", img: "o", cr: 2, xp: 450 };
@@ -32,6 +32,14 @@ describe("editing", () => {
     const gone = { uuid: "Compendium.gone.Actor.x", name: "Owlbear", img: "", cr: 3, xp: 700, count: 2, missing: true };
     const e = swapEntry([gone, { ...goblin, count: 1, missing: false }], gone.uuid, ogre);
     expect(e.map(x => [x.name, x.count, x.missing])).toEqual([["Ogre", 2, false], ["Goblin", 1, false]]);
+  });
+  it("merges another Encounter's creatures, adding counts and keeping missing rows marked", () => {
+    const gone = { uuid: "Compendium.gone.Actor.x", name: "Owlbear", img: "", cr: 3, xp: 700, count: 1, missing: true };
+    const mine = [{ ...goblin, count: 2, missing: false }];
+    const theirs = [{ ...goblin, count: 3, missing: false }, { ...ogre, count: 1, missing: false }, gone, { ...ogre, count: 0, missing: false }];
+    const e = mergeEntries(mine, theirs);
+    expect(e.map(x => [x.name, x.count, x.missing])).toEqual([["Goblin", 5, false], ["Ogre", 1, false], ["Owlbear", 1, true]]);
+    expect(mine[0].count).toBe(2);
   });
   it("writes dnd5e members plus the saved copies", () => {
     const { members, cache } = toSource([{ ...goblin, count: 3, missing: false }]);

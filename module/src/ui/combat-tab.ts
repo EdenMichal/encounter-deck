@@ -3,7 +3,7 @@
  * running underneath and ui.combat stays a real tracker. For the GM, the encounter browser replaces the tracker's
  * parts while no combat is viewed (PLAN.md "Combat tab"); players always get the vanilla tracker.
  */
-import { CHANGED_HOOK, MODULE_ID, STATUSES, STATUS_LABELS, T, type Status } from "../constants";
+import { CHANGED_HOOK, ENCOUNTER_DRAG_MIME, ENCOUNTER_DRAG_TYPE, MODULE_ID, STATUSES, STATUS_LABELS, T, type Status } from "../constants";
 import {
   activeCampaign, actorFolderChoices, campaignFlags, createCampaign, deleteCampaign, setActiveCampaign, togglePresent,
 } from "../campaigns";
@@ -20,7 +20,6 @@ import { isMonster, showStatBlock } from "./statblocks";
 
 const { DialogV2 } = foundry.applications.api;
 const esc = (s: string) => foundry.utils.escapeHTML(s ?? "");
-const DRAG_TYPE = "EncounterDeckEncounter";
 
 type Handler = (this: any, event: Event, target: HTMLElement) => unknown;
 const act = (fn: (app: any, target: HTMLElement, event: Event) => unknown): Handler =>
@@ -360,7 +359,8 @@ export function createCombatTab(Base: any) {
       el.addEventListener("dragstart", (e: DragEvent) => {
         const row = (e.target as HTMLElement).closest?.<HTMLElement>(".ed-row");
         if (!row || !e.dataTransfer) return;
-        e.dataTransfer.setData("text/plain", JSON.stringify({ type: DRAG_TYPE, id: row.dataset.encounterId }));
+        e.dataTransfer.setData("text/plain", JSON.stringify({ type: ENCOUNTER_DRAG_TYPE, id: row.dataset.encounterId }));
+        e.dataTransfer.setData(ENCOUNTER_DRAG_MIME, row.dataset.encounterId!);
         e.dataTransfer.effectAllowed = "copyMove";
       });
       el.addEventListener("dragover", (e: DragEvent) => {
@@ -378,7 +378,7 @@ export function createCombatTab(Base: any) {
         head.classList.remove("ed-drop");
         let data: any;
         try { data = JSON.parse(e.dataTransfer?.getData("text/plain") ?? ""); } catch { return; }
-        if (data?.type !== DRAG_TYPE || !data.id) return;
+        if (data?.type !== ENCOUNTER_DRAG_TYPE || !data.id) return;
         e.preventDefault();
         const target = folderOf(head);
         const entry = pack()?.index.get(data.id);

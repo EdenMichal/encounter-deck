@@ -34,6 +34,18 @@ export function addEntry(entries: CreatureEntry[], monster: EntryCache, count = 
   return [...entries, { ...monster, count, missing: false }];
 }
 
+/** Add every creature of another Encounter: counts add up for monsters already here, the rest join at the end. */
+export function mergeEntries(entries: CreatureEntry[], incoming: CreatureEntry[]): CreatureEntry[] {
+  let merged = entries;
+  for (const { count, missing, ...monster } of incoming) {
+    if (count <= 0) continue;
+    const had = merged.some(e => e.uuid === monster.uuid);
+    merged = addEntry(merged, monster, count);
+    if (!had && missing) merged = merged.map(e => (e.uuid === monster.uuid ? { ...e, missing } : e));
+  }
+  return merged;
+}
+
 /** +/− on a row. The count never drops below 1; removing is its own action. */
 export function changeCount(entries: CreatureEntry[], uuid: string, delta: number): CreatureEntry[] {
   return entries.map(e => (e.uuid === uuid ? { ...e, count: Math.max(1, e.count + delta) } : e));

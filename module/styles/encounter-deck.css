@@ -172,8 +172,9 @@
 /*  Builder drawer                              */
 /* -------------------------------------------- */
 
-/* The drawer lives inside #sidebar and hangs off its left edge. */
+/* The drawer lives inside #sidebar, or the floating combat tracker while that's open, and hangs off its left edge. */
 #sidebar:has(> #encounter-deck-builder) { position: relative; }
+#combat-popout:has(> #encounter-deck-builder) { overflow: visible; }
 #encounter-deck-builder {
   position: absolute;
   top: 0;
@@ -326,6 +327,8 @@
   border-radius: var(--ed-radius);
 }
 .ed-dropzone.ed-drop { border-color: var(--ed-accent) !important; background: rgba(238, 155, 58, 0.08); }
+/* An Encounter from the browser is being dragged over the drawer. */
+#encounter-deck-builder.ed-drop-encounter { outline: 2px dashed var(--ed-accent); outline-offset: -2px; }
 .ed-entry.missing .ed-entry-name { color: var(--ed-high); }
 .ed-entry.swapping { outline: 1px solid var(--ed-accent); }
 .ed-entry-ghost { flex: none; width: 32px; text-align: center; font-size: 18px; color: var(--ed-muted); }
