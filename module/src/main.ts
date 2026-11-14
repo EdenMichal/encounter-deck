@@ -7,6 +7,7 @@ import { startBuilder } from "./ui/builder";
 import { checkTokenBar, startFinish } from "./finish";
 import { startStatBlocks } from "./ui/statblocks";
 import { checkAutoRecharge, checkCarouselTakeover, startCarousel } from "./ui/carousel";
+import { startLoot } from "./ui/loot";
 
 Hooks.once("init", () => {
   registerSettings();
@@ -36,6 +37,7 @@ Hooks.once("ready", async () => {
   startBuilder();
   startStatBlocks();
   startFinish();
+  startLoot();
   Hooks.callAll(CHANGED_HOOK);
   checkTokenBar();
   checkCarouselTakeover();
