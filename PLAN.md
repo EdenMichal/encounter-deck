@@ -36,7 +36,6 @@ Reuse what Foundry and dnd5e already do (the combat tracker, actor sheets, compe
 - **v0.1, prep:** storage, Campaigns, Shared Library, browser, Builder (Sources, filters, difficulty).
 - **v0.2, running the fight:** Import, the enhanced tracker, Stat Blocks, Finish and XP.
 - **v0.3, carousel:** our own carousel initiative tracker across the top. It shows portraits, the current turn, the round, PC HP, monster HP only as "bloodied", hidden enemy initiative, and Next/Previous turn for the GM. It gets a design pass, and it replaces the Carousel Combat Tracker module.
-- **v0.4, integrations:** foundry-mcp tools.
 
 ## To verify during the build
 
