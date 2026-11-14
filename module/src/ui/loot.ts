@@ -28,6 +28,9 @@ export function startLoot(): void {
   Hooks.on("renderLootablesApp", (app: any, element: HTMLElement) => takeOver(app, element));
 }
 
+/** TokenBar dialogs whose loot is being handed out right now, so a second click can't give it all again. */
+const busy = new WeakSet<object>();
+
 const mobileDeckActive = () => MOBILE_DECK.some(id => game.modules.get(id)?.active);
 
 /** The Present PCs the loot is for: the fight's Campaign, else the Active Campaign, else the PCs in the fight. */
@@ -70,10 +73,12 @@ function takeOver(app: any, element: HTMLElement): void {
     button.addEventListener("click", (event: Event) => {
       event.preventDefault();
       event.stopImmediatePropagation();
+      if (busy.has(app)) return;
+      busy.add(app);
       distribute(app).catch((err: unknown) => {
         console.error("Encounter Deck | Distribute Loot failed", err);
         ui.notifications.error("Encounter Deck could not distribute the loot. See the console for details.");
-      });
+      }).finally(() => busy.delete(app));
     }, { capture: true });
   }
   const content = element.querySelector(".dialog-content");
