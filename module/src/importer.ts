@@ -8,6 +8,7 @@ import { activeCampaign, partyOf } from "./campaigns";
 import { addEntry, readEntries, toSource, totalXp } from "./entries";
 import { hasMargin, mainEncounterOf, marginSlots, rollNow, tokenNames, type FightRecord, type Footprint } from "./fight";
 import { lairDelta } from "./legendary";
+import { sharedInFlight } from "./serial";
 import { lookupMonster, xpForCr } from "./sources";
 import { copyEncounter, encounterFlags, getEncounter, isInLibrary, rootOf } from "./store";
 
@@ -29,14 +30,16 @@ export interface CombatFlags {
 
 export const combatFlags = (combat: any): CombatFlags => ({ imports: [], counts: [], ...(combat?.flags?.[MODULE_ID] ?? {}) });
 
-/** The world Actors folder that holds imported monsters while a fight runs. Players can't see what's in it. */
-export const importedFolder = (): any => game.folders.find((f: any) => f.type === "Actor" && f.flags?.[MODULE_ID]?.kind === "imported") ?? null;
+/**
+ * Every world Actors folder that holds imported monsters while a fight runs. Players can't see what's in them. There
+ * should be one, but up to v0.9 one Import could create several at once, so Finish and reuse look in all of them.
+ */
+export const importedFolders = (): any[] => game.folders.filter((f: any) => f.type === "Actor" && f.flags?.[MODULE_ID]?.kind === "imported");
 
-async function ensureImportedFolder(): Promise<any> {
-  return importedFolder() ?? CONFIG.Folder.documentClass.create({
-    name: IMPORTED_FOLDER, type: "Actor", sorting: "a", color: "#3b2e4a", flags: { [MODULE_ID]: { kind: "imported" } },
-  });
-}
+/** The folder new imported monsters go into. Concurrent callers (one per Creature Entry) share a single create. */
+const ensureImportedFolder = sharedInFlight(async (): Promise<any> => importedFolders()[0] ?? CONFIG.Folder.documentClass.create({
+  name: IMPORTED_FOLDER, type: "Actor", sorting: "a", color: "#3b2e4a", flags: { [MODULE_ID]: { kind: "imported" } },
+}));
 
 /**
  * The world actor a Creature Entry's tokens come from. A world actor is used as it is; a compendium monster is
@@ -46,9 +49,9 @@ async function worldActorFor(uuid: string): Promise<any> {
   const source = await fromUuid(uuid);
   if (!source) return null;
   if (!source.pack) return source;
-  const folder = await ensureImportedFolder();
-  const existing = folder.contents.find((a: any) => a.flags?.[MODULE_ID]?.source === uuid);
+  const existing = importedFolders().flatMap(f => f.contents).find((a: any) => a.flags?.[MODULE_ID]?.source === uuid);
   if (existing) return existing;
+  const folder = await ensureImportedFolder();
   // Not game.actors.importFromCompendium: it switches the sidebar to the Actors tab.
   const data = game.actors.fromCompendium(source);
   data.folder = folder.id;
