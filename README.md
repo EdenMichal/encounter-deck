@@ -2,14 +2,14 @@
 
 A Foundry VTT v14 (dnd5e 5.3+) module for preparing encounters ahead of time, organized by campaign, without putting anything on a scene until you need it. Prep is GM-only; the carousel is for the whole table.
 
-Status: **v0.6 (on the fly)**. See [PLAN.md](PLAN.md) for the full spec and roadmap, [CONTEXT.md](CONTEXT.md) for the terms, and [docs/adr/](docs/adr/) for the decisions.
+Status: **v0.7 (loot)**. See [PLAN.md](PLAN.md) for the full spec and roadmap, [CONTEXT.md](CONTEXT.md) for the terms, and [docs/adr/](docs/adr/) for the decisions.
 
 ## What v0.1 does
 
 - **Storage:** the first time a GM loads the world, the module creates a world compendium, *Encounter Deck*. Each Encounter is a dnd5e Encounter actor inside it (ADR 0001, ADR 0003). Campaigns and the Shared Library are its top-level folders.
 - **Combat tab:** while no combat is viewed, the GM sees the encounter browser instead of the tracker. Foundry's combat keeps running underneath (`CONFIG.ui.combat` is subclassed, not replaced). During a combat the tracker shows, with an **Encounters** button to get back to the browser. Players always see the normal tracker.
 - **Campaigns:** a switcher in the header (remembered per world), folders inside each Campaign, a Party Folder per Campaign with Present toggles, and an Advancement Mode (XP or Milestone, defaulting to a world setting).
-- **Builder:** a collapsible drawer docked beside the Combat tab. Search the Sources by name, then filter by CR range, type, size, habitat and source. Add monsters with + or by dragging, change counts with +/−, and watch the live 2024 difficulty meter for the Present PCs. Drag an encounter from the browser onto the Builder to open it; if another encounter is open, you choose between adding its creatures and opening it instead. While the combat tracker is popped out, the Builder docks on that floating window instead of the sidebar.
+- **Builder:** a collapsible drawer docked beside the Combat tab. Open and close it with the hammer tab at the bottom of the sidebar's tabs (it shows while the Combat tab is open). Search the Sources by name, then filter by CR range, type, size, habitat and source. Add monsters with + or by dragging, change counts with +/−, and watch the live 2024 difficulty meter for the Present PCs. Drag an encounter from the browser onto the Builder to open it; if another encounter is open, you choose between adding its creatures and opening it instead. While the combat tracker is popped out, the Builder docks on that floating window instead of the sidebar, with its own handle.
 - **Encounters:** tags, notes, tactics, Status (Draft, Ready, Completed; Completed hidden behind "Show completed"), duplicate, a link to a journal page or scene, copy-on-use from the Shared Library, and "missing" rows (with swap) for monsters whose Source is gone.
 - **Sources:** dnd5e's own Compendium Browser source checklist, so there's one list for the whole world (shown in our own dialog since v0.4).
 
@@ -47,6 +47,14 @@ Status: **v0.6 (on the fly)**. See [PLAN.md](PLAN.md) for the full spec and road
 - **The fight's Encounter:** a row at the top of the combat tracker (GM only) names the Encounter the fight started with, with every later Import listed as reinforcements, every monster added mid-fight as added, and the XP Finish will award. Click a name to open that Encounter in the Builder.
 - **Add on the fly:** during a fight, drop a monster on the tracker (from the Builder's results, the Actors tab or a compendium). It gets a numbered token in the Margin and joins the combat, and it's saved into the fight's Encounter, so the Encounter records what was fought. Drop an Encounter from the browser (with the tracker popped out) to import it as reinforcements. The tracker shows a dashed gold outline while you drag over it.
 - **Legendary resistance pips:** under a legendary monster's legendary action pips on the Carousel, small gold shields show its legendary resistances left (GM only).
+
+## What v0.7 adds
+
+- **Distribute Loot:** when a fight ends, Monk's TokenBar's loot dialog still lists the defeated monsters' gear and coins (edit or remove anything), but its button is now **Distribute Loot**:
+  - With **Mobile Deck** active and a **party inventory** (a dnd5e Group: the primary party, or a Group one of the Present PCs is in), everything goes into the Group.
+  - Otherwise a short dialog lists each item with a dropdown of the **Present PCs** (pre-filled so they take turns). Coins are split evenly, and the leftover goes to whoever you pick.
+  - Items stack onto ones the character (or Group) already has and arrive unequipped. One chat line says who got what.
+- **Builder tab:** the Builder opens from a hammer tab at the bottom of the sidebar's tabs, shown with the Combat tab and lit while it's open. The popped-out tracker keeps the drawer's own handle.
 
 ## Develop
 

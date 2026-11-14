@@ -42,6 +42,8 @@ export function startBuilder(): void {
   const sync = () => instance?.syncVisibility();
   Hooks.on("changeSidebarTab", sync);
   Hooks.on("collapseSidebar", sync);
+  // The sidebar redraws its tab strip now and then; put the Builder tab back under the others.
+  Hooks.on("renderSidebar", () => setTimeout(sync, 0));
   // The floating combat tracker opening, closing or minimizing moves the drawer between it and the sidebar.
   for (const hook of ["renderCombatTracker", "closeCombatTracker", "minimizeCombatTracker", "maximizeCombatTracker"]) Hooks.on(hook, () => setTimeout(sync, 0));
   // dnd5e's Sources checklist is a world setting: the first save creates it, later saves update it.
@@ -138,14 +140,44 @@ class Builder extends HandlebarsApplicationMixin(ApplicationV2) {
     return document.getElementById("sidebar") ?? document.body;
   }
 
-  /** Dock on the current host. On the sidebar it shows only on the Combat tab while expanded; on the pop-out, always. */
+  /**
+   * Dock on the current host. On the sidebar it shows only on the Combat tab while expanded, and opens from the
+   * Builder tab under the sidebar's own tabs; on the pop-out it always shows, with its own handle.
+   */
   syncVisibility(): void {
     if (!this.element) return;
     const host = this.host();
     if (this.element.parentElement !== host) host.append(this.element);
     const onPopout = host.id !== "sidebar";
-    const show = onPopout || (!!ui.sidebar?.expanded && ui.sidebar?.tabGroups?.primary === "combat");
+    const onCombatTab = ui.sidebar?.tabGroups?.primary === "combat";
+    const show = onPopout || (!!ui.sidebar?.expanded && onCombatTab);
     this.element.classList.toggle("ed-hidden", !show);
+    this.element.classList.toggle("ed-tabbed", !onPopout);
+    this.syncTab(!onPopout && onCombatTab);
+  }
+
+  /** The Builder tab: an icon at the bottom of the sidebar's tab strip, shown with the Combat tab, lit while open. */
+  syncTab(visible: boolean): void {
+    const menu = document.querySelector("#sidebar-tabs > menu");
+    if (!menu) return;
+    let li = menu.querySelector<HTMLElement>(":scope > li.ed-builder-tab");
+    if (!li) {
+      li = document.createElement("li");
+      li.className = "ed-builder-tab";
+      li.innerHTML = `<button type="button" class="ui-control plain icon fa-solid fa-hammer" role="tab" aria-label="Builder"></button>`;
+      li.querySelector("button")!.addEventListener("click", (event: Event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (!ui.sidebar?.expanded) ui.sidebar?.expand();
+        this.setCollapsed(!this.collapsed);
+      });
+    }
+    if (li.parentElement !== menu || menu.lastElementChild !== li) menu.append(li);
+    li.hidden = !visible;
+    const button = li.querySelector<HTMLElement>("button")!;
+    button.classList.toggle("active", !this.collapsed);
+    button.setAttribute("aria-pressed", String(!this.collapsed));
+    button.dataset.tooltip = this.collapsed ? `Open the Builder${this.doc ? `: ${this.doc.name}` : ""}` : "Close the Builder";
   }
 
   setCollapsed(collapsed: boolean): void {
@@ -154,6 +186,7 @@ class Builder extends HandlebarsApplicationMixin(ApplicationV2) {
     this.element?.classList.toggle("collapsed", collapsed);
     if (!collapsed) this.refreshResults();
     this.render({ parts: ["handle"] });
+    this.syncVisibility();
   }
 
   /* -------------------------------------------- */
