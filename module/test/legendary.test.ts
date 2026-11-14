@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { lairDelta, legendaryActions, legendaryOf, pips, promptRows, rechargeAbilities, rechargeLabel, type PromptCandidate } from "../src/legendary";
+import { lairDelta, legendaryActions, legendaryOf, resistanceOf, pips, promptRows, rechargeAbilities, rechargeLabel, type PromptCandidate } from "../src/legendary";
 
 const act = (id: string, type: string, value: number | null = null, name = "") => ({ id, name, activation: { type, value } });
 const dragonItems = [
@@ -18,6 +18,13 @@ describe("legendaryOf", () => {
   it("is null for a monster without legendary actions", () => {
     expect(legendaryOf({ resources: { legact: { max: 0, spent: 0 } } })).toBeNull();
     expect(legendaryOf({})).toBeNull();
+  });
+});
+
+describe("resistanceOf", () => {
+  it("reads legendary resistances left from dnd5e's legres", () => {
+    expect(resistanceOf({ resources: { legres: { max: 4, spent: 1, value: 3 } } })).toEqual({ value: 3, max: 4 });
+    expect(resistanceOf({ resources: { legres: { max: 0, spent: 0 } } })).toBeNull();
   });
 });
 

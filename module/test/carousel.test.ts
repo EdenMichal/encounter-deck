@@ -30,6 +30,11 @@ describe("buildCards", () => {
     expect(buildCards([{ ...dragon, defeated: true }], null, true)[0].legendary).toBeNull();
     expect(buildCards([goblin], null, true)[0].legendary).toBeNull();
   });
+  it("shows legendary resistance pips to the GM only", () => {
+    const dragon = base({ id: "d", name: "Dragon", resistance: { value: 3, max: 4 } });
+    expect(buildCards([dragon], null, true)[0].resistance).toEqual([true, true, true, false]);
+    expect(buildCards([dragon], null, false)[0].resistance).toBeNull();
+  });
   it("gives the GM every number", () => {
     const [g, h] = buildCards([goblin, hero], "g", true);
     expect(g).toMatchObject({ current: true, init: "15", hp: { text: "4/10", pct: 40, low: true }, bloodied: false });

@@ -12,8 +12,8 @@ import {
   copyEncounter, createEncounter, createFolder, deleteEncounter, deleteFolder, folderById, getEncounter,
   isInLibrary, kindOf, moveEncounter, pack, rootOf,
 } from "../store";
-import { parseHp } from "../fight";
-import { importEncounter } from "../importer";
+import { parseHp, summarizeFight } from "../fight";
+import { addToFight, combatFlags, importEncounter } from "../importer";
 import { browserContext, type BrowserUi } from "./browser-model";
 import { builder, openBuilder } from "./builder";
 import { isMonster, showStatBlock } from "./statblocks";
@@ -250,7 +250,40 @@ export function createCombatTab(Base: any) {
       if (header && !this.browserMode && !header.querySelector(".ed-show-browser")) {
         header.insertAdjacentHTML("afterbegin", `<button type="button" class="ed-show-browser" data-action="edShowBrowser"><i class="fa-solid fa-book-skull" inert></i> Encounters</button>`);
       }
-      if (!this.browserMode) this.addStatColumns(el);
+      if (!this.browserMode) {
+        this.addFightRow(el);
+        this.addStatColumns(el);
+      }
+    }
+
+    /** The tracker part: the list of combatants, which takes drops of monsters and Encounters during a fight. */
+    trackerPart(el: HTMLElement): HTMLElement | null {
+      return el.querySelector<HTMLElement>("[data-application-part='tracker']");
+    }
+
+    /**
+     * At the top of the tracker, which Encounter this fight is: its name (click to open it in the Builder), every
+     * later Import as reinforcements, every monster dropped on the tracker as added, and the XP Finish will award.
+     */
+    addFightRow(el: HTMLElement): void {
+      const part = this.trackerPart(el);
+      part?.querySelector(":scope > .ed-fight-row")?.remove();
+      const summary = summarizeFight(combatFlags(this.viewed).imports);
+      if (!part || !summary) return;
+      const fmt = (n: number) => new Intl.NumberFormat(game.i18n.lang).format(n);
+      const link = (id: string, name: string) =>
+        `<a class="ed-fight-name" data-action="edOpen" data-encounter-id="${esc(id)}" data-tooltip="Open in the Builder">${esc(name)}</a>`;
+      const lines = summary.lines.map(l => `<li>+ ${l.note === "added" ? `<span class="ed-fight-name">${esc(l.name)}</span>` : link(l.encounterId, l.name)}
+        <span class="ed-fight-note">(${l.note})</span></li>`).join("");
+      part.insertAdjacentHTML("afterbegin", `
+        <section class="ed-fight-row" data-tooltip-direction="LEFT">
+          <div class="ed-fight-main">
+            <i class="fa-solid fa-swords" inert></i> ${link(summary.encounterId, summary.name)}
+            <span class="ed-fight-xp" data-tooltip="Awarded at Finish (XP mode)">${fmt(summary.xp)} XP</span>
+          </div>
+          ${lines ? `<ul class="ed-fight-lines">${lines}</ul>` : ""}
+          <p class="ed-fight-hint">Drop a monster or an Encounter here to add it</p>
+        </section>`);
     }
 
     /** AC and HP on every row of the running fight, HP typed in like the token HUD, and a stat block button for monsters. */
@@ -363,7 +396,17 @@ export function createCombatTab(Base: any) {
         e.dataTransfer.setData(ENCOUNTER_DRAG_MIME, row.dataset.encounterId!);
         e.dataTransfer.effectAllowed = "copyMove";
       });
+      // During a fight, the tracker takes a monster (from the Builder's results, the Actors tab or a compendium),
+      // which joins the fight and its Encounter, or an Encounter from the browser, imported as reinforcements.
+      const overTracker = (e: DragEvent) =>
+        !this.browserMode && !!this.viewed && !!(e.target as HTMLElement).closest?.("[data-application-part='tracker']");
       el.addEventListener("dragover", (e: DragEvent) => {
+        if (overTracker(e)) {
+          e.preventDefault();
+          if (e.dataTransfer) e.dataTransfer.dropEffect = "copy";
+          this.trackerPart(el)?.classList.add("ed-drop");
+          return;
+        }
         const head = (e.target as HTMLElement).closest?.(".ed-folder-head");
         if (!head) return;
         e.preventDefault();
@@ -371,8 +414,18 @@ export function createCombatTab(Base: any) {
       });
       el.addEventListener("dragleave", (e: DragEvent) => {
         (e.target as HTMLElement).closest?.(".ed-folder-head")?.classList.remove("ed-drop");
+        const part = this.trackerPart(el);
+        if (part && !part.contains(e.relatedTarget as Node)) part.classList.remove("ed-drop");
       });
       el.addEventListener("drop", async (e: DragEvent) => {
+        if (overTracker(e)) {
+          this.trackerPart(el)?.classList.remove("ed-drop");
+          let data: any;
+          try { data = JSON.parse(e.dataTransfer?.getData("text/plain") ?? ""); } catch { return; }
+          if (data?.type === ENCOUNTER_DRAG_TYPE && data.id) { e.preventDefault(); e.stopPropagation(); return void runImport(data.id); }
+          if (data?.type === "Actor" && data.uuid) { e.preventDefault(); e.stopPropagation(); return void addToFight(data.uuid, this.viewed); }
+          return;
+        }
         const head = (e.target as HTMLElement).closest?.<HTMLElement>(".ed-folder-head");
         if (!head) return;
         head.classList.remove("ed-drop");

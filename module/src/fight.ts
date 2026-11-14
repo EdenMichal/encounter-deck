@@ -85,3 +85,36 @@ export function parseHp(raw: string): { value: number; isDelta: boolean } | null
   if (match[1] === "+") return { value: n, isDelta: true };
   return { value: n, isDelta: false };
 }
+
+/** What the tracker's Encounter row needs from one of the fight's Import records (see importer.ts). */
+export interface FightRecord {
+  encounterId: string;
+  name: string;
+  xp: number;
+  /** "added": one monster dropped onto the tracker mid-fight (it is also saved into the Encounter). */
+  kind?: "import" | "added";
+}
+
+export interface FightLine { encounterId: string; name: string; note: "reinforcements" | "added" }
+export interface FightSummary { encounterId: string; name: string; xp: number; lines: FightLine[] }
+
+/**
+ * The tracker's Encounter row: the first Encounter imported into this fight, then every later Import as
+ * reinforcements and every monster dropped onto the tracker as added, with the fight's total XP (what Finish awards).
+ * Null for a fight Encounter Deck didn't start.
+ */
+export function summarizeFight(records: FightRecord[]): FightSummary | null {
+  const first = records.find(r => r.kind !== "added");
+  if (!first) return null;
+  return {
+    encounterId: first.encounterId,
+    name: first.name,
+    xp: records.reduce((n, r) => n + (Number(r.xp) || 0), 0),
+    lines: records.filter(r => r !== first).map(r => ({
+      encounterId: r.encounterId, name: r.name, note: r.kind === "added" ? "added" : "reinforcements",
+    })),
+  };
+}
+
+/** The Encounter a monster dropped onto the tracker joins: the one the fight started with. */
+export const mainEncounterOf = (records: FightRecord[]): string | null => records.find(r => r.kind !== "added")?.encounterId ?? null;

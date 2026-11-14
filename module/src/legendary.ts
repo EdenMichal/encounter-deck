@@ -24,14 +24,19 @@ const LEGENDARY_TYPES = new Set(["legendary", "mythic"]);
 const list = (x: any): any[] => (x ? [...x] : []);
 const num = (x: unknown, fallback = 0): number => (Number.isFinite(Number(x)) ? Number(x) : fallback);
 
-/** Legendary actions left and their maximum, or null for a monster without any. */
-export function legendaryOf(system: any): Legendary | null {
-  const legact = system?.resources?.legact;
-  const max = num(legact?.max);
+/** Uses left and maximum of one of dnd5e's legendary resources, or null when the monster has none. */
+function usesOf(resource: any): Legendary | null {
+  const max = num(resource?.max);
   if (max <= 0) return null;
-  const value = legact?.value !== undefined ? num(legact.value) : max - num(legact?.spent);
+  const value = resource?.value !== undefined ? num(resource.value) : max - num(resource?.spent);
   return { value: Math.min(max, Math.max(0, value)), max };
 }
+
+/** Legendary actions left and their maximum, or null for a monster without any. */
+export const legendaryOf = (system: any): Legendary | null => usesOf(system?.resources?.legact);
+
+/** Legendary resistances left and their maximum (one more inside its lair), or null for a monster without any. */
+export const resistanceOf = (system: any): Legendary | null => usesOf(system?.resources?.legres);
 
 /**
  * Every activity that costs legendary actions, cheapest first. Spells a feature casts (dnd5e's cached spells,

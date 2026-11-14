@@ -689,3 +689,33 @@
 .ed-lp-ability.ready { border-color: var(--ed-low); }
 .ed-lp-ability.spent { border-color: rgba(244, 241, 234, 0.25); color: rgba(244, 241, 234, 0.55); }
 .ed-lp-recharge .ed-lp-icon { color: #f0c24a; }
+
+/* Legendary resistances under the legendary pips: small gold shields, filled for each one left. */
+.ed-car-resistance { display: flex; gap: 3px; justify-content: center; margin-top: 3px; }
+.ed-car-resistance i {
+  width: 8px; height: 9px;
+  border: 1px solid var(--ed-gold);
+  border-radius: 2px 2px 50% 50% / 2px 2px 60% 60%;
+  background: rgba(0, 0, 0, 0.55);
+  box-shadow: 0 0 2px #000;
+}
+.ed-car-resistance i.on { background: var(--ed-gold); }
+
+/* The fight's Encounter, at the top of the tracker (GM only). The tracker takes drops during a fight. */
+.ed-fight-row {
+  margin: 4px 6px 6px;
+  padding: 5px 8px;
+  border: 1px solid rgba(216, 180, 90, 0.45);
+  border-radius: var(--ed-radius, 4px);
+  background: rgba(216, 180, 90, 0.08);
+  font-size: 12px;
+}
+.ed-fight-main { display: flex; align-items: center; gap: 6px; }
+.ed-fight-main > i { color: var(--ed-gold, #d8b45a); }
+.ed-fight-main .ed-fight-name { flex: 1; min-width: 0; font-weight: 600; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ed-fight-xp { flex: none; color: var(--ed-gold, #d8b45a); font-variant-numeric: tabular-nums; }
+.ed-fight-lines { list-style: none; margin: 2px 0 0 18px; padding: 0; }
+.ed-fight-note { color: var(--color-text-secondary, #9a9a9a); }
+.ed-fight-hint { display: none; margin: 4px 0 0; font-size: 11px; color: var(--ed-gold, #d8b45a); }
+[data-application-part='tracker'].ed-drop { outline: 2px dashed rgba(216, 180, 90, 0.8); outline-offset: -2px; }
+[data-application-part='tracker'].ed-drop .ed-fight-hint { display: block; }

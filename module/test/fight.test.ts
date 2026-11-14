@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { hasMargin, marginSlots, parseHp, splitXp, tokenNames, type SceneArea } from "../src/fight";
+import { hasMargin, mainEncounterOf, marginSlots, parseHp, splitXp, summarizeFight, tokenNames, type SceneArea } from "../src/fight";
 
 // A 10×8 cell canvas (100px cells) with a 2-cell margin all round: the background is cells 2–7 × 2–5.
 const area: SceneArea = { width: 1000, height: 800, size: 100, sceneRect: { x: 200, y: 200, width: 600, height: 400 } };
@@ -58,5 +58,29 @@ describe("parseHp", () => {
     expect(parseHp("")).toBeNull();
     expect(parseHp("abc")).toBeNull();
     expect(parseHp("-")).toBeNull();
+  });
+});
+
+describe("summarizeFight", () => {
+  const ambush = { encounterId: "a", name: "Goblin Ambush", xp: 1000 };
+  const wolves = { encounterId: "w", name: "Wolf Pack", xp: 150, kind: "import" as const };
+  const ogre = { encounterId: "a", name: "Ogre", xp: 450, kind: "added" as const };
+
+  it("names the first Encounter, then reinforcements and added monsters, with the fight's total XP", () => {
+    expect(summarizeFight([ambush, wolves, ogre, { ...ambush }])).toEqual({
+      encounterId: "a", name: "Goblin Ambush", xp: 2600,
+      lines: [
+        { encounterId: "w", name: "Wolf Pack", note: "reinforcements" },
+        { encounterId: "a", name: "Ogre", note: "added" },
+        { encounterId: "a", name: "Goblin Ambush", note: "reinforcements" },
+      ],
+    });
+  });
+  it("is null for a fight with no Import", () => {
+    expect(summarizeFight([])).toBeNull();
+  });
+  it("sends a dropped monster to the Encounter the fight started with", () => {
+    expect(mainEncounterOf([ambush, wolves])).toBe("a");
+    expect(mainEncounterOf([])).toBeNull();
   });
 });
