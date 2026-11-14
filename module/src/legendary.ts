@@ -1,5 +1,5 @@
 /**
- * Legendary actions, recharge and lairs for the Carousel's pips and the Legendary Prompt. Pure: the UI hands it
+ * Legendary actions, recharge and lairs for the Carousel's pips and the Legendary Menu. Pure: the UI hands it
  * plain dnd5e data (an NPC's `system`, its items and their activities). dnd5e does the bookkeeping itself: spent
  * legendary actions reset at the end of the monster's own turn, using a legendary activity spends them, recharge is
  * rolled at turn start when its auto-recharge setting is on, and a monster inside its lair gets one more legendary
@@ -10,6 +10,8 @@ export interface Legendary { value: number; max: number }
 
 export interface LegendaryAction {
   itemId: string;
+  /** The item's UUID, for dnd5e's rich tooltip with its description. */
+  uuid: string;
   activityId: string;
   name: string;
   img: string;
@@ -50,7 +52,7 @@ export function legendaryActions(items: any): LegendaryAction[] {
     for (const a of activities) {
       const own = String(a.name ?? "").trim();
       const name = activities.length > 1 && own && own !== item.name ? `${item.name}: ${own}` : item.name;
-      out.push({ itemId: item.id, activityId: a.id, name, img: a.img || item.img || "", cost: Math.max(1, num(a.activation?.value, 1)) });
+      out.push({ itemId: item.id, uuid: item.uuid ?? "", activityId: a.id, name, img: a.img || item.img || "", cost: Math.max(1, num(a.activation?.value, 1)) });
     }
   }
   return out.sort((a, b) => a.cost - b.cost || a.name.localeCompare(b.name));
@@ -81,38 +83,45 @@ export function rechargeAbilities(items: any): RechargeAbility[] {
   return out;
 }
 
-export interface PromptCandidate {
-  id: string;
-  name: string;
-  img: string;
-  defeated: boolean;
-  legendary: Legendary | null;
-  actions: LegendaryAction[];
-}
-
-export interface PromptRow {
-  id: string;
-  name: string;
-  img: string;
-  legendary: Legendary;
-  pips: boolean[];
-  actions: (LegendaryAction & { usable: boolean })[];
-}
-
 /** Filled pips for the uses left, empty ones for the uses spent. */
 export const pips = (l: Legendary): boolean[] => Array.from({ length: l.max }, (_, i) => i < l.value);
 
+/** What the Legendary Menu is built from: one monster's uses, legendary actions and recharge abilities. */
+export interface MenuInput {
+  id: string;
+  name: string;
+  legendary: Legendary | null;
+  resistance: Legendary | null;
+  actions: LegendaryAction[];
+  recharge: RechargeAbility[];
+  /** It's this monster's own turn (legendary actions come at the end of another creature's turn). */
+  ownTurn: boolean;
+}
+
+export interface LegendaryMenu {
+  id: string;
+  name: string;
+  legendary: Legendary | null;
+  pips: boolean[];
+  resistance: Legendary | null;
+  shields: boolean[];
+  actions: (LegendaryAction & { usable: boolean; showCost: boolean })[];
+  recharge: RechargeAbility[];
+  ownTurn: boolean;
+}
+
 /**
- * Who gets a row in the Legendary Prompt once a turn ends: every legendary monster that is still up, has uses left
- * and didn't just take that turn (legendary actions come at the end of another creature's turn).
+ * The Legendary Menu that opens on hovering a monster's pips: its legendary actions as buttons (those costing more
+ * than what's left can't be used), its legendary resistances left, and its recharge abilities, ready or spent.
  */
-export function promptRows(candidates: PromptCandidate[], endedId: string | null): PromptRow[] {
-  return candidates
-    .filter(c => c.legendary && c.legendary.value > 0 && !c.defeated && c.id !== endedId)
-    .map(c => ({
-      id: c.id, name: c.name, img: c.img, legendary: c.legendary!, pips: pips(c.legendary!),
-      actions: c.actions.map(a => ({ ...a, usable: a.cost <= c.legendary!.value })),
-    }));
+export function legendaryMenu(c: MenuInput): LegendaryMenu {
+  const left = c.legendary?.value ?? 0;
+  return {
+    id: c.id, name: c.name, ownTurn: c.ownTurn, recharge: c.recharge,
+    legendary: c.legendary, pips: c.legendary ? pips(c.legendary) : [],
+    resistance: c.resistance, shields: c.resistance ? pips(c.resistance) : [],
+    actions: c.legendary ? c.actions.map(a => ({ ...a, usable: a.cost <= left, showCost: a.cost > 1 })) : [],
+  };
 }
 
 /**

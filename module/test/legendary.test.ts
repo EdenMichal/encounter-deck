@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { lairDelta, legendaryActions, legendaryOf, resistanceOf, pips, promptRows, rechargeAbilities, rechargeLabel, type PromptCandidate } from "../src/legendary";
+import { lairDelta, legendaryActions, legendaryOf, resistanceOf, legendaryMenu, pips, rechargeAbilities, rechargeLabel, type MenuInput } from "../src/legendary";
 
 const act = (id: string, type: string, value: number | null = null, name = "") => ({ id, name, activation: { type, value } });
 const dragonItems = [
@@ -62,22 +62,25 @@ describe("recharge", () => {
   });
 });
 
-describe("promptRows", () => {
+describe("legendaryMenu", () => {
   const actions = legendaryActions(dragonItems);
-  const c = (id: string, over: Partial<PromptCandidate> = {}): PromptCandidate =>
-    ({ id, name: id, img: "", defeated: false, legendary: { value: 1, max: 3 }, actions, ...over });
+  const input = (over: Partial<MenuInput> = {}): MenuInput => ({
+    id: "red", name: "Red", legendary: { value: 1, max: 3 }, resistance: { value: 2, max: 3 },
+    actions, recharge: [{ name: "Fire Breath", ready: false, label: "5–6" }], ownTurn: false, ...over,
+  });
 
-  it("lists legendary monsters except the one whose turn just ended", () => {
-    const rows = promptRows([c("red"), c("blue"), c("goblin", { legendary: null })], "red");
-    expect(rows.map(r => r.id)).toEqual(["blue"]);
+  it("marks actions that cost more than what's left, and shows the cost only when it's more than 1", () => {
+    const menu = legendaryMenu(input());
+    expect(menu.pips).toEqual([true, false, false]);
+    expect(menu.shields).toEqual([true, true, false]);
+    expect(menu.actions.map(a => [a.name, a.usable, a.showCost])).toEqual([["Detect", true, false], ["Tail Attack", true, false], ["Wing Attack", false, true]]);
+    expect(menu.recharge).toEqual([{ name: "Fire Breath", ready: false, label: "5–6" }]);
   });
-  it("skips the defeated and those with no uses left", () => {
-    expect(promptRows([c("a", { defeated: true }), c("b", { legendary: { value: 0, max: 3 } })], null)).toEqual([]);
-  });
-  it("marks actions that cost more than what's left", () => {
-    const [row] = promptRows([c("red")], null);
-    expect(row.pips).toEqual([true, false, false]);
-    expect(row.actions.map(a => [a.name, a.usable])).toEqual([["Detect", true], ["Tail Attack", true], ["Wing Attack", false]]);
+  it("has no action buttons for a monster with only legendary resistances", () => {
+    const menu = legendaryMenu(input({ legendary: null }));
+    expect(menu.actions).toEqual([]);
+    expect(menu.pips).toEqual([]);
+    expect(menu.shields).toEqual([true, true, false]);
   });
 });
 

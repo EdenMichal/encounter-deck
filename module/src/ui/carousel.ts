@@ -4,15 +4,14 @@
  * and conditions show with Foundry's own icons, and only the GM gets turn controls, monster initiative and monster
  * HP (players see Bloodied). It replaces the Carousel Combat Tracker module, and stays hidden while that is active.
  *
- * For the GM it also shows legendary uses as pips under a monster's card, and the Legendary Prompt under the strip:
- * when a turn ends, every legendary monster that didn't just act, with its legendary actions as buttons, plus the
- * recharge abilities of the monster whose turn it is.
+ * For the GM it also shows legendary actions and resistances as pips under a monster's card. Hovering them opens the
+ * Legendary Menu: that monster's legendary actions as buttons, its resistances left and its recharge abilities.
  */
 import { MODULE_ID, T } from "../constants";
 import { buildCards, canSeeCarousel, type Audience, type CombatantInput } from "../carousel-model";
-import { legendaryActions, legendaryOf, promptRows, rechargeAbilities, resistanceOf, type PromptCandidate } from "../legendary";
+import { legendaryActions, legendaryMenu, legendaryOf, rechargeAbilities, resistanceOf } from "../legendary";
 import { setSetting, setting } from "../settings";
-import { isMonster, keepStatBlockClear, showStatBlock } from "./statblocks";
+import { isMonster, showStatBlock } from "./statblocks";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 const OLD_CAROUSEL = "combat-tracker-dock";
@@ -24,8 +23,6 @@ export function startCarousel(): void {
   instance = new Carousel();
   instance.render({ force: true });
   const refresh = foundry.utils.debounce(() => instance?.render(), 50);
-  // Before the refresh, so the Legendary Prompt knows whose turn just ended.
-  Hooks.on("updateCombat", (combat: any, changed: any, options: any) => instance?.onCombatUpdate(combat, changed, options));
   for (const hook of [
     "createCombat", "updateCombat", "deleteCombat", "createCombatant", "updateCombatant", "deleteCombatant",
     "updateActor", "updateToken", "createActiveEffect", "updateActiveEffect", "deleteActiveEffect", "canvasReady", "createSetting", "updateSetting",
@@ -34,12 +31,9 @@ export function startCarousel(): void {
   ]) Hooks.on(hook, refresh);
 }
 
-/** Where a fight stands: which combatant's turn it is, in which round. */
-interface TurnMark { combatId: string; combatantId: string | null; round: number; turn: number | null }
-const markOf = (combat: any): TurnMark | null =>
-  combat ? { combatId: combat.id, combatantId: combat.combatant?.id ?? null, round: combat.round, turn: combat.turn } : null;
-const sameTurn = (a: TurnMark | null, b: TurnMark | null) =>
-  !!a && !!b && a.combatId === b.combatId && a.round === b.round && a.turn === b.turn;
+/** The pips and the Legendary Menu: the mouse can move between them without the menu closing. */
+const menuZone = (target: EventTarget | null): HTMLElement | null =>
+  (target as HTMLElement | null)?.closest?.<HTMLElement>(".ed-car-legend, .ed-car-lm") ?? null;
 
 const isPlainMonster = (c: any): boolean => isMonster(c) && !c.hasPlayerOwner;
 
@@ -107,57 +101,56 @@ class Carousel extends HandlebarsApplicationMixin(ApplicationV2) {
         return this.render();
       },
       edLegendary: function (this: Carousel, event: Event, target: HTMLElement) { return this.useLegendary(event, target); },
-      edDismissPrompt: function (this: Carousel) { this.dismissed = true; return this.render(); },
     },
   };
 
-  /** The turn on screen, and the one before it: whose turn just ended is who the Legendary Prompt leaves out. */
-  turn: TurnMark | null = markOf(shownCombat());
-  ended: TurnMark | null = null;
-  /** The Prompt belongs to this turn; it clears when the turn changes, or when the GM closes it. */
-  promptFor: TurnMark | null = null;
-  dismissed = false;
+  /** The monster whose Legendary Menu is open (its pips are hovered), and the pending close when the mouse leaves. */
+  legendFor: string | null = null;
+  closeTimer: ReturnType<typeof setTimeout> | null = null;
 
   /** The card whose full list of statuses is open under it. */
   expanded: string | null = null;
 
-  static PARTS = { strip: { template: T("carousel") }, prompt: { template: T("legendary-prompt") } };
+  static PARTS = { strip: { template: T("carousel") } };
 
-  /**
-   * Every client sees every turn change. Moving forward (Next Turn, End Turn, a new round, Begin Combat) raises the
-   * Prompt for the new turn; going back clears it.
-   */
-  onCombatUpdate(combat: any, changed: any, options: any): void {
-    if (!("turn" in changed) && !("round" in changed)) return;
-    if (combat !== shownCombat()) return;
-    const now = markOf(combat);
-    if (sameTurn(now, this.turn)) return;
-    const forward = options?.direction !== -1;
-    const before = this.turn;
-    this.ended = forward && before && before.combatId === combat.id && before.round >= 1 ? before : null;
-    this.turn = now;
-    this.promptFor = forward ? now : null;
-    this.dismissed = false;
-  }
-
-  /** The Legendary Prompt for the GM, or null when there's nothing to show. */
-  promptContext(combat: any) {
-    if (!game.user.isGM || this.dismissed || !combat?.started || !sameTurn(this.promptFor, markOf(combat))) return null;
-    const candidates: PromptCandidate[] = combat.turns
-      .filter((c: any) => isPlainMonster(c) && legendaryOf(c.actor?.system))
-      .map((c: any) => ({
-        id: c.id, name: c.name, img: c.img || c.actor?.img || CONST.DEFAULT_TOKEN, defeated: !!c.isDefeated,
-        legendary: legendaryOf(c.actor.system), actions: legendaryActions(c.actor.items),
-      }));
-    const rows = this.ended?.combatantId ? promptRows(candidates, this.ended.combatantId) : [];
-    const current = combat.combatant;
-    const recharge = isPlainMonster(current) && !current.isDefeated ? rechargeAbilities(current.actor?.items) : [];
-    if (!rows.length && !recharge.length) return null;
+  /** The Legendary Menu of the hovered monster, for the GM; null when none is open or it has nothing to show. */
+  menuContext(combat: any) {
+    const c = this.legendFor ? combat?.combatants.get(this.legendFor) : null;
+    if (!game.user.isGM || !isPlainMonster(c) || c.isDefeated) return null;
+    const system = c.actor?.system;
+    const legendary = legendaryOf(system), resistance = resistanceOf(system);
+    if (!legendary && !resistance) return null;
     return {
-      rows: rows.map(r => ({ ...r, actions: r.actions.map(a => ({ ...a, showCost: a.cost > 1 })) })),
-      recharge: recharge.length ? { name: current.name, abilities: recharge } : null,
+      ...legendaryMenu({
+        id: c.id, name: c.name, legendary, resistance, ownTurn: combat.combatant?.id === c.id,
+        actions: legendaryActions(c.actor.items), recharge: rechargeAbilities(c.actor.items),
+      }),
       autoRecharge: game.settings.get("dnd5e", "autoRecharge") !== "no",
     };
+  }
+
+  /** Open a monster's Legendary Menu (hovering its pips). */
+  openMenu(id: string): void {
+    this.cancelClose();
+    if (this.legendFor === id) return;
+    this.legendFor = id;
+    this.render();
+  }
+
+  /** Close it a moment after the mouse leaves, so it can cross the gap between the pips and the menu. */
+  closeMenuSoon(): void {
+    this.cancelClose();
+    this.closeTimer = setTimeout(() => {
+      this.closeTimer = null;
+      if (!this.legendFor) return;
+      this.legendFor = null;
+      this.render();
+    }, 250);
+  }
+
+  cancelClose(): void {
+    if (this.closeTimer) clearTimeout(this.closeTimer);
+    this.closeTimer = null;
   }
 
   /**
@@ -183,7 +176,7 @@ class Carousel extends HandlebarsApplicationMixin(ApplicationV2) {
     const isGM = game.user.isGM;
     const show = !!combat?.started && !oldCarouselActive()
       && canSeeCarousel(setting("carouselAudience") as Audience, { isGM, isTable: isTableDisplay() });
-    if (!show) return { show: false, prompt: null };
+    if (!show) return { show: false, legend: null };
     const cards = buildCards(combat.turns.map(inputOf), combat.combatant?.id ?? null, isGM);
     const open = cards.find(c => c.id === this.expanded && c.more > 0);
     if (!open) this.expanded = null;
@@ -195,7 +188,7 @@ class Carousel extends HandlebarsApplicationMixin(ApplicationV2) {
       popover: open ? { id: open.id, name: open.name, statuses: open.allStatuses } : null,
       trim: TRIM,
       deadIcon: CONFIG.controlIcons?.defeated ?? "icons/svg/skull.svg",
-      prompt: this.promptContext(combat),
+      legend: this.menuContext(combat),
     };
   }
 
@@ -209,7 +202,25 @@ class Carousel extends HandlebarsApplicationMixin(ApplicationV2) {
       list.scrollLeft = current.offsetLeft - (list.clientWidth - current.offsetWidth) / 2;
     }
     this.placePopover();
-    if (context.prompt) keepStatBlockClear();
+    this.liftMenu();
+  }
+
+  /**
+   * The Legendary Menu has to sit above every window (a Stat Block opens right under the Carousel), so it moves out
+   * to the page's top layer, with its own listeners since it's no longer inside the app.
+   */
+  liftMenu(): void {
+    document.querySelectorAll("body > .ed-car-lm").forEach(el => el.remove());
+    const menu = (this.element as HTMLElement).querySelector<HTMLElement>(".ed-car-lm");
+    if (!menu) return;
+    document.body.append(menu);
+    menu.addEventListener("pointerover", () => this.cancelClose());
+    menu.addEventListener("pointerout", (event: PointerEvent) => { if (!menuZone(event.relatedTarget)) this.closeMenuSoon(); });
+    menu.addEventListener("click", (event: MouseEvent) => {
+      const button = (event.target as HTMLElement).closest<HTMLButtonElement>('button[data-action="edLegendary"]');
+      if (button && button.getAttribute("aria-disabled") !== "true") this.useLegendary(event, button);
+    });
+    this.placeMenu();
   }
 
   /** Put the open list of statuses just under its card, kept inside the carousel. */
@@ -223,6 +234,20 @@ class Carousel extends HandlebarsApplicationMixin(ApplicationV2) {
     const left = Math.min(Math.max(0, at.left - box.left), Math.max(0, box.width - popover.offsetWidth));
     popover.style.left = `${Math.round(left)}px`;
     popover.style.top = `${Math.round(at.bottom - box.top + 4)}px`;
+  }
+
+  /** Put the Legendary Menu just under its monster's pips, kept on screen. */
+  placeMenu(): void {
+    const menu = document.querySelector<HTMLElement>("body > .ed-car-lm");
+    const pipsEl = menu && (this.element as HTMLElement).querySelector<HTMLElement>(`.ed-car-item[data-combatant-id="${menu.dataset.for}"] .ed-car-legend`);
+    if (!menu || !pipsEl) return;
+    const at = pipsEl.getBoundingClientRect();
+    const centre = at.left + at.width / 2 - menu.offsetWidth / 2;
+    menu.style.left = `${Math.round(Math.min(Math.max(8, centre), window.innerWidth - menu.offsetWidth - 8))}px`;
+    menu.style.top = `${Math.round(at.bottom + 4)}px`;
+    // An action's description opens beside the menu, on whichever side has more room.
+    const side = at.left + at.width / 2 > window.innerWidth / 2 ? "LEFT" : "RIGHT";
+    for (const button of menu.querySelectorAll<HTMLElement>("button[data-tooltip]")) button.dataset.tooltipDirection = side;
   }
 
   async _onFirstRender(context: any, options: any) {
@@ -242,7 +267,16 @@ class Carousel extends HandlebarsApplicationMixin(ApplicationV2) {
       this.expanded = null;
       this.render();
     }, true);
-    this.element.addEventListener("scroll", () => this.placePopover(), true);
+    this.element.addEventListener("scroll", () => { this.placePopover(); this.placeMenu(); }, true);
+    // Hovering a monster's pips opens its Legendary Menu; it stays open while the mouse is on the pips or the menu.
+    this.element.addEventListener("pointerover", (event: PointerEvent) => {
+      const pipsEl = (event.target as HTMLElement).closest?.<HTMLElement>(".ed-car-legend");
+      const id = pipsEl?.closest<HTMLElement>("[data-combatant-id]")?.dataset.combatantId;
+      if (id) this.openMenu(id);
+    });
+    this.element.addEventListener("pointerout", (event: PointerEvent) => {
+      if (menuZone(event.target) && !menuZone(event.relatedTarget)) this.closeMenuSoon();
+    });
     // The GM double-clicks a monster to open its Stat Block, as in the tracker.
     this.element.addEventListener("dblclick", (event: MouseEvent) => {
       if (!game.user.isGM) return;
@@ -286,7 +320,7 @@ export async function checkCarouselTakeover(): Promise<void> {
 
 /**
  * dnd5e rolls a monster's recharge at the start of its turn, but only once its "Auto-recharge" setting is on (it
- * starts off). Ask once whether to turn it on, so the Legendary Prompt's recharge list stays true by itself.
+ * starts off). Ask once whether to turn it on, so the Legendary Menu's recharge list stays true by itself.
  */
 export async function checkAutoRecharge(): Promise<void> {
   if (setting("rechargeAsked")) return;
@@ -296,7 +330,7 @@ export async function checkAutoRecharge(): Promise<void> {
   const turnOn = await foundry.applications.api.DialogV2.confirm({
     window: { title: "Encounter Deck" },
     content: `<p>dnd5e can roll a monster's recharge (like a dragon's breath, 5–6) at the start of its turn, but that's switched off in this world.</p>
-      <p>Turn on dnd5e's Auto-recharge? Encounter Deck's Legendary Prompt then shows which abilities are ready. You won't be asked again.</p>`,
+      <p>Turn on dnd5e's Auto-recharge? Encounter Deck's Legendary Menu (hover a monster's legendary pips) then shows which abilities are ready. You won't be asked again.</p>`,
     yes: { label: "Turn it on", icon: "fa-solid fa-bolt" },
     no: { label: "Keep it off" },
     rejectClose: false,
