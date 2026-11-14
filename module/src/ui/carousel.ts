@@ -218,7 +218,7 @@ class Carousel extends HandlebarsApplicationMixin(ApplicationV2) {
     menu.addEventListener("pointerout", (event: PointerEvent) => { if (!menuZone(event.relatedTarget)) this.closeMenuSoon(); });
     menu.addEventListener("click", (event: MouseEvent) => {
       const button = (event.target as HTMLElement).closest<HTMLButtonElement>('button[data-action="edLegendary"]');
-      if (button && !button.disabled) this.useLegendary(event, button);
+      if (button && button.getAttribute("aria-disabled") !== "true") this.useLegendary(event, button);
     });
     this.placeMenu();
   }
@@ -245,6 +245,9 @@ class Carousel extends HandlebarsApplicationMixin(ApplicationV2) {
     const centre = at.left + at.width / 2 - menu.offsetWidth / 2;
     menu.style.left = `${Math.round(Math.min(Math.max(8, centre), window.innerWidth - menu.offsetWidth - 8))}px`;
     menu.style.top = `${Math.round(at.bottom + 4)}px`;
+    // An action's description opens beside the menu, on whichever side has more room.
+    const side = at.left + at.width / 2 > window.innerWidth / 2 ? "LEFT" : "RIGHT";
+    for (const button of menu.querySelectorAll<HTMLElement>("button[data-tooltip]")) button.dataset.tooltipDirection = side;
   }
 
   async _onFirstRender(context: any, options: any) {

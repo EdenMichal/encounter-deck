@@ -50,7 +50,7 @@ Status: **v0.9 (Legendary Menu)**. See [PLAN.md](PLAN.md) for the full spec and 
 
 ## What v0.9 adds
 
-- **Legendary Menu:** the Legendary Prompt strip under the Carousel is gone. Instead, hover a legendary monster's pips (or its resistance shields) and a small window opens right under them, on top of any Stat Block: its legendary actions as one-click buttons, its legendary resistances left, and its recharge abilities, ready or spent. Move onto the window to use it; it closes when the mouse leaves.
+- **Legendary Menu:** the Legendary Prompt strip under the Carousel is gone. Instead, hover a legendary monster's pips (or its resistance shields) and a small window opens right under them, on top of any Stat Block: its legendary actions as one-click buttons (hover one for its description, as on the sheet), its legendary resistances left, and its recharge abilities, ready or spent. Move onto the window to use it; it closes when the mouse leaves.
 - **Stat Block placement (v0.8.1):** the sheet's side tabs no longer cover the tracker.
 
 ## What v0.8 adds

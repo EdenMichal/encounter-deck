@@ -53,7 +53,9 @@
     <div class="ed-lm-actions">
       {{#each legend.actions}}
       <button type="button" data-action="edLegendary" data-combatant-id="{{@root.legend.id}}" data-item-id="{{itemId}}" data-activity-id="{{activityId}}"
-        {{#unless usable}}disabled data-tooltip="Costs {{cost}}: not enough left"{{/unless}}>
+        class="{{#unless usable}}ed-lm-spent{{/unless}}" {{#unless usable}}aria-disabled="true"{{/unless}}
+        {{#if uuid}}data-tooltip='<section class="loading" data-uuid="{{uuid}}"><i class="fas fa-spinner fa-spin-pulse"></i></section>'
+        data-tooltip-class="dnd5e2 dnd5e-tooltip item-tooltip themed theme-light"{{/if}}>
         <img src="{{img}}" alt=""><span>{{name}}</span>{{#if showCost}}<span class="ed-lm-cost">{{cost}}</span>{{/if}}
       </button>
       {{else}}

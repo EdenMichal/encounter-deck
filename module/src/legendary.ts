@@ -10,6 +10,8 @@ export interface Legendary { value: number; max: number }
 
 export interface LegendaryAction {
   itemId: string;
+  /** The item's UUID, for dnd5e's rich tooltip with its description. */
+  uuid: string;
   activityId: string;
   name: string;
   img: string;
@@ -50,7 +52,7 @@ export function legendaryActions(items: any): LegendaryAction[] {
     for (const a of activities) {
       const own = String(a.name ?? "").trim();
       const name = activities.length > 1 && own && own !== item.name ? `${item.name}: ${own}` : item.name;
-      out.push({ itemId: item.id, activityId: a.id, name, img: a.img || item.img || "", cost: Math.max(1, num(a.activation?.value, 1)) });
+      out.push({ itemId: item.id, uuid: item.uuid ?? "", activityId: a.id, name, img: a.img || item.img || "", cost: Math.max(1, num(a.activation?.value, 1)) });
     }
   }
   return out.sort((a, b) => a.cost - b.cost || a.name.localeCompare(b.name));

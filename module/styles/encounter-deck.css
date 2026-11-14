@@ -682,8 +682,9 @@
 }
 .ed-lm-actions button span:first-of-type { flex: 1; }
 .ed-lm-actions button img { flex: none; width: 18px; height: 18px; border: none; border-radius: 3px; object-fit: cover; }
-.ed-lm-actions button:hover:not(:disabled) { background: rgba(216, 180, 90, 0.32); }
-.ed-lm-actions button:disabled { opacity: 0.4; cursor: default; }
+/* Too costly: greyed out, but still hoverable so its description shows. */
+.ed-lm-actions button:hover:not(.ed-lm-spent) { background: rgba(216, 180, 90, 0.32); }
+.ed-lm-actions button.ed-lm-spent { opacity: 0.4; cursor: default; }
 .ed-lm-cost { color: var(--ed-gold); font-size: 11px; }
 .ed-lm-none { margin: 0; font-size: 11px; font-style: italic; color: rgba(244, 241, 234, 0.6); }
 .ed-lm-recharge .ed-lm-label i { color: #f0c24a; }
