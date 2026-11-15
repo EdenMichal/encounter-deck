@@ -2,3 +2,7 @@ node_modules/
 module/dist/
 .DS_Store
 *.log
+
+# Local tooling output (screenshots, page snapshots, Claude worktrees)
+.playwright-cli/
+.claude/

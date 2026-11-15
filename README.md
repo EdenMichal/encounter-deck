@@ -74,10 +74,10 @@ npm test           # vitest
 npm run typecheck
 ```
 
-Install by symlinking `module/` into the Foundry data folder:
+Install by symlinking `module/` into your Foundry data folder's `modules/` directory. Set `FOUNDRY_DATA` to your Foundry user data path (the folder that holds `Data/`):
 
 ```bash
-ln -s "$PWD/module" $FOUNDRY_DATA/Data/modules/encounter-deck
+ln -s "$PWD/module" "$FOUNDRY_DATA/Data/modules/encounter-deck"
 ```
 
 Foundry only discovers a new module when a world is launched from Setup, so relaunch the world once, then enable Encounter Deck in Manage Modules.
