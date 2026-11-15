@@ -6,7 +6,7 @@
 import { MODULE_ID } from "./constants";
 import { advancementOf, partyOf } from "./campaigns";
 import { splitXp } from "./fight";
-import { combatFlags, importedFolder, type ImportRecord } from "./importer";
+import { combatFlags, importedFolders, type ImportRecord } from "./importer";
 import { setting, setSetting } from "./settings";
 import { folderById, getEncounter } from "./store";
 
@@ -68,13 +68,13 @@ async function removeImported(combatId: string): Promise<void> {
     const ids = scene.tokens.filter((t: any) => t.flags?.[MODULE_ID]?.combat === combatId).map((t: any) => t.id);
     if (ids.length) await scene.deleteEmbeddedDocuments("Token", ids);
   }
-  const folder = importedFolder();
-  if (!folder) return;
+  const folders = importedFolders();
+  if (!folders.length) return;
   const inUse = new Set<string>();
   for (const scene of game.scenes) for (const t of scene.tokens) if (t.actorId) inUse.add(t.actorId);
-  const unused = folder.contents.filter((a: any) => !inUse.has(a.id)).map((a: any) => a.id);
+  const unused = folders.flatMap(f => f.contents).filter((a: any) => !inUse.has(a.id)).map((a: any) => a.id);
   if (unused.length) await CONFIG.Actor.documentClass.deleteDocuments(unused);
-  if (!folder.contents.length) await folder.delete();
+  for (const folder of folders) if (!folder.contents.length) await folder.delete();
 }
 
 /**

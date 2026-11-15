@@ -8,6 +8,7 @@ import { activeCampaign, partyOf } from "./campaigns";
 import { addEntry, readEntries, toSource, totalXp } from "./entries";
 import { hasMargin, mainEncounterOf, marginSlots, rollNow, tokenNames, type FightRecord, type Footprint } from "./fight";
 import { lairDelta } from "./legendary";
+import { createQueue, sharedInFlight } from "./serial";
 import { lookupMonster, xpForCr } from "./sources";
 import { copyEncounter, encounterFlags, getEncounter, isInLibrary, rootOf } from "./store";
 
@@ -29,14 +30,16 @@ export interface CombatFlags {
 
 export const combatFlags = (combat: any): CombatFlags => ({ imports: [], counts: [], ...(combat?.flags?.[MODULE_ID] ?? {}) });
 
-/** The world Actors folder that holds imported monsters while a fight runs. Players can't see what's in it. */
-export const importedFolder = (): any => game.folders.find((f: any) => f.type === "Actor" && f.flags?.[MODULE_ID]?.kind === "imported") ?? null;
+/**
+ * Every world Actors folder that holds imported monsters while a fight runs. Players can't see what's in them. There
+ * should be one, but up to v0.9 one Import could create several at once, so Finish and reuse look in all of them.
+ */
+export const importedFolders = (): any[] => game.folders.filter((f: any) => f.type === "Actor" && f.flags?.[MODULE_ID]?.kind === "imported");
 
-async function ensureImportedFolder(): Promise<any> {
-  return importedFolder() ?? CONFIG.Folder.documentClass.create({
-    name: IMPORTED_FOLDER, type: "Actor", sorting: "a", color: "#3b2e4a", flags: { [MODULE_ID]: { kind: "imported" } },
-  });
-}
+/** The folder new imported monsters go into. Concurrent callers (one per Creature Entry) share a single create. */
+const ensureImportedFolder = sharedInFlight(async (): Promise<any> => importedFolders()[0] ?? CONFIG.Folder.documentClass.create({
+  name: IMPORTED_FOLDER, type: "Actor", sorting: "a", color: "#3b2e4a", flags: { [MODULE_ID]: { kind: "imported" } },
+}));
 
 /**
  * The world actor a Creature Entry's tokens come from. A world actor is used as it is; a compendium monster is
@@ -46,9 +49,9 @@ async function worldActorFor(uuid: string): Promise<any> {
   const source = await fromUuid(uuid);
   if (!source) return null;
   if (!source.pack) return source;
-  const folder = await ensureImportedFolder();
-  const existing = folder.contents.find((a: any) => a.flags?.[MODULE_ID]?.source === uuid);
+  const existing = importedFolders().flatMap(f => f.contents).find((a: any) => a.flags?.[MODULE_ID]?.source === uuid);
   if (existing) return existing;
+  const folder = await ensureImportedFolder();
   // Not game.actors.importFromCompendium: it switches the sidebar to the Actors tab.
   const data = game.actors.fromCompendium(source);
   data.folder = folder.id;
@@ -112,8 +115,16 @@ async function placeTokens(scene: any, combat: any, list: Placement[], slots: { 
   return { tokens, counts: [...counts].map(([uuid, n]) => ({ uuid, n })) };
 }
 
+/**
+ * Imports and monsters dropped onto the tracker run one at a time: each reads the fight's records and token numbering
+ * and writes them back, so two at once (a double click, two quick drops) would lose one's record and repeat names.
+ */
+const oneAtATime = createQueue();
+
 /** Import an Encounter into the scene you're viewing. A Master Copy is copied into the Active Campaign first. */
-export async function importEncounter(id: string): Promise<boolean> {
+export const importEncounter = (id: string): Promise<boolean> => oneAtATime(() => importNow(id));
+
+async function importNow(id: string): Promise<boolean> {
   if (!game.user.isGM) return false;
   const scene = canvas.scene;
   if (!scene) return warn("View a scene first: Import puts the tokens in its Margin.");
@@ -121,12 +132,9 @@ export async function importEncounter(id: string): Promise<boolean> {
 
   let encounter = await getEncounter(id);
   if (!encounter) return warn("That Encounter is gone.");
-  if (isInLibrary(encounter.folder?.id ?? encounter._source.folder)) {
-    const campaign = activeCampaign();
-    if (!campaign) return warn("Create a Campaign first: a Master Copy is copied into the Active Campaign before it's imported.");
-    encounter = await copyEncounter(id, campaign.id, { fromMaster: true });
-    if (!encounter) return false;
-  }
+  const fromLibrary = isInLibrary(encounter.folder?.id ?? encounter._source.folder);
+  const campaign = fromLibrary ? activeCampaign() : rootOf(encounter.folder?.id ?? encounter._source.folder);
+  if (fromLibrary && !campaign) return warn("Create a Campaign first: a Master Copy is copied into the Active Campaign before it's imported.");
 
   const flags = encounterFlags(encounter);
   const entries = readEntries(encounter._source.system?.members ?? [], flags.entries, lookupMonster);
@@ -137,10 +145,18 @@ export async function importEncounter(id: string): Promise<boolean> {
   // Resolve every actor before touching the scene, so a failure leaves nothing half-placed.
   const actors = await Promise.all(live.map(e => worldActorFor(e.uuid)));
   const usable: Placement[] = live.map((e, i) => ({ uuid: e.uuid, count: e.count, actor: actors[i] })).filter(x => x.actor);
-  if (usable.length < live.length) skipped.push(...live.filter((_, i) => !actors[i]).map(e => e.name));
+  const found = live.filter((_, i) => actors[i]);
+  skipped.push(...live.filter((_, i) => !actors[i]).map(e => e.name));
+  if (!usable.length) return warn(`Couldn't bring in any creature of "${encounter.name}": ${skipped.join(", ")}.`);
 
   const slots = slotsFor(scene, usable);
   if (!slots) return warn(noRoom(scene, usable.reduce((n, p) => n + p.count, 0)));
+
+  // Only now that it will go ahead: a Master Copy is copied, so a failed Import leaves no stray copy behind.
+  if (fromLibrary) {
+    encounter = await copyEncounter(id, campaign.id, { fromMaster: true });
+    if (!encounter) return false;
+  }
 
   const combat = await combatFor(scene);
   const state = combatFlags(combat);
@@ -148,7 +164,6 @@ export async function importEncounter(id: string): Promise<boolean> {
 
   const combatants: object[] = tokens.map((t: any) => ({ tokenId: t.id, sceneId: scene.id, actorId: t.actorId }));
   // The present PCs join without tokens, unless they already have one on this scene.
-  const campaign = rootOf(encounter.folder?.id ?? encounter._source.folder);
   for (const { actor, present } of partyOf(campaign)) {
     if (!present || combat.combatants.some((c: any) => c.actorId === actor.id)) continue;
     const token = scene.tokens.find((t: any) => t.actorId === actor.id);
@@ -157,7 +172,7 @@ export async function importEncounter(id: string): Promise<boolean> {
   const created = await combat.createEmbeddedDocuments("Combatant", combatants);
   await rollForNewMonsters(combat, created);
 
-  const record: ImportRecord = { encounterId: encounter.id, name: encounter.name, xp: totalXp(live), campaignId: campaign?.id ?? null, kind: "import" };
+  const record: ImportRecord = { encounterId: encounter.id, name: encounter.name, xp: totalXp(found), campaignId: campaign?.id ?? null, kind: "import" };
   await combat.update({ [`flags.${MODULE_ID}`]: { imports: [...state.imports, record], counts } });
 
   const again = state.imports.length ? " as reinforcements" : "";
@@ -171,7 +186,9 @@ export async function importEncounter(id: string): Promise<boolean> {
  * combatant, and a Creature Entry in the Encounter the fight started with, so the Encounter records what was
  * actually fought. Its XP counts at Finish.
  */
-export async function addToFight(uuid: string, combat: any): Promise<boolean> {
+export const addToFight = (uuid: string, combat: any): Promise<boolean> => oneAtATime(() => addNow(uuid, combat));
+
+async function addNow(uuid: string, combat: any): Promise<boolean> {
   if (!game.user.isGM || !combat) return false;
   const state = combatFlags(combat);
   const encounterId = mainEncounterOf(state.imports);

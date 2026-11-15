@@ -12,6 +12,8 @@ const FIELDS = ["type", "system.details.cr", "system.details.type.value", "syste
   "system.source.book", "system.source.rules"];
 let monsters: Monster[] | null = null;
 let loading: Promise<Monster[]> | null = null;
+/** Bumped when the Sources change, so a load that started before then doesn't store its out-of-date list. */
+let generation = 0;
 
 export const xpForCr = (cr: number | null) => crToXp(cr, CONFIG.DND5E.CR_EXP_LEVELS);
 
@@ -64,7 +66,9 @@ export const monsterPackCount = (): number | null => (monsters ? new Set(monster
 /** Every NPC in the Sources, loaded from the compendium indexes once and cached. */
 export function loadMonsters(): Promise<Monster[]> {
   if (monsters) return Promise.resolve(monsters);
-  loading ??= (async () => {
+  if (loading) return loading;
+  const started = generation;
+  const run: Promise<Monster[]> = (async () => {
     const all: Monster[] = [];
     for (const p of sourcePacks()) {
       try {
@@ -77,17 +81,22 @@ export function loadMonsters(): Promise<Monster[]> {
         console.warn(`Encounter Deck | Could not index ${p.collection}`, err);
       }
     }
+    // The Sources changed while this was loading: load them again instead of keeping the old list.
+    if (started !== generation) return loadMonsters();
     monsters = sortMonsters(all);
-    loading = null;
     return monsters;
   })();
-  return loading;
+  loading = run;
+  run.finally(() => { if (loading === run) loading = null; }).catch(() => undefined);
+  return run;
 }
 
 export const cachedMonsters = (): Monster[] | null => monsters;
 
 export function invalidateMonsters(): void {
   monsters = null;
+  loading = null;
+  generation++;
 }
 
 /** dnd5e's own checklist of every compendium, for anything our Sources dialog doesn't show. */
