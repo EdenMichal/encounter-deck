@@ -428,6 +428,13 @@
   color: #f4f1ea;
 }
 #encounter-deck-carousel.ed-hidden { display: none; }
+/*
+ * On the table display, Monk's Common Display hides everything in #ui-top but its own short list, which took the
+ * Carousel with it. The two :not(#id)s only add weight, so this outranks that rule.
+ */
+body.hide-ui #ui-middle #ui-top > #encounter-deck-carousel:not(.ed-hidden):not(#loading):not(#combat-dock) { display: block !important; }
+/* There the Carousel takes the place of Monk's popped-out tracker, which shows only the current turn. */
+body.hide-ui.ed-table-carousel #combat-popout { display: none !important; }
 .ed-car-strip { display: flex; align-items: flex-start; gap: 10px; }
 /* The GM's turn arrows: quiet chevrons beside the strip, brightening to gold on hover. */
 .ed-car-nav {
