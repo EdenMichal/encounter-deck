@@ -174,15 +174,17 @@ class Carousel extends HandlebarsApplicationMixin(ApplicationV2) {
   async _prepareContext() {
     const combat = shownCombat();
     const isGM = game.user.isGM;
+    const isTable = isTableDisplay();
     const show = !!combat?.started && !oldCarouselActive()
-      && canSeeCarousel(setting("carouselAudience") as Audience, { isGM, isTable: isTableDisplay() });
-    if (!show) return { show: false, legend: null };
+      && canSeeCarousel(setting("carouselAudience") as Audience, { isGM, isTable });
+    if (!show) return { show: false, isTable, legend: null };
     const cards = buildCards(combat.turns.map(inputOf), combat.combatant?.id ?? null, isGM);
     const open = cards.find(c => c.id === this.expanded && c.more > 0);
     if (!open) this.expanded = null;
     return {
       show,
       isGM,
+      isTable,
       round: combat.round,
       cards,
       popover: open ? { id: open.id, name: open.name, statuses: open.allStatuses } : null,
@@ -195,6 +197,8 @@ class Carousel extends HandlebarsApplicationMixin(ApplicationV2) {
   async _onRender(context: any, options: any) {
     await super._onRender(context, options);
     this.element.classList.toggle("ed-hidden", !context.show);
+    // On the table display the Carousel replaces Monk's Common Display's one-combatant tracker (see the CSS).
+    document.body.classList.toggle("ed-table-carousel", context.show && context.isTable);
     // Keep the current card in view when the fight is wider than the screen.
     const list = (this.element as HTMLElement).querySelector<HTMLElement>(".ed-car-list");
     const current = (this.element as HTMLElement).querySelector<HTMLElement>(".ed-car-item.current");
