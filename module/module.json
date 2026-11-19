@@ -3,6 +3,7 @@
   "title": "Encounter Deck",
   "description": "Encounter prep and running for dnd5e: Campaigns, a Shared Library and a Builder with a live 2024 difficulty meter inside the Combat tab, plus a carousel initiative tracker across the top for the whole table.",
   "version": "0.10.0",
+  "license": "https://github.com/EdenMichal/encounter-deck/blob/main/LICENSE",
   "compatibility": {
     "minimum": "14",
     "verified": "14.360"
