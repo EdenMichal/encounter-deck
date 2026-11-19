@@ -1,10 +1,10 @@
 # Encounter Deck
 
-**Prep your fights by campaign. Run them as real combat. Keep the map clean for your minis.**
+**Encounter prep for D&D 5e GMs who play with miniatures on a Foundry table display.**
 
-Encounter Deck is a Foundry VTT module for D&D 5e GMs. You build encounters ahead of time, organised by campaign, and nothing touches a scene until you start the fight. When you do, the monsters join a real Foundry combat with their tokens parked in the scene's margin, off the map. That way the table display stays clear for miniatures, and you still get initiative, HP, conditions and stat blocks. A carousel across the top of the screen shows the whole table whose turn it is.
+I built Encounter Deck for my own table. The map goes on a table display and the monsters are miniatures, so monster tokens on the map only get in the way, but I still wanted Foundry to track initiative, HP and conditions. So you build encounters ahead of time, sorted by campaign, and none of it touches a scene until the fight starts. Then the monsters join a real Foundry combat with their tokens parked in the scene's margin, off the map. A carousel across the top of the screen shows everyone whose turn it is.
 
-Needs **Foundry VTT v14** and **dnd5e 5.3 or later**. Current version: **v0.10** ([changelog](CHANGELOG.md)).
+It needs Foundry VTT v14 and dnd5e 5.3 or later. This is v0.10, and the [changelog](CHANGELOG.md) lists what each version added.
 
 ## Screenshots
 
@@ -28,31 +28,40 @@ From a real campaign, so you can see what it looks like at the table.
 
 - **Import.** Press ▶ on an encounter. Its monsters get numbered tokens in the margin right beside the map, and they join the combat with the PCs who are present. Import another encounter mid-fight for reinforcements.
 - **Add on the fly.** Drop a monster, a PC or a whole encounter onto the tracker during a fight. New monsters roll initiative straight away and slot into the turn order.
-- **A better tracker.** AC and HP on every row. Type `-7` for damage or `+5` for healing. A row at the top shows the fight's encounter and the XP it's worth.
+- **The tracker.** AC and HP on every row. Type `-7` for damage or `+5` for healing. A row at the top shows the fight's encounter and the XP it's worth.
 - **Stat Blocks.** A monster's sheet opens in one fixed spot beside the sidebar. When the turn passes to a monster, its sheet comes up.
-- **Legendary monsters.** Gold pips show legendary actions and resistances left. Hover them for a small menu that uses an action in one click, and shows which recharge abilities are ready.
+- **Legendary monsters.** Gold pips show legendary actions and resistances left. Hover them to open a small menu. One click there uses a legendary action, and it shows which recharge abilities are ready.
 
 ### At the table
 
-- **The Carousel.** The fight in initiative order across the top of the screen, for everyone (or only the GM, if you prefer). Players see the heroes' initiative and HP. For monsters they only see when one is Bloodied.
+- **The Carousel.** The fight in initiative order across the top of the screen, for everyone (or only the GM, if you prefer). Players see the heroes' initiative and HP. For monsters, they only see when one is Bloodied.
 - **The table display stays on the map.** If you use Monk's Common Display, it won't pan off the map to follow monsters in the margin.
 
 ### When the fight ends
 
-- **Finish.** End the combat as usual. The encounter is marked Completed and moves to the campaign's Completed folder. In XP mode, its XP is split between the PCs who were there. Every imported token and actor is cleaned up.
+- **Finish.** End the combat as usual. Encounter Deck marks the encounter Completed and moves it to the campaign's Completed folder. In XP mode, the PCs who were there split its XP. Then it deletes every token and actor it imported.
 - **Loot.** With Monk's TokenBar, the loot dialog hands out the monsters' gear and coins to the PCs, or into the party inventory if you use Mobile Deck.
+
+## Bring your own monsters
+
+Encounter Deck ships no monsters, stat blocks, art or encounters. It works with the monster compendiums already in your world, and everything you build stays in that world.
+
+- **Monsters come from your compendiums.** The Builder searches the compendiums you switch on as Sources. dnd5e's free SRD monsters are there from the start. Anything else you have shows up too, such as books bought on Foundry, monsters brought in with DDB Importer, or your own homebrew compendiums. The Sources list is dnd5e's own source checklist, so it matches dnd5e's Compendium Browser.
+- **Encounters link to monsters.** An encounter saves a link to each monster, plus its name, CR and XP. If you later switch off or remove that compendium, the encounter still shows the monster's name and CR, marks the row missing, and lets you swap in a replacement.
+- **Fights use temporary copies.** When you import an encounter, Encounter Deck copies its compendium monsters into a hidden Actors folder for the fight, and Finish deletes them again. Your compendiums never change.
+- **Your encounters stay in your world.** The first time a GM loads a world, Encounter Deck creates an Encounter Deck compendium there, and your campaigns and encounters go into it. The module uploads nothing, and a new world starts with an empty deck.
 
 ## Works with
 
-- **Monk's Common Display**: the Carousel can show on the table display, which stays on the map during monster turns.
-- **Monk's TokenBar**: its loot dialog becomes Distribute Loot. Encounter Deck offers to turn off TokenBar's own XP dialog, so XP isn't awarded twice.
-- **[Mobile Deck](https://github.com/EdenMichal/mobile-deck)**: loot can go straight into the party inventory.
-- **Carousel Combat Tracker**: Encounter Deck has its own carousel, so it offers to turn that one off.
+- **Monk's Common Display.** The Carousel can show on the table display, and the display stays on the map during monster turns.
+- **Monk's TokenBar.** Its loot dialog becomes Distribute Loot. Encounter Deck offers to turn off TokenBar's own XP dialog, so the party doesn't get XP twice.
+- **[Mobile Deck](https://github.com/EdenMichal/mobile-deck).** Loot goes straight into the party inventory.
+- **Carousel Combat Tracker.** Encounter Deck draws its own carousel, so it offers to turn that one off.
 
 ## More modules
 
-- **[Music Deck](https://github.com/EdenMichal/music-deck)**: two music decks with a crossfader, ambient sound scenes, SFX pads and combat music, played from a redesigned Playlists tab or an Elgato Stream Deck+.
-- **[Mobile Deck](https://github.com/EdenMichal/mobile-deck)**: a phone and tablet interface for Foundry (D&D5e and PF2e), with a Character Builder and party inventory.
+- **[Music Deck](https://github.com/EdenMichal/music-deck).** Two music decks with a crossfader, ambient sound scenes, SFX pads and combat music, played from a redesigned Playlists tab or an Elgato Stream Deck+.
+- **[Mobile Deck](https://github.com/EdenMichal/mobile-deck).** A phone and tablet interface for Foundry (D&D5e and PF2e), with a Character Builder and party inventory.
 
 ## Install
 
@@ -69,7 +78,7 @@ Then link the `module/` folder into your Foundry data folder's `modules/` direct
 ln -s "$PWD/module" "$FOUNDRY_DATA/Data/modules/encounter-deck"
 ```
 
-Foundry only notices a new module when a world is launched from Setup, so relaunch the world once, then enable Encounter Deck in Manage Modules.
+Foundry only notices a new module when you launch a world from Setup, so relaunch the world once, then enable Encounter Deck in Manage Modules.
 
 ## Develop
 
@@ -79,7 +88,7 @@ npm test           # vitest
 npm run typecheck
 ```
 
-The design lives in [PLAN.md](PLAN.md), the terms in [CONTEXT.md](CONTEXT.md), and the decisions in [docs/adr/](docs/adr/).
+[PLAN.md](PLAN.md) has the design, [CONTEXT.md](CONTEXT.md) the terms, and [docs/adr/](docs/adr/) the decisions.
 
 ## License
 
