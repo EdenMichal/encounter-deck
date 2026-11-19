@@ -79,26 +79,6 @@ Encounter Deck ships no monsters, stat blocks, art or encounters. It works with 
 
 Foundry's **Check for Updates** finds new versions through the same URL.
 
-## Develop
-
-```bash
-npm install
-npm run build      # module/dist/main.js
-npm run watch      # rebuild on change
-npm test           # vitest
-npm run typecheck
-```
-
-To run it from a checkout, link `module/` into your Foundry data folder instead of installing it. Set `FOUNDRY_DATA` to your Foundry user data path (the folder that holds `Data/`):
-
-```bash
-ln -s "$PWD/module" "$FOUNDRY_DATA/Data/modules/encounter-deck"
-```
-
-To release, bump `version` and the `download` URL in `module/module.json`, then push a tag such as `v1.0.1`. The Release workflow builds the zip and publishes it with `module.json` as a GitHub release.
-
-[PLAN.md](PLAN.md) has the design, [CONTEXT.md](CONTEXT.md) the terms, and [docs/adr/](docs/adr/) the decisions.
-
 ## License
 
 [MIT](LICENSE).
