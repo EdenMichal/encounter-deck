@@ -80,3 +80,7 @@ npm run typecheck
 ```
 
 The design lives in [PLAN.md](PLAN.md), the terms in [CONTEXT.md](CONTEXT.md), and the decisions in [docs/adr/](docs/adr/).
+
+## License
+
+[MIT](LICENSE).
