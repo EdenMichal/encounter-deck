@@ -42,6 +42,15 @@ From a real campaign, so you can see what it looks like at the table.
 - **Finish.** End the combat as usual. Encounter Deck marks the encounter Completed and moves it to the campaign's Completed folder. In XP mode, the PCs who were there split its XP. Then it deletes every token and actor it imported.
 - **Loot.** With Monk's TokenBar, the loot dialog hands out the monsters' gear and coins to the PCs, or into the party inventory if you use Mobile Deck.
 
+## Bring your own monsters
+
+Encounter Deck ships no monsters, stat blocks, art or encounters. It works with the monster compendiums already in your world, and everything you build stays in that world.
+
+- **Monsters come from your compendiums.** The Builder searches the compendiums you switch on as Sources. dnd5e's free SRD monsters are there from the start. Anything else you have shows up too, such as books bought on Foundry, monsters brought in with DDB Importer, or your own homebrew compendiums. The Sources list is dnd5e's own source checklist, so it matches dnd5e's Compendium Browser.
+- **Encounters link to monsters.** An encounter saves a link to each monster, plus its name, CR and XP. If you later switch off or remove that compendium, the encounter still shows the monster's name and CR, marks the row missing, and lets you swap in a replacement.
+- **Fights use temporary copies.** When you import an encounter, Encounter Deck copies its compendium monsters into a hidden Actors folder for the fight, and Finish deletes them again. Your compendiums never change.
+- **Your encounters stay in your world.** The first time a GM loads a world, Encounter Deck creates an Encounter Deck compendium there, and your campaigns and encounters go into it. The module uploads nothing, and a new world starts with an empty deck.
+
 ## Works with
 
 - **Monk's Common Display.** The Carousel can show on the table display, and the display stays on the map during monster turns.
