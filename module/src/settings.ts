@@ -28,6 +28,14 @@ export function registerSettings(): void {
     choices: { everyone: "Everyone", players: "GM and players, not the table display", gm: "GM only" },
     default: "everyone",
   });
+  game.settings.register(MODULE_ID, "displayFollowsMargin", {
+    name: "Table display follows tokens in the Margin",
+    hint: "When Monk's Common Display follows the combat (or the GM's controlled tokens), it pans to whoever's turn it is. Monsters sit in the Margin, so on their turns the map slides away. Leave this off and the table display stays put on those turns.",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: false,
+  });
   // Whether the GM has been asked once about turning off Carousel Combat Tracker.
   game.settings.register(MODULE_ID, "carouselTakeoverAsked", { scope: "world", config: false, type: Boolean, default: false });
   game.settings.register(MODULE_ID, "rechargeAsked", { scope: "world", config: false, type: Boolean, default: false });

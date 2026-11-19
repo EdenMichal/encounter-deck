@@ -16,8 +16,8 @@
     {{#if campaign}}
     <div class="ed-party">
       {{#each party.members}}
-      <button type="button" class="ed-pc {{#unless present}}absent{{/unless}}" data-action="edTogglePresent" data-actor-id="{{id}}"
-        data-tooltip="{{name}}, level {{level}}: {{#if present}}Present{{else}}Absent{{/if}} (click to toggle)" aria-pressed="{{present}}">
+      <button type="button" class="ed-pc {{#unless present}}absent{{/unless}}" data-action="edTogglePresent" data-actor-id="{{id}}" draggable="true"
+        data-tooltip="{{name}}, level {{level}}: {{#if present}}Present{{else}}Absent{{/if}} (click to toggle, drag onto a running fight to add)" aria-pressed="{{present}}">
         <img src="{{img}}" alt="{{name}}"><span class="ed-pc-level">{{level}}</span>
       </button>
       {{else}}

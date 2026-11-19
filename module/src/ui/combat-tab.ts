@@ -10,10 +10,10 @@ import {
 import { setSetting, setting } from "../settings";
 import {
   copyEncounter, createEncounter, createFolder, deleteEncounter, deleteFolder, folderById, getEncounter,
-  isInLibrary, kindOf, moveEncounter, pack, rootOf,
+  isCompletedFolder, isInLibrary, kindOf, moveEncounter, pack, rootOf,
 } from "../store";
 import { parseHp, summarizeFight } from "../fight";
-import { addToFight, combatFlags, importEncounter } from "../importer";
+import { addHeroToFight, addToFight, combatFlags, importEncounter, isHero } from "../importer";
 import { browserContext, type BrowserUi } from "./browser-model";
 import { builder, openBuilder } from "./builder";
 import { isMonster, showStatBlock } from "./statblocks";
@@ -282,7 +282,7 @@ export function createCombatTab(Base: any) {
             <span class="ed-fight-xp" data-tooltip="Awarded at Finish (XP mode)">${fmt(summary.xp)} XP</span>
           </div>
           ${lines ? `<ul class="ed-fight-lines">${lines}</ul>` : ""}
-          <p class="ed-fight-hint">Drop a monster or an Encounter here to add it</p>
+          <p class="ed-fight-hint">Drop a monster, a PC or an Encounter here to add it</p>
         </section>`);
     }
 
@@ -367,7 +367,8 @@ export function createCombatTab(Base: any) {
       const folder = (li: HTMLElement) => folderById(folderOf(li));
       const isRoot = (li: HTMLElement) => !!kindOf(folder(li));
       return [
-        { label: "New Encounter", icon: "fa-solid fa-plus", onClick: (_e: Event, li: HTMLElement) => newEncounter(folderOf(li)) },
+        { label: "New Encounter", icon: "fa-solid fa-plus", visible: (li: HTMLElement) => li.dataset.completed !== "true",
+          onClick: (_e: Event, li: HTMLElement) => newEncounter(folderOf(li)) },
         { label: "New Folder", icon: "fa-solid fa-folder-plus", visible: (li: HTMLElement) => li.dataset.canNest === "true",
           onClick: (_e: Event, li: HTMLElement) => newFolder(folderOf(li)) },
         { label: "Campaign Settings", icon: "fa-solid fa-gear", visible: (li: HTMLElement) => kindOf(folder(li)) === "campaign",
@@ -390,6 +391,14 @@ export function createCombatTab(Base: any) {
      */
     bindDragDrop(el: HTMLElement): void {
       el.addEventListener("dragstart", (e: DragEvent) => {
+        // A party portrait drags as its actor, so it can be dropped onto the tracker (or the canvas).
+        const pc = (e.target as HTMLElement).closest?.<HTMLElement>(".ed-pc[data-actor-id]");
+        const actor = pc ? game.actors.get(pc.dataset.actorId) : null;
+        if (actor && e.dataTransfer) {
+          e.dataTransfer.setData("text/plain", JSON.stringify(actor.toDragData()));
+          e.dataTransfer.effectAllowed = "copy";
+          return;
+        }
         const row = (e.target as HTMLElement).closest?.<HTMLElement>(".ed-row");
         if (!row || !e.dataTransfer) return;
         e.dataTransfer.setData("text/plain", JSON.stringify({ type: ENCOUNTER_DRAG_TYPE, id: row.dataset.encounterId }));
@@ -423,7 +432,14 @@ export function createCombatTab(Base: any) {
           let data: any;
           try { data = JSON.parse(e.dataTransfer?.getData("text/plain") ?? ""); } catch { return; }
           if (data?.type === ENCOUNTER_DRAG_TYPE && data.id) { e.preventDefault(); e.stopPropagation(); return void runImport(data.id); }
-          if (data?.type === "Actor" && data.uuid) { e.preventDefault(); e.stopPropagation(); return void addToFight(data.uuid, this.viewed); }
+          if (data?.type === "Actor" && data.uuid) {
+            e.preventDefault();
+            e.stopPropagation();
+            const combat = this.viewed;
+            // A Hero (a PC, or a companion a player owns) joins the fight; anything else is a monster for its Encounter.
+            const actor = await fromUuid(data.uuid);
+            return void (isHero(actor) ? addHeroToFight(data.uuid, combat) : addToFight(data.uuid, combat));
+          }
           return;
         }
         const head = (e.target as HTMLElement).closest?.<HTMLElement>(".ed-folder-head");
@@ -438,7 +454,16 @@ export function createCombatTab(Base: any) {
         if (!entry || entry.folder === target) return;
         const fromLibrary = isInLibrary(entry.folder);
         const toLibrary = isInLibrary(target);
-        if (rootOf(entry.folder)?.id === rootOf(target)?.id) return moveEncounter(data.id, target);
+        if (rootOf(entry.folder)?.id === rootOf(target)?.id) {
+          // The Completed folder holds only Completed Encounters: dropping one in completes it (and remembers where
+          // it came from); dragging one out makes it Ready again.
+          if (isCompletedFolder(target)) return setStatus(data.id, "completed");
+          if (isCompletedFolder(entry.folder)) {
+            const doc = await getEncounter(data.id);
+            return doc?.update({ folder: target, [`flags.${MODULE_ID}.status`]: "ready", [`flags.${MODULE_ID}.completedFrom`]: null });
+          }
+          return moveEncounter(data.id, target);
+        }
         if (fromLibrary && !toLibrary) return useMaster(data.id, target);
         // copyEncounter turns a Completed one back to Ready, so a new Master Copy is never Completed.
         const copy = await copyEncounter(data.id, target);

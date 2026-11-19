@@ -27,35 +27,56 @@ export function hasMargin(area: SceneArea): boolean {
   return r.x > 0 || r.y > 0 || r.x + r.width < area.width || r.y + r.height < area.height;
 }
 
+/** How far a rectangle sits from another, in pixels: 0 when it touches it (edge or corner). */
+function gap(a: Rect, b: Rect): number {
+  const dx = Math.max(b.x - (a.x + a.width), a.x - (b.x + b.width), 0);
+  const dy = Math.max(b.y - (a.y + a.height), a.y - (b.y + b.height), 0);
+  return Math.max(dx, dy);
+}
+
 /**
  * Free spots in the Margin for each footprint, in order: grid-aligned, fully outside the background, inside the
- * canvas, and not on top of an existing token or of each other. Fills the top margin first, left to right.
- * Returns null when they don't all fit.
+ * canvas, and not on top of an existing token or of each other. The ring of cells hugging the background fills
+ * first, so tokens sit right beside the map instead of out in a far corner of the padding. Within a ring: top to
+ * bottom, left to right. Returns null when they don't all fit.
  */
 export function marginSlots(area: SceneArea, occupied: Rect[], footprints: Footprint[]): Point[] | null {
   const taken = [...occupied];
   const slots: Point[] = [];
   const cols = Math.floor(area.width / area.size);
   const rows = Math.floor(area.height / area.size);
-  for (const fp of footprints) {
-    const w = Math.max(1, Math.ceil(fp.width)) * area.size;
-    const h = Math.max(1, Math.ceil(fp.height)) * area.size;
-    let found: Point | null = null;
-    for (let row = 0; row < rows && !found; row++) {
-      for (let col = 0; col < cols && !found; col++) {
+  const candidates = new Map<string, Rect[]>();
+  const candidatesFor = (w: number, h: number): Rect[] => {
+    const key = `${w}x${h}`;
+    let list = candidates.get(key);
+    if (list) return list;
+    list = [];
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < cols; col++) {
         const rect = { x: col * area.size, y: row * area.size, width: w, height: h };
         if (rect.x + w > area.width || rect.y + h > area.height) continue;
         if (overlaps(rect, area.sceneRect)) continue;
-        if (taken.some(t => overlaps(rect, t))) continue;
-        found = { x: rect.x, y: rect.y };
-        taken.push(rect);
+        list.push(rect);
       }
     }
-    if (!found) return null;
-    slots.push(found);
+    // Stable sort: equal gaps keep their top-to-bottom, left-to-right order.
+    list.sort((a, b) => gap(a, area.sceneRect) - gap(b, area.sceneRect));
+    candidates.set(key, list);
+    return list;
+  };
+  for (const fp of footprints) {
+    const w = Math.max(1, Math.ceil(fp.width)) * area.size;
+    const h = Math.max(1, Math.ceil(fp.height)) * area.size;
+    const rect = candidatesFor(w, h).find(r => !taken.some(t => overlaps(r, t)));
+    if (!rect) return null;
+    taken.push(rect);
+    slots.push({ x: rect.x, y: rect.y });
   }
   return slots;
 }
+
+/** Whether a token's rectangle lies entirely in the Margin, off the background. */
+export const inMargin = (token: Rect, sceneRect: Rect): boolean => !overlaps(token, sceneRect);
 
 /**
  * Token names for `count` new copies of a monster, when `already` of it are in the fight. A lone creature keeps its
