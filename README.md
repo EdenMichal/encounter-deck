@@ -2,7 +2,7 @@
 
 A Foundry VTT v14 (dnd5e 5.3+) module for preparing encounters ahead of time, organized by campaign, without putting anything on a scene until you need it. Prep is GM-only; the carousel is for the whole table.
 
-Status: **v0.9 (Legendary Menu)**. See [PLAN.md](PLAN.md) for the full spec and roadmap, [CONTEXT.md](CONTEXT.md) for the terms, and [docs/adr/](docs/adr/) for the decisions.
+Status: **v0.10 (Completed folders)**. See [PLAN.md](PLAN.md) for the full spec and roadmap, [CONTEXT.md](CONTEXT.md) for the terms, and [docs/adr/](docs/adr/) for the decisions.
 
 ## What v0.1 does
 
@@ -47,6 +47,13 @@ Status: **v0.9 (Legendary Menu)**. See [PLAN.md](PLAN.md) for the full spec and 
 - **The fight's Encounter:** a row at the top of the combat tracker (GM only) names the Encounter the fight started with, with every later Import listed as reinforcements, every monster added mid-fight as added, and the XP Finish will award. Click a name to open that Encounter in the Builder.
 - **Add on the fly:** during a fight, drop a monster on the tracker (from the Builder's results, the Actors tab or a compendium). It gets a numbered token in the Margin and joins the combat, and it's saved into the fight's Encounter, so the Encounter records what was fought. Drop an Encounter from the browser (with the tracker popped out) to import it as reinforcements. The tracker shows a dashed gold outline while you drag over it.
 - **Legendary resistance pips:** under a legendary monster's legendary action pips on the Carousel, small gold shields show its legendary resistances left (GM only).
+
+## What v0.10 adds
+
+- **Drag PCs into a fight:** drop a player character (from the Actors tab, or a portrait in the browser's party row) onto the running fight's tracker. It joins on its token if it has one on the scene, token-less otherwise. A party member marked absent is marked present, so they share the XP at Finish. A companion a player owns joins the same way, not as a monster.
+- **Tokens beside the map:** imported monsters now fill the Margin ring right next to the map first, instead of starting in the canvas's far top-left corner.
+- **The table display stays put:** with Monk's Common Display following the combat (or the GM's controlled tokens), monster turns no longer pan the table display out into the Margin. The world setting "Table display follows tokens in the Margin" turns the old behaviour back on.
+- **Completed folders:** each Campaign files its played Encounters in its own Completed folder, hidden unless "Show completed" is ticked. Finish, the row menu and the Builder all file them; marking one Ready or Draft again returns it to the folder it came from. Dragging an Encounter into the Completed folder completes it, and dragging it out makes it Ready. Encounters already Completed are filed when the world loads.
 
 ## What v0.9 adds
 

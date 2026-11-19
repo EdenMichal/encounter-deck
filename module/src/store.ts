@@ -74,8 +74,16 @@ export function rootOf(folderId: string | null | undefined): any {
   return folder ?? null;
 }
 
+/** A folder's subfolders by name, with a Completed folder always last. */
 export const childFolders = (parentId: string): any[] =>
-  folders().filter(f => parentIdOf(f) === parentId).sort((a, b) => a.name.localeCompare(b.name));
+  folders().filter(f => parentIdOf(f) === parentId)
+    .sort((a, b) => Number(kindOf(a) === "completed") - Number(kindOf(b) === "completed") || a.name.localeCompare(b.name));
+
+/** A Campaign's Completed folder, if it has one yet. */
+export const completedFolderOf = (campaignId: string): any =>
+  folders().find(f => kindOf(f) === "completed" && parentIdOf(f) === campaignId) ?? null;
+
+export const isCompletedFolder = (folderId: string | null | undefined): boolean => kindOf(folderById(folderId)) === "completed";
 
 /** How deep a folder is from the pack root (a Campaign is 1). Foundry allows CONST.FOLDER_MAX_DEPTH. */
 export function depthOf(folderId: string): number {
@@ -110,7 +118,7 @@ export async function deleteFolder(id: string): Promise<void> {
 export const encounterFlags = (doc: any): EncounterFlags => ({ ...defaultFlags(), ...(doc?.flags?.[MODULE_ID] ?? {}) });
 
 export function defaultFlags(): EncounterFlags {
-  return { status: "draft", tags: [], notes: "", tactics: "", link: null, entries: [], copiedFrom: null, inLair: false };
+  return { status: "draft", tags: [], notes: "", tactics: "", link: null, entries: [], copiedFrom: null, inLair: false, completedFrom: null };
 }
 
 /** Index entries of the Encounters directly inside a folder. */
@@ -124,16 +132,24 @@ export async function createEncounter(folderId: string, name = "New Encounter"):
   return ActorClass().create({ name, type: "encounter", folder: folderId, flags: { [MODULE_ID]: defaultFlags() } }, { pack: PACK_ID });
 }
 
-/** Copy an Encounter into a folder. A copy of a Completed one starts over as Ready. */
+/**
+ * Copy an Encounter into a folder. A copy of a Completed one starts over as Ready, so it never lands in a Completed
+ * folder: it goes where the original came from (or the Campaign itself) instead.
+ */
 export async function copyEncounter(id: string, folderId: string, { rename = false, fromMaster = false } = {}): Promise<any> {
   const source = await getEncounter(id);
   if (!source) return null;
   const data = source.toObject();
   delete data._id;
   delete data._stats;
+  const flags = { ...defaultFlags(), ...(data.flags?.[MODULE_ID] ?? {}) };
+  if (isCompletedFolder(folderId)) {
+    const back = folderById(flags.completedFrom);
+    folderId = back && rootOf(back.id)?.id === rootOf(folderId)?.id && !isCompletedFolder(back.id) ? back.id : rootOf(folderId)?.id ?? folderId;
+  }
   data.folder = folderId;
   if (rename) data.name = `${data.name} (Copy)`;
-  const flags = { ...defaultFlags(), ...(data.flags?.[MODULE_ID] ?? {}) };
+  flags.completedFrom = null;
   if (flags.status === "completed") flags.status = "ready";
   if (fromMaster) flags.copiedFrom = source.uuid;
   data.flags = { ...data.flags, [MODULE_ID]: flags };

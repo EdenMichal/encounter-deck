@@ -16,7 +16,8 @@ export type AdvancementMode = "xp" | "milestone";
 /** A Campaign's own choice, or "default" to follow the world setting. */
 export type CampaignAdvancement = AdvancementMode | "default";
 
-export type FolderKind = "campaign" | "library";
+/** A Campaign, the Shared Library, or a Campaign's Completed folder (where finished Encounters go). */
+export type FolderKind = "campaign" | "library" | "completed";
 
 /** One Creature Entry's saved copy of its monster, so the row can still show it if the Source is gone. */
 export interface EntryCache {
@@ -39,6 +40,8 @@ export interface EncounterFlags {
   copiedFrom?: string | null;
   /** In its lair: Import puts every monster that has a lair inside it (2024 rules, +1 legendary action and resistance). */
   inLair?: boolean;
+  /** While Completed: the folder it was in before it moved to its Campaign's Completed folder, to return to. */
+  completedFrom?: string | null;
 }
 
 export const T = (name: string) => `modules/${MODULE_ID}/templates/${name}.hbs`;

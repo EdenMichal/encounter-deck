@@ -5,7 +5,7 @@ import { BAND_LABELS, bandOf, partyBudget, type Budget } from "../difficulty";
 import { readEntries, totalCount, totalXp } from "../entries";
 import { setting } from "../settings";
 import { lookupMonster } from "../sources";
-import { campaignFolders, childFolders, depthOf, encountersIn, libraryFolder, pack } from "../store";
+import { campaignFolders, childFolders, depthOf, encountersIn, kindOf, libraryFolder, pack } from "../store";
 
 export interface BrowserUi { query: string; openEncounter: string | null }
 
@@ -48,16 +48,23 @@ export function browserContext(ui: BrowserUi) {
     words.every(w => r.name.toLowerCase().includes(w) || r.tags.some(t => t.toLowerCase().includes(w)) || r.summary.toLowerCase().includes(w));
 
   const node = (folder: any, isLibrary: boolean): any => {
-    const folders = childFolders(folder.id).map(f => node(f, isLibrary)).filter(n => !words.length || n.hasContent);
+    // A Campaign's Completed folder only shows with "Show completed"; until then its Encounters just count as hidden.
+    const shown = childFolders(folder.id).filter(f => {
+      if (showCompleted || kindOf(f) !== "completed") return true;
+      hiddenCompleted += encountersIn(f.id).length;
+      return false;
+    });
+    const folders = shown.map(f => node(f, isLibrary)).filter(n => !words.length || n.hasContent);
     const encounters = encountersIn(folder.id).map(e => row(e, isLibrary)).filter(r => {
       if (r.status === "completed" && !showCompleted) { hiddenCompleted++; return false; }
       return matches(r);
     });
     const depth = depthOf(folder.id);
+    const isCompleted = kindOf(folder) === "completed";
     return {
-      id: folder.id, name: folder.name, isLibrary, root: depth === 1, depth,
+      id: folder.id, name: folder.name, isLibrary, isCompleted, root: depth === 1, depth,
       collapsed: !words.length && !!collapsed[folder.id],
-      canNest: depth < CONST.FOLDER_MAX_DEPTH,
+      canNest: depth < CONST.FOLDER_MAX_DEPTH && !isCompleted,
       folders, encounters, hasContent: folders.length + encounters.length > 0,
     };
   };

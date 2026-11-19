@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { hasMargin, mainEncounterOf, marginSlots, parseHp, rollNow, splitXp, summarizeFight, tokenNames, type SceneArea } from "../src/fight";
+import { hasMargin, inMargin, mainEncounterOf, marginSlots, parseHp, rollNow, splitXp, summarizeFight, tokenNames, type SceneArea } from "../src/fight";
 
 // A 10×8 cell canvas (100px cells) with a 2-cell margin all round: the background is cells 2–7 × 2–5.
 const area: SceneArea = { width: 1000, height: 800, size: 100, sceneRect: { x: 200, y: 200, width: 600, height: 400 } };
@@ -12,13 +12,21 @@ describe("hasMargin", () => {
 });
 
 describe("marginSlots", () => {
-  it("fills the top margin left to right", () => {
-    expect(marginSlots(area, [], [{ width: 1, height: 1 }, { width: 1, height: 1 }])).toEqual([{ x: 0, y: 0 }, { x: 100, y: 0 }]);
+  it("hugs the map: the ring right beside the background fills first, top row left to right", () => {
+    expect(marginSlots(area, [], [{ width: 1, height: 1 }, { width: 1, height: 1 }])).toEqual([{ x: 100, y: 100 }, { x: 200, y: 100 }]);
+  });
+
+  it("goes round the ring before moving further out", () => {
+    // The ring next to a 6×4 background is 8×6 cells minus the middle: 24 cells, none of them in the outer ring.
+    const ring = marginSlots(area, [], Array(24).fill({ width: 1, height: 1 }))!;
+    expect(ring.every(p => p.x >= 100 && p.x <= 800 && p.y >= 100 && p.y <= 600)).toBe(true);
+    const next = marginSlots(area, [], Array(25).fill({ width: 1, height: 1 }))!;
+    expect(next[24]).toEqual({ x: 0, y: 0 });
   });
 
   it("skips existing tokens and never touches the background", () => {
-    const slots = marginSlots(area, [{ x: 0, y: 0, width: 100, height: 100 }], [{ width: 1, height: 1 }])!;
-    expect(slots).toEqual([{ x: 100, y: 0 }]);
+    const slots = marginSlots(area, [{ x: 100, y: 100, width: 100, height: 100 }], [{ width: 1, height: 1 }])!;
+    expect(slots).toEqual([{ x: 200, y: 100 }]);
     // Fill every margin cell (10×8 = 80 cells, 6×4 = 24 background) and nothing lands on the background.
     const all = marginSlots(area, [], Array(56).fill({ width: 1, height: 1 }))!;
     expect(all).toHaveLength(56);
@@ -27,7 +35,13 @@ describe("marginSlots", () => {
 
   it("fits large creatures in cells that have room", () => {
     const [big] = marginSlots(area, [], [{ width: 2, height: 2 }])!;
+    // Touching the background's top-left corner is the first spot with no gap.
     expect(big).toEqual({ x: 0, y: 0 });
+  });
+
+  it("knows when a token is in the Margin", () => {
+    expect(inMargin({ x: 100, y: 100, width: 100, height: 100 }, area.sceneRect)).toBe(true);
+    expect(inMargin({ x: 150, y: 150, width: 100, height: 100 }, area.sceneRect)).toBe(false);
   });
 
   it("returns null when they don't all fit", () => {

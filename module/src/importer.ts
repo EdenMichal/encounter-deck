@@ -4,13 +4,13 @@
  * PCs join the combat tracker. It can be repeated mid-fight for reinforcements; Finish undoes it.
  */
 import { MODULE_ID } from "./constants";
-import { activeCampaign, partyOf } from "./campaigns";
+import { activeCampaign, partyOf, togglePresent } from "./campaigns";
 import { addEntry, readEntries, toSource, totalXp } from "./entries";
 import { hasMargin, mainEncounterOf, marginSlots, rollNow, tokenNames, type FightRecord, type Footprint } from "./fight";
 import { lairDelta } from "./legendary";
 import { createQueue, sharedInFlight } from "./serial";
 import { lookupMonster, xpForCr } from "./sources";
-import { copyEncounter, encounterFlags, getEncounter, isInLibrary, rootOf } from "./store";
+import { copyEncounter, encounterFlags, getEncounter, isInLibrary, kindOf, pack, rootOf } from "./store";
 
 const IMPORTED_FOLDER = "Encounter Deck: In Combat";
 
@@ -225,6 +225,43 @@ async function addNow(uuid: string, combat: any): Promise<boolean> {
   const record: ImportRecord = { encounterId, name: tokens[0]?.name ?? source.name, xp: monster.xp, campaignId: campaign?.id ?? null, kind: "added" };
   await combat.update({ [`flags.${MODULE_ID}`]: { imports: [...state.imports, record], counts } });
   ui.notifications.info(`Added ${record.name} to the fight and to "${encounter.name}".`);
+  return true;
+}
+
+/** A Hero: a player character, or a world actor a player owns (a companion). They join a fight, never its Encounter. */
+export const isHero = (actor: any): boolean => actor?.type === "character" || (!actor?.pack && !!actor?.hasPlayerOwner);
+
+/**
+ * A Hero dropped onto the tracker joins the fight: on its token if it has one on the fight's scene, token-less
+ * otherwise (ADR 0002), with no Encounter or XP change. A party member marked absent is marked present, so they share
+ * the XP at Finish.
+ */
+export const addHeroToFight = (uuid: string, combat: any): Promise<boolean> => oneAtATime(() => addHeroNow(uuid, combat));
+
+async function addHeroNow(uuid: string, combat: any): Promise<boolean> {
+  if (!game.user.isGM || !combat) return false;
+  const actor = await fromUuid(uuid);
+  if (actor?.documentName !== "Actor") return false;
+  if (actor.pack) return warn(`Import ${actor.name} into the world first: a player character joins as the actor your player uses.`);
+  if (combat.combatants.some((c: any) => c.actorId === actor.id)) {
+    ui.notifications.info(`${actor.name} is already in the fight.`);
+    return false;
+  }
+  const scene = combat.scene ?? canvas.scene;
+  const token = scene?.tokens.find((t: any) => t.actorId === actor.id);
+  await combat.createEmbeddedDocuments("Combatant", [token ? { tokenId: token.id, sceneId: scene.id, actorId: actor.id } : { actorId: actor.id }]);
+
+  // Present for this Campaign's XP, if they're in its party.
+  const encounterId = mainEncounterOf(combatFlags(combat).imports);
+  const encounter = encounterId ? pack()?.index.get(encounterId) : null;
+  const campaign = encounter ? rootOf(encounter.folder) : null;
+  const member = campaign && kindOf(campaign) === "campaign" ? partyOf(campaign).find(m => m.actor.id === actor.id) : null;
+  if (member && !member.present) {
+    await togglePresent(campaign, actor.id);
+    ui.notifications.info(`${actor.name} joined the fight and is now marked present.`);
+  } else {
+    ui.notifications.info(`${actor.name} joined the fight.`);
+  }
   return true;
 }
 

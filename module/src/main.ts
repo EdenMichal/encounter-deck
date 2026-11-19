@@ -8,6 +8,8 @@ import { checkTokenBar, startFinish } from "./finish";
 import { startStatBlocks } from "./ui/statblocks";
 import { checkAutoRecharge, checkCarouselTakeover, startCarousel } from "./ui/carousel";
 import { startLoot } from "./ui/loot";
+import { fileLooseCompleted, startCompletedFolders } from "./completed";
+import { startDisplayFollow } from "./ui/display-follow";
 
 Hooks.once("init", () => {
   registerSettings();
@@ -26,6 +28,8 @@ Hooks.once("init", () => {
 Hooks.once("ready", async () => {
   // Everyone at the table gets the carousel; the rest is the GM's.
   startCarousel();
+  // The table display is a player client: keep it from following monsters into the Margin.
+  startDisplayFollow();
   if (!game.user.isGM) return;
   watchChanges();
   try {
@@ -38,6 +42,8 @@ Hooks.once("ready", async () => {
   startStatBlocks();
   startFinish();
   startLoot();
+  startCompletedFolders();
+  fileLooseCompleted().catch((err: unknown) => console.error("Encounter Deck | Couldn't file the Completed Encounters", err));
   Hooks.callAll(CHANGED_HOOK);
   checkTokenBar();
   checkCarouselTakeover();

@@ -86,4 +86,8 @@ _Avoid_: Leveling type, XP setting
 
 **Status**:
 Where an Encounter stands: **Draft** (still being built), **Ready** (prepped to run) or **Completed** (already played; hidden and not loaded by default).
+
+**Completed Folder**:
+The folder in each Campaign that holds its Completed Encounters, hidden unless "Show completed" is on. Completing an Encounter moves it there; making it Ready or Draft again moves it back to where it was.
+_Avoid_: Archive, done folder
 _Avoid_: Used, done
