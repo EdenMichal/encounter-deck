@@ -60,7 +60,7 @@ Encounter Deck ships no monsters, stat blocks, art or encounters. It works with 
 
 ## More modules
 
-- **[Music Deck](https://github.com/EdenMichal/music-deck).** Two music decks with a crossfader, ambient sound scenes, SFX pads and combat music, played from a redesigned Playlists tab or an Elgato Stream Deck+.
+- **[Music Deck](https://github.com/EdenMichal/music-deck).** Two music decks with a crossfader, ambient sound scenes, SFX pads and combat music, played from a redesigned Playlists tab or an Elgato Stream Deck.
 - **[Mobile Deck](https://github.com/EdenMichal/mobile-deck).** A phone and tablet interface for Foundry (D&D5e and PF2e), with a Character Builder and party inventory.
 
 ## Install
