@@ -4,7 +4,13 @@
 
 I built Encounter Deck for my own table. The map goes on a table display and the monsters are miniatures, so monster tokens on the map only get in the way, but I still wanted Foundry to track initiative, HP and conditions. So you build encounters ahead of time, sorted by campaign, and none of it touches a scene until the fight starts. Then the monsters join a real Foundry combat with their tokens parked in the scene's margin, off the map. A carousel across the top of the screen shows everyone whose turn it is.
 
-It needs Foundry VTT v14 and dnd5e 5.3 or later. This is v0.10, and the [changelog](CHANGELOG.md) lists what each version added.
+It needs Foundry VTT v14 and dnd5e 5.3 or later. To install it, paste this manifest URL into Foundry's **Add-on Modules › Install Module** ([details below](#install)):
+
+```text
+https://github.com/EdenMichal/encounter-deck/releases/latest/download/module.json
+```
+
+This is v1.0, and the [changelog](CHANGELOG.md) lists what each version added.
 
 ## Screenshots
 
@@ -56,7 +62,6 @@ Encounter Deck ships no monsters, stat blocks, art or encounters. It works with 
 - **Monk's Common Display.** The Carousel can show on the table display, and the display stays on the map during monster turns.
 - **Monk's TokenBar.** Its loot dialog becomes Distribute Loot. Encounter Deck offers to turn off TokenBar's own XP dialog, so the party doesn't get XP twice.
 - **[Mobile Deck](https://github.com/EdenMichal/mobile-deck).** Loot goes straight into the party inventory.
-- **Carousel Combat Tracker.** Encounter Deck draws its own carousel, so it offers to turn that one off.
 
 ## More modules
 
@@ -65,28 +70,32 @@ Encounter Deck ships no monsters, stat blocks, art or encounters. It works with 
 
 ## Install
 
-There's no packaged release yet, so install from source:
+1. In Foundry's setup screen, open **Add-on Modules**, click **Install Module**, and paste the manifest URL into the box at the bottom:
+   ```text
+   https://github.com/EdenMichal/encounter-deck/releases/latest/download/module.json
+   ```
+2. Launch your world, then tick **Encounter Deck** in **Game Settings › Manage Modules**.
+3. Open the world as GM. Encounter Deck creates its compendium the first time, and the encounter browser takes over the Combat tab while no fight is running.
+
+Foundry's **Check for Updates** finds new versions through the same URL.
+
+## Develop
 
 ```bash
 npm install
-npm run build
+npm run build      # module/dist/main.js
+npm run watch      # rebuild on change
+npm test           # vitest
+npm run typecheck
 ```
 
-Then link the `module/` folder into your Foundry data folder's `modules/` directory. Set `FOUNDRY_DATA` to your Foundry user data path (the folder that holds `Data/`):
+To run it from a checkout, link `module/` into your Foundry data folder instead of installing it. Set `FOUNDRY_DATA` to your Foundry user data path (the folder that holds `Data/`):
 
 ```bash
 ln -s "$PWD/module" "$FOUNDRY_DATA/Data/modules/encounter-deck"
 ```
 
-Foundry only notices a new module when you launch a world from Setup, so relaunch the world once, then enable Encounter Deck in Manage Modules.
-
-## Develop
-
-```bash
-npm run watch      # rebuild module/dist/main.js on change
-npm test           # vitest
-npm run typecheck
-```
+To release, bump `version` and the `download` URL in `module/module.json`, then push a tag such as `v1.0.1`. The Release workflow builds the zip and publishes it with `module.json` as a GitHub release.
 
 [PLAN.md](PLAN.md) has the design, [CONTEXT.md](CONTEXT.md) the terms, and [docs/adr/](docs/adr/) the decisions.
 

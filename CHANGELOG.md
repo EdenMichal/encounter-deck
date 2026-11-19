@@ -2,6 +2,11 @@
 
 What each version of Encounter Deck added, newest first.
 
+## v1.0.0
+
+- **First public release.** Install it with the manifest URL in the README. Foundry's update check finds new versions through it.
+- Same features as v0.10.
+
 ## v0.10
 
 - **Drag PCs into a fight:** drop a player character (from the Actors tab, or a portrait in the browser's party row) onto the running fight's tracker. It joins on its token if it has one on the scene, token-less otherwise. A party member marked absent is marked present, so they share the XP at Finish. A companion a player owns joins the same way, not as a monster.
