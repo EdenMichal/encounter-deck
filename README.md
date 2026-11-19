@@ -4,6 +4,14 @@ A Foundry VTT v14 (dnd5e 5.3+) module for preparing encounters ahead of time, or
 
 Status: **v0.10 (Completed folders)**. See [PLAN.md](PLAN.md) for the full spec and roadmap, [CONTEXT.md](CONTEXT.md) for the terms, and [docs/adr/](docs/adr/) for the decisions.
 
+## Screenshots
+
+From a real campaign, so you can see what it looks like at the table.
+
+| The Builder and the encounter browser | A fight: Carousel, tracker and Stat Block |
+| :---: | :---: |
+| <img src="docs/screenshots/builder.png" alt="The Builder beside the encounter browser in the Combat tab" width="400"> | <img src="docs/screenshots/fight.png" alt="A running fight: the Carousel across the top, the tracker with the fight's Encounter row, and a monster's Stat Block" width="400"> |
+
 ## What v0.1 does
 
 - **Storage:** the first time a GM loads the world, the module creates a world compendium, *Encounter Deck*. Each Encounter is a dnd5e Encounter actor inside it (ADR 0001, ADR 0003). Campaigns and the Shared Library are its top-level folders.
