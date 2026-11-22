@@ -39,6 +39,9 @@
   <div class="ed-pb-buttons">
     <button type="button" data-action="edPartyRequest" data-tooltip="Request a roll" aria-label="Request a roll" {{#unless canRequest}}disabled{{/unless}}><i class="fa-solid fa-dice-d20" inert></i></button>
     <button type="button" data-action="edPartyStats" data-tooltip="Choose what the bar shows" aria-label="Choose what the Party Bar shows"><i class="fa-solid fa-gear" inert></i></button>
+    <button type="button" data-action="edPartyPin" aria-pressed="{{#if pinned}}true{{else}}false{{/if}}"
+      data-tooltip="{{#if pinned}}Pinned: the bar stays solid. Click to let it fade{{else}}Pin the bar so it stays solid{{/if}}"
+      aria-label="{{#if pinned}}Unpin the Party Bar so it fades with the UI{{else}}Pin the Party Bar so it stays solid{{/if}}"><i class="fa-solid fa-thumbtack" inert></i></button>
     <button type="button" data-action="edPartyCollapse" aria-expanded="{{#if collapsed}}false{{else}}true{{/if}}"
       data-tooltip="{{#if collapsed}}Show the party{{else}}Hide the party{{/if}}" aria-label="{{#if collapsed}}Show the party{{else}}Hide the party{{/if}}">
       <i class="fa-solid {{#if collapsed}}fa-caret-right{{else}}fa-caret-left{{/if}}" inert></i></button>

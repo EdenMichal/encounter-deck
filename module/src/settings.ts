@@ -53,6 +53,8 @@ export function registerSettings(): void {
   // The Party Bar's stats (gear button), its spot ({left, top}, empty until dragged) and whether it's collapsed.
   game.settings.register(MODULE_ID, "partyBarStats", { scope: "client", config: false, type: Object, default: {}, onChange: partyBarChanged });
   game.settings.register(MODULE_ID, "partyBarPosition", { scope: "client", config: false, type: Object, default: {} });
+  // Pinned: the bar stays solid instead of fading with the rest of the UI until you hover it.
+  game.settings.register(MODULE_ID, "partyBarPinned", { scope: "client", config: false, type: Boolean, default: false, onChange: partyBarChanged });
   game.settings.register(MODULE_ID, "partyBarCollapsed", { scope: "client", config: false, type: Boolean, default: false, onChange: partyBarChanged });
   // Whether this client has been asked once about turning off Monk's TokenBar's own bar (a per-client setting there).
   game.settings.register(MODULE_ID, "monkBarAsked", { scope: "client", config: false, type: Boolean, default: false });
