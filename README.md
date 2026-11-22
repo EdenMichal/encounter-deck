@@ -41,6 +41,7 @@ From a real campaign, so you can see what it looks like at the table.
 ### At the table
 
 - **The Carousel.** The fight in initiative order across the top of the screen, for everyone (or only the GM, if you prefer). Players see the heroes' initiative and HP. For monsters, they only see when one is Bloodied.
+- **The Party Bar.** A small bar for the GM with tonight's PCs from the campaign's party, whatever scene is up. It shows each PC's AC, passive Perception, Investigation and Insight, HP, spell save DC and Inspiration. Its Request Roll button posts dnd5e's roll request card, so each player rolls from their own button, and you can roll for anyone who's away.
 - **The table display stays on the map.** If you use Monk's Common Display, it won't pan off the map to follow monsters in the margin.
 
 ### When the fight ends
@@ -60,7 +61,7 @@ Encounter Deck ships no monsters, stat blocks, art or encounters. It works with 
 ## Works with
 
 - **Monk's Common Display.** The Carousel can show on the table display, and the display stays on the map during monster turns.
-- **Monk's TokenBar.** Its loot dialog becomes Distribute Loot. Encounter Deck offers to turn off TokenBar's own XP dialog, so the party doesn't get XP twice.
+- **Monk's TokenBar.** Its loot dialog becomes Distribute Loot. Encounter Deck offers to turn off TokenBar's own XP dialog, so the party doesn't get XP twice. It also offers to turn off TokenBar's own bar, since the Party Bar does that job.
 - **[Mobile Deck](https://github.com/EdenMichal/mobile-deck).** Loot goes straight into the party inventory.
 
 ## More modules

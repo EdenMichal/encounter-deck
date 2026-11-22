@@ -1,0 +1,47 @@
+<div class="ed-pb {{#if collapsed}}collapsed{{/if}}">
+  {{#if show}}
+  <button type="button" class="ed-pb-grip" data-tooltip="Drag to move the Party Bar" aria-label="Move the Party Bar"><i class="fa-solid fa-grip-vertical" inert></i></button>
+  {{#unless collapsed}}
+  {{#if entries.length}}
+  <ol class="ed-pb-list">
+    {{#each entries}}
+    <li class="ed-pb-member" data-actor-id="{{id}}">
+      <div class="ed-pb-figure">
+        <button type="button" class="ed-pb-portrait" data-action="edPartyFocus" draggable="true" data-tooltip-html="{{tooltip}}"
+          aria-label="{{name}}: select and pan to their token. Double-click for the sheet, right-click for more.">
+          <img src="{{img}}" alt="">
+        </button>
+        {{#if showInspiration}}
+        <button type="button" class="ed-pb-insp {{#if inspiration}}on{{/if}}" data-action="edPartyInspiration" aria-pressed="{{#if inspiration}}true{{else}}false{{/if}}"
+          data-tooltip="{{#if inspiration}}Has Inspiration: click to remove it{{else}}No Inspiration: click to give it{{/if}}"
+          aria-label="{{#if inspiration}}Remove Inspiration from {{name}}{{else}}Give Inspiration to {{name}}{{/if}}"><i class="fa-solid fa-star" inert></i></button>
+        {{/if}}
+        {{#if hp}}
+        <span class="ed-pb-hp {{#if hp.low}}low{{/if}} {{#if hp.down}}down{{/if}}" role="img" aria-label="{{hp.text}}" data-tooltip-text="{{hp.text}}">
+          <span class="ed-pb-hp-value" style="width: {{hp.pct}}%"></span>
+          {{#if hp.tempPct}}<span class="ed-pb-hp-temp" style="width: {{hp.tempPct}}%"></span>{{/if}}
+        </span>
+        {{/if}}
+      </div>
+      {{#if stats.length}}
+      <ul class="ed-pb-stats">
+        {{#each stats}}<li class="ed-pb-stat ed-pb-{{key}}" data-tooltip-text="{{label}}" aria-label="{{label}}"><i class="{{icon}}" inert></i><span>{{value}}</span></li>{{/each}}
+      </ul>
+      {{/if}}
+      <span class="ed-pb-name" data-tooltip-text="{{name}}">{{name}}</span>
+    </li>
+    {{/each}}
+  </ol>
+  {{else}}
+  <p class="ed-pb-empty">{{hint}}</p>
+  {{/if}}
+  {{/unless}}
+  <div class="ed-pb-buttons">
+    <button type="button" data-action="edPartyRequest" data-tooltip="Request a roll" aria-label="Request a roll" {{#unless canRequest}}disabled{{/unless}}><i class="fa-solid fa-dice-d20" inert></i></button>
+    <button type="button" data-action="edPartyStats" data-tooltip="Choose what the bar shows" aria-label="Choose what the Party Bar shows"><i class="fa-solid fa-gear" inert></i></button>
+    <button type="button" data-action="edPartyCollapse" aria-expanded="{{#if collapsed}}false{{else}}true{{/if}}"
+      data-tooltip="{{#if collapsed}}Show the party{{else}}Hide the party{{/if}}" aria-label="{{#if collapsed}}Show the party{{else}}Hide the party{{/if}}">
+      <i class="fa-solid {{#if collapsed}}fa-caret-right{{else}}fa-caret-left{{/if}}" inert></i></button>
+  </div>
+  {{/if}}
+</div>
