@@ -856,6 +856,8 @@ body.hide-ui.ed-table-carousel #combat-popout { display: none !important; }
 .ed-pb-buttons button { width: 22px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: rgba(244, 241, 234, 0.7); border-radius: 3px; }
 .ed-pb-buttons button:hover:not(:disabled), .ed-pb-buttons button:focus-visible { color: #1a1209; background: var(--ed-gold); }
 .ed-pb-buttons button:disabled { opacity: 0.35; cursor: default; }
+/* The pin while it's on. */
+.ed-pb-buttons button[aria-pressed="true"]:not(:hover):not(:focus-visible) { color: var(--ed-gold); }
 /* The gear and Request Roll dialogs. */
 .ed-pb-dialog .ed-pb-checks { display: flex; flex-direction: column; gap: 4px; }
 .ed-pb-check { display: flex; align-items: center; gap: 6px; }

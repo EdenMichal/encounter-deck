@@ -8,7 +8,7 @@ What each version of Encounter Deck added, newest first.
   - Each PC shows AC, passive Perception, Investigation and Insight, an HP bar under the portrait (hover it for HP and temp HP), a spell save DC if they cast spells, and a gold star while they have Inspiration. Click the star to give or remove it. The gear button picks which of these show.
   - Click a PC to select and pan to their token, double-click for their sheet, or drag them onto the canvas or the combat tracker. Right-click for the sheet, a roll request, Inspiration and Mark absent.
   - **Request Roll** asks for a skill check, ability check or saving throw, with an optional DC and a line of flavour. It posts dnd5e's own request card with a Roll button for each PC you picked. Players roll from their button, and you can press any of them to roll for a player who's away. The last roll and DC are remembered until you reload.
-  - Drag it by its grip and it stays there. The first time, it sits where Monk's TokenBar's bar was, or just above the players list. The caret folds it down to its buttons.
+  - Drag it by its grip and it stays there. The first time, it sits where Monk's TokenBar's bar was, or just above the players list. The caret folds it down to its buttons. The bar fades with the rest of Foundry's UI until you hover it; the pin button keeps it solid.
   - Turn it off with "Show the Party Bar" in the module settings.
 - **Monk's TokenBar:** if its bar is on, Encounter Deck asks once whether to turn it off on your computer. Its loot dialog (Distribute Loot) and XP dialog keep working.
 

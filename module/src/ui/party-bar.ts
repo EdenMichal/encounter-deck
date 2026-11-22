@@ -121,8 +121,8 @@ class PartyBar extends HandlebarsApplicationMixin(ApplicationV2) {
   static DEFAULT_OPTIONS = {
     id: "encounter-deck-party-bar",
     tag: "section",
-    // faded-ui: the core "fade the UI" look, as the players list and hotbar have.
-    classes: ["encounter-deck", "ed-party-bar", "faded-ui"],
+    // The core "fade the UI" look (faded-ui), as the players list and hotbar have, is added on render unless pinned.
+    classes: ["encounter-deck", "ed-party-bar"],
     window: { frame: false, positioned: false },
     actions: {
       // The second click of a double-click opens the sheet (see _onFirstRender), so it doesn't pan again.
@@ -130,6 +130,7 @@ class PartyBar extends HandlebarsApplicationMixin(ApplicationV2) {
       edPartyInspiration: (_event: Event, target: HTMLElement) => toggleInspiration(actorOf(target)),
       edPartyRequest: () => requestRoll(),
       edPartyStats: () => editStats(),
+      edPartyPin: () => setSetting("partyBarPinned", !setting("partyBarPinned")),
       edPartyCollapse: () => setSetting("partyBarCollapsed", !setting("partyBarCollapsed")),
     },
   };
@@ -152,12 +153,14 @@ class PartyBar extends HandlebarsApplicationMixin(ApplicationV2) {
       showInspiration: e.inspiration !== null,
       tooltip: `${esc(e.name)}${e.hp ? `<br>${esc(e.hp.text)}` : ""}`,
     }));
-    return { show, collapsed: !!setting("partyBarCollapsed"), entries, hint, canRequest: members.length > 0 };
+    return { show, collapsed: !!setting("partyBarCollapsed"), pinned: !!setting("partyBarPinned"), entries, hint, canRequest: members.length > 0 };
   }
 
   async _onRender(context: any, options: any) {
     await super._onRender(context, options);
     this.element.classList.toggle("ed-hidden", !context.show);
+    // Pinned, the bar stays solid; otherwise it fades with the rest of the UI until hovered.
+    this.element.classList.toggle("faded-ui", !context.pinned);
     this.place();
   }
 
