@@ -10,7 +10,7 @@ It needs Foundry VTT v14 and dnd5e 5.3 or later. To install it, paste this manif
 https://github.com/EdenMichal/encounter-deck/releases/latest/download/module.json
 ```
 
-This is v1.0, and the [changelog](CHANGELOG.md) lists what each version added.
+This is v1.1, and the [changelog](CHANGELOG.md) lists what each version added.
 
 ## Screenshots
 
