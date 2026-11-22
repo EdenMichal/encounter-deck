@@ -759,3 +759,110 @@ body.hide-ui.ed-table-carousel #combat-popout { display: none !important; }
 
 /* A Campaign's Completed folder: quieter than the folders still in play. */
 .ed-completed-folder > .ed-folder-head { opacity: 0.75; font-style: italic; }
+
+/* -------------------------------------------- */
+/*  Party Bar                                   */
+/* -------------------------------------------- */
+
+/* The Active Campaign's Present PCs in a small dark panel the GM drags by its grip. It sits with the HUD: above the
+   canvas and the players list, under every window, tooltip and context menu. */
+#encounter-deck-party-bar {
+  --ed-gold: #d8b45a;
+  position: fixed;
+  z-index: var(--z-index-app, 30);
+  pointer-events: all;
+  color: #f4f1ea;
+  font-size: 12px;
+}
+#encounter-deck-party-bar.ed-hidden { display: none; }
+.ed-pb {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+  padding: 4px;
+  background: rgba(16, 16, 20, 0.92);
+  border: 1px solid rgba(216, 180, 90, 0.6);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+/* Foundry's button look off, kept weak (:where) so each button's own rule wins. */
+:where(.ed-pb) button {
+  width: auto;
+  height: auto;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  line-height: 1;
+  color: inherit;
+  background: none;
+  border: none;
+  box-shadow: none;
+}
+.ed-pb-grip { flex: none; width: 14px; display: flex; align-items: center; justify-content: center; color: rgba(244, 241, 234, 0.45); cursor: grab; touch-action: none; }
+.ed-pb-grip:hover, .ed-pb-grip:focus-visible { color: var(--ed-gold); }
+.ed-pb-moving .ed-pb-grip { cursor: grabbing; }
+.ed-pb-list { list-style: none; margin: 0; padding: 0; display: flex; gap: 8px; }
+.ed-pb-member {
+  margin: 0;
+  width: 56px;
+  display: grid;
+  grid-template-areas: "stats" "figure" "name";
+  /* Stats sit above the portrait, so a PC is only as wide as its portrait. Portraits and names line up along the
+     bottom, however many stats each PC shows. */
+  grid-template-rows: 1fr auto auto;
+  row-gap: 3px;
+}
+.ed-pb-figure { grid-area: figure; position: relative; width: 56px; }
+.ed-pb-portrait { display: block; width: 56px; height: 56px; overflow: hidden; border: 1px solid #000; border-radius: 4px; background: #26262b; cursor: pointer; }
+.ed-pb-portrait:hover, .ed-pb-portrait:focus-visible { outline: 1px solid var(--ed-gold); outline-offset: 0; }
+.ed-pb-portrait img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top center; border: none; }
+/* Inspiration: a gold star on the portrait's corner while the PC has it; a faint one on hover to give it. */
+.ed-pb-insp {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  border-radius: 50%;
+  color: rgba(244, 241, 234, 0.6);
+  background: rgba(12, 12, 14, 0.9);
+  border: 1px solid rgba(216, 180, 90, 0.5);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.ed-pb-member:hover .ed-pb-insp, .ed-pb-insp:focus-visible, .ed-pb-insp.on { opacity: 1; }
+.ed-pb-insp.on { color: #1a1209; background: var(--ed-gold); border-color: #f6e2b0; box-shadow: 0 0 6px rgba(216, 180, 90, 0.8); }
+/* HP: a thin bar under the portrait, red at half or less, with temp HP as a blue line over it. */
+.ed-pb-hp { position: relative; display: block; height: 4px; margin-top: 3px; border-radius: 2px; background: rgba(0, 0, 0, 0.7); overflow: hidden; }
+.ed-pb-hp-value { position: absolute; inset: 0 auto 0 0; background: #41aa7d; }
+.ed-pb-hp.low .ed-pb-hp-value { background: #d23b2a; }
+.ed-pb-hp.down { outline: 1px solid #d23b2a; }
+.ed-pb-hp-temp { position: absolute; inset: 0 auto auto 0; height: 2px; background: #5ea2e0; }
+/* Two stats to a row, filling from the top; a short list rests on the portrait. */
+.ed-pb-stats { grid-area: stats; align-self: end; list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 1px 2px; }
+.ed-pb-stat { margin: 0; display: flex; align-items: center; gap: 3px; font-size: 11px; line-height: 1.15; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ed-pb-stat i { width: 11px; font-size: 9px; text-align: center; color: rgba(244, 241, 234, 0.55); }
+.ed-pb-ac { font-weight: 700; color: var(--ed-gold); }
+.ed-pb-ac i { color: var(--ed-gold); }
+.ed-pb-dc i { color: #b79ae8; }
+.ed-pb-name { grid-area: name; max-width: 56px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; font-weight: 600; }
+.ed-pb-empty { margin: 0; align-self: center; max-width: 220px; font-size: 12px; font-style: italic; color: rgba(244, 241, 234, 0.7); }
+.ed-pb-buttons { flex: none; display: flex; flex-direction: column; justify-content: center; gap: 2px; padding-left: 4px; border-left: 1px solid rgba(216, 180, 90, 0.35); }
+.ed-pb.collapsed .ed-pb-buttons { flex-direction: row; border-left: none; padding-left: 0; }
+.ed-pb-buttons button { width: 22px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: rgba(244, 241, 234, 0.7); border-radius: 3px; }
+.ed-pb-buttons button:hover:not(:disabled), .ed-pb-buttons button:focus-visible { color: #1a1209; background: var(--ed-gold); }
+.ed-pb-buttons button:disabled { opacity: 0.35; cursor: default; }
+/* The gear and Request Roll dialogs. */
+.ed-pb-dialog .ed-pb-checks { display: flex; flex-direction: column; gap: 4px; }
+.ed-pb-check { display: flex; align-items: center; gap: 6px; }
+.ed-pb-check input { margin: 0; }
+.ed-pb-picks { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 6px; }
+.ed-pb-pick { position: relative; width: 64px; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 11px; cursor: pointer; }
+.ed-pb-pick input { position: absolute; top: 2px; left: 2px; margin: 0; }
+.ed-pb-pick img { width: 48px; height: 48px; object-fit: cover; object-position: top center; border: 2px solid transparent; border-radius: 4px; filter: grayscale(1); opacity: 0.5; }
+.ed-pb-pick:has(input:checked) img { border-color: var(--ed-gold, #d8b45a); filter: none; opacity: 1; }
+.ed-pb-pick span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

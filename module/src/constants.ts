@@ -7,6 +7,8 @@ export const ENCOUNTER_DRAG_TYPE = "EncounterDeckEncounter";
 export const ENCOUNTER_DRAG_MIME = "application/x-encounter-deck-encounter";
 /** Fired after anything the browser or Builder shows has changed. */
 export const CHANGED_HOOK = "encounterDeck.changed";
+/** Fired when one of the Party Bar's own client settings changes. */
+export const PARTY_BAR_HOOK = "encounterDeck.partyBar";
 
 export type Status = "draft" | "ready" | "completed";
 export const STATUSES: Status[] = ["draft", "ready", "completed"];

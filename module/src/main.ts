@@ -10,9 +10,12 @@ import { checkAutoRecharge, checkCarouselTakeover, startCarousel } from "./ui/ca
 import { startLoot } from "./ui/loot";
 import { fileLooseCompleted, startCompletedFolders } from "./completed";
 import { startDisplayFollow } from "./ui/display-follow";
+import { checkMonkBar, registerRollRequests, startPartyBar } from "./ui/party-bar";
 
 Hooks.once("init", () => {
   registerSettings();
+  // Every client: a player's own client runs the handler when they press Roll on a Party Bar request.
+  registerRollRequests();
   // Subclass whatever the Combat tab is (dnd5e's CombatTracker5e), so ui.combat stays a real tracker.
   CONFIG.ui.combat = createCombatTab(CONFIG.ui.combat);
   // Every client, players included: their initiative rolls are where the duplicate would come from.
@@ -44,8 +47,10 @@ Hooks.once("ready", async () => {
   startLoot();
   startCompletedFolders();
   fileLooseCompleted().catch((err: unknown) => console.error("Encounter Deck | Couldn't file the Completed Encounters", err));
+  startPartyBar();
   Hooks.callAll(CHANGED_HOOK);
   checkTokenBar();
   checkCarouselTakeover();
   checkAutoRecharge();
+  checkMonkBar();
 });

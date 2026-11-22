@@ -30,6 +30,10 @@ _Avoid_: Party, group
 Whether a party member is at the table tonight. Absent members don't count toward difficulty.
 _Avoid_: Active, attending
 
+**Party Bar**:
+A small GM-only bar of the Active Campaign's Present PCs that the GM drags anywhere on screen. Each PC shows AC, passive Perception, Investigation and Insight, an HP bar, a spell save DC if they cast, and Inspiration. Its Request Roll button posts dnd5e's own request card with a Roll button per PC. It follows the Party Folder, so it shows the same PCs on every scene, with or without tokens.
+_Avoid_: Token bar, party HUD, party panel
+
 ## Encounters
 
 **Encounter**:
